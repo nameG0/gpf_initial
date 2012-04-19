@@ -2,7 +2,7 @@
 /**
  * GPF 主类。
  * 
- * @version 2012-04-04
+ * @version 2012-04-13
  * @package default
  * @filesource
  */
@@ -10,9 +10,45 @@ class gpf
 {
 	/**
 	 * 调度器
+	 * <pre>
+	 * 默认使用 $_GET["a"] 做调度器。a 是第一个英文字母，也作 action.
+	 * 格式： a=m,f,a
+	 * 用 , 分隔，m为模块，f为控制器文件，a为动作。
+	 * </pre>
 	 */
 	static function a()
 	{//{{{
-		echo 'this is a';
+		list($mod, $file, $action) = explode(",", $_GET['a']);
+		//默认使用 main,index,
+		if (!$mod)
+			{
+			$mod = 'main';
+			}
+		if (!$file)
+			{
+			$file = 'index';
+			}
+		if (!$action)
+			{
+			$action = 'index';
+			}
+		$mod_path = mod_info($mod, 'path_full');
+		//实例化控制器类。
+		$ctrl_path = $mod_path . 'control' . DS . $file . '.class.php';
+		if (!is_file($ctrl_path))
+			{
+			echo "control not exists.";
+			exit;
+			}
+		include_once $ctrl_path;
+		$ctrl_class = "ctrl_{$file}";
+		$o_ctrl = new $ctrl_class();
+		//调用控制器方法。
+		if (!method_exists($o_ctrl, $action))
+			{
+			echo "action not exists";
+			exit;
+			}
+		$o_ctrl->$action();
 	}//}}}
 }
