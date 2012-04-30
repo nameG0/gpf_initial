@@ -27,6 +27,10 @@ function mod_info($mod, $key = NULL)
 		{
 		return G_PATH_MOD_RUN . 'main' . DS;
 		}
+	if ('conm' == $mod && 'path_full' == $key)
+		{
+		return G_PATH_MOD . 'conm' . DS;
+		}
 }//}}}
 
 /**

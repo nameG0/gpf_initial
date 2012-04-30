@@ -35,6 +35,7 @@ class gpf
 		$mod_path = mod_info($mod, 'path_full');
 		//实例化控制器类。
 		$ctrl_path = $mod_path . 'control' . DS . $file . '.class.php';
+		log::add("control:{$ctrl_path}", log::INFO, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
 		if (!is_file($ctrl_path))
 			{
 			echo "control not exists.";
@@ -49,6 +50,7 @@ class gpf
 			echo "action not exists";
 			exit;
 			}
+		log::add("action:{$action}", log::INFO, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
 		$o_ctrl->$action();
 	}//}}}
 }
