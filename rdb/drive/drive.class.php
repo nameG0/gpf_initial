@@ -1,6 +1,6 @@
 <?php
 /**
- * Êı¾İ¿âÇı¶¯µÄ»ùÀà
+ * æ•°æ®åº“é©±åŠ¨çš„åŸºç±»
  * 20120430
  * 
  * @version 20120430
@@ -12,17 +12,17 @@ class rdb_drive
 {
 	var $connid;
 	var $dbname;
-	var $querynum = 0;	//SQL Ö´ĞĞ´ÎÊı
-	public $error_num = 0;	//²éÑ¯³ö´í´ÎÊı
-	public $sql_select_time_total = 0;	//ËùÓĞ SELECT Óï¾ä×ÜÓÃÊ±
+	var $querynum = 0;	//SQL æ‰§è¡Œæ¬¡æ•°
+	public $error_num = 0;	//æŸ¥è¯¢å‡ºé”™æ¬¡æ•°
+	public $sql_select_time_total = 0;	//æ‰€æœ‰ SELECT è¯­å¥æ€»ç”¨æ—¶
 	public $sql_insert_time_total = 0;
 	public $sql_update_time_total = 0;
 
 	var $debug = 1;
 
 	/**
-	 * Ö´ĞĞ²éÑ¯ SQL ²¢°Ñ½á¹û¼¯×ª»»ÎªÊı×é¸ñÊ½·µ»Ø.
-	 * @return array ²éÑ¯½á¹û¼ÇÂ¼¼¯.
+	 * æ‰§è¡ŒæŸ¥è¯¢ SQL å¹¶æŠŠç»“æœé›†è½¬æ¢ä¸ºæ•°ç»„æ ¼å¼è¿”å›.
+	 * @return array æŸ¥è¯¢ç»“æœè®°å½•é›†.
 	 */
 	function select($sql, $keyfield = '')
 	{//{{{
@@ -48,9 +48,12 @@ class rdb_drive
 		$this->free_result($result);
 		return $array;
 	}//}}}
+	/**
+	 * æ‰§è¡Œåªè¿”å›ä¸€æ¡è®°å½•çš„æŸ¥è¯¢.
+	 */
 	function find($sql, $type = '', $expires = 3600, $dbname = '')
 	{//{{{
-		//select Ç¿ÖÆ¼ÓÉÏ limit ×Ó¾ä
+		//select å¼ºåˆ¶åŠ ä¸Š limit å­å¥
 		if ('S' == strtoupper($sql[0]) && 'E' == strtoupper($sql[1]) && !stripos($sql, 'limit'))
 			{
 			$sql .= ' LIMIT 1';
@@ -66,17 +69,17 @@ class rdb_drive
 		return $rs ;
 	}//}}}
 	/**
-	 * ²åÈë¼ÇÂ¼
+	 * æ’å…¥è®°å½•
 	 * <b>hisgory</b>
 	 * <pre>
-	 * ggzhu@2011-03-17 ¼ÓÈë $other ²ÎÊı£¬ÓÃÓÚÊäÈëÈç IGNORE ÕâÑùµÄ²Ù×÷·û
-	 * ggzhu@2011-03-24 ¼ÓÈë¶Ô¶şÎ¬Êı×éµÄÖ§³Ö
+	 * ggzhu@2011-03-17 åŠ å…¥ $other å‚æ•°ï¼Œç”¨äºè¾“å…¥å¦‚ IGNORE è¿™æ ·çš„æ“ä½œç¬¦
+	 * ggzhu@2011-03-24 åŠ å…¥å¯¹äºŒç»´æ•°ç»„çš„æ”¯æŒ
 	 * </pre>
 	 */
 	function insert($table, $data, $other = '')
 	{//{{{
-		$type = is_array(current($data)) ? 2 : 1;	//±ê¼ÇÊı×éµÄÎ¬Êı
-		//Ò»Î¬Êı×éÊ±¼ì²é×Ö¶ÎºÏ·¨ĞÔ
+		$type = is_array(current($data)) ? 2 : 1;	//æ ‡è®°æ•°ç»„çš„ç»´æ•°
+		//ä¸€ç»´æ•°ç»„æ—¶æ£€æŸ¥å­—æ®µåˆæ³•æ€§
 		if (1 == $type)
 			{
 			$fields = $this->get_fields($table);
@@ -90,7 +93,7 @@ class rdb_drive
 				}
 			}
 		$sql_field = join("`,`", array_keys((1 == $type ? $data : current($data))));
-		//ÓÃif·ÖÖ§,±ÈÇ¿ÖÆ×ª»»Îª¶şÎ¬Êı×é¼° switch ½á¹¹¿ìÄÇÃ´Ò»µãµã
+		//ç”¨ifåˆ†æ”¯,æ¯”å¼ºåˆ¶è½¬æ¢ä¸ºäºŒç»´æ•°ç»„åŠ switch ç»“æ„å¿«é‚£ä¹ˆä¸€ç‚¹ç‚¹
 		if (1 == $type)
 			{
 			$sql_value = "('" . join("','", $data) . "')";
@@ -113,10 +116,10 @@ class rdb_drive
 		return $ret;
 	}//}}}
 	/**
-	 * ¸üĞÂ¼ÇÂ¼
+	 * æ›´æ–°è®°å½•
 	 * <b>hisgory</b>
 	 * <pre>
-	 * ggzhu@2010-10-22 Ìí¼Ó $is_query ²ÎÊı£¬ÈôÎªfalse,Ôò·µ»ØsqlÓï¾ä,²»Ö´ĞĞ
+	 * ggzhu@2010-10-22 æ·»åŠ  $is_query å‚æ•°ï¼Œè‹¥ä¸ºfalse,åˆ™è¿”å›sqlè¯­å¥,ä¸æ‰§è¡Œ
 	 * </pre>
 	 */
 	function update($tablename, $array, $where = '', $is_query = true)
@@ -129,7 +132,7 @@ class rdb_drive
 				unset($array[$key]);
 				}
 			}
-		//·ÀÖ¹¿Õ¸üĞÂ
+		//é˜²æ­¢ç©ºæ›´æ–°
 		if (empty($array))
 			{
 			return ;
@@ -159,7 +162,7 @@ class rdb_drive
 		return $ret;
 	}//}}}
 	/**
-	 * É¾³ı¼ÇÂ¼
+	 * åˆ é™¤è®°å½•
 	 */
 	function delete($table)
 	{//{{{
@@ -167,7 +170,7 @@ class rdb_drive
 	}//}}}
 
 	/**
-	 * ½¨Á¢Êı¾İ¿âÁ´½Ó
+	 * å»ºç«‹æ•°æ®åº“é“¾æ¥
 	 *
 	 */
 	function connect($dbhost, $dbuser, $dbpw, $dbname = '', $pconnect = 0, $charset = '')
@@ -199,24 +202,24 @@ class rdb_drive
 	}//}}}
 
 	/**
-	 * Ñ¡ÔñÊı¾İ¿â
-	 * ×ÓÀàÊµÏÖ·½·¨
-	 * @param string $dbname Êı¾İ¿âÃû
+	 * é€‰æ‹©æ•°æ®åº“
+	 * å­ç±»å®ç°æ–¹æ³•
+	 * @param string $dbname æ•°æ®åº“å
 	 *
 	 */
 	function select_db($dbname) {}
 	/**
-	 * Ö´ĞĞ SQL ,·µ»ØÖ´ĞĞ½á¹û.
-	 * ×ÓÀàÊµÏÖ·½·¨
-	 * @param string $sql SQL Óï¾ä.
-	 * @param bool $is_buffer ÊÇ·ñ»º´æ²éÑ¯½á¹û.
+	 * æ‰§è¡Œ SQL ,è¿”å›æ‰§è¡Œç»“æœ.
+	 * å­ç±»å®ç°æ–¹æ³•
+	 * @param string $sql SQL è¯­å¥.
+	 * @param bool $is_buffer æ˜¯å¦ç¼“å­˜æŸ¥è¯¢ç»“æœ.
 	 */
 	function query($sql , $is_buffer = true) {}
 
 
 	/**
-	 * È¡±íÖ÷¼ü×Ö¶Î
-	 * ×ÓÀàÊµÏÖ·½·¨
+	 * å–è¡¨ä¸»é”®å­—æ®µ
+	 * å­ç±»å®ç°æ–¹æ³•
 	 */
 	function get_primary($table) {}
 
@@ -293,7 +296,7 @@ class rdb_drive
 			}
 		$tables = array();
 		$sql = "SHOW TABLES {$like}";
-		//Èç¹ûÓÃ $this->select() ÔÚ select() ÖĞÓĞÒ»´ÎÑ­»·£¬ÕâÀïÓÖÒªÒ»´ÎÑ­»·
+		//å¦‚æœç”¨ $this->select() åœ¨ select() ä¸­æœ‰ä¸€æ¬¡å¾ªç¯ï¼Œè¿™é‡Œåˆè¦ä¸€æ¬¡å¾ªç¯
 		$result = $this->query($sql);
 		while($r = $this->fetch_array($result))
 			{
@@ -339,7 +342,7 @@ class rdb_drive
 	{//{{{
 		global $debug;
 		$this->error_num++;
-		//ÕÒµ½µ÷ÓÃ±¾ÀàµÄÎ»ÖÃ
+		//æ‰¾åˆ°è°ƒç”¨æœ¬ç±»çš„ä½ç½®
 		$traces = debug_backtrace(0);
 		foreach ($traces as $k => $v)
 			{
@@ -356,7 +359,7 @@ class rdb_drive
 			{
 			$msg = (defined('IN_ADMIN') || DEBUG) ? $this->errormsg : "Bad Request. {$LANG['illegal_request_return']}";
 			echo '<div style="font-size:12px;text-align:left; border:1px solid #9cc9e0; padding:1px 4px;color:#000000;font-family:Arial, Helvetica,sans-serif;"><span>'.$msg.'</span></div>';
-			//ggzhu 2011-1-7 ³ö´íÒ²²»ÖĞ¶ÏÔËĞĞ¡£
+			//ggzhu 2011-1-7 å‡ºé”™ä¹Ÿä¸ä¸­æ–­è¿è¡Œã€‚
 			//exit;
 			}
 	}//}}}

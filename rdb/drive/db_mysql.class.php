@@ -3,9 +3,9 @@ class db_mysql
 {
 	var $connid;
 	var $dbname;
-	var $querynum = 0;	//SQL Ö´ĞĞ´ÎÊı
-	public $error_num = 0;	//²éÑ¯³ö´í´ÎÊı
-	public $sql_select_time_total = 0;	//ËùÓĞ SELECT Óï¾ä×ÜÓÃÊ±
+	var $querynum = 0;	//SQL æ‰§è¡Œæ¬¡æ•°
+	public $error_num = 0;	//æŸ¥è¯¢å‡ºé”™æ¬¡æ•°
+	public $sql_select_time_total = 0;	//æ‰€æœ‰ SELECT è¯­å¥æ€»ç”¨æ—¶
 	public $sql_insert_time_total = 0;
 	public $sql_update_time_total = 0;
 
@@ -85,12 +85,12 @@ class db_mysql
 		return $array;
 	}
 
-	//2011-03-17 ggzhu ¼ÓÈë $other ²ÎÊı£¬ÓÃÓÚÊäÈëÈç IGNORE ÕâÑùµÄ²Ù×÷·û
-	//2011-03-24 ggzhu ¼ÓÈë¶Ô¶şÎ¬Êı×éµÄÖ§³Ö
+	//2011-03-17 ggzhu åŠ å…¥ $other å‚æ•°ï¼Œç”¨äºè¾“å…¥å¦‚ IGNORE è¿™æ ·çš„æ“ä½œç¬¦
+	//2011-03-24 ggzhu åŠ å…¥å¯¹äºŒç»´æ•°ç»„çš„æ”¯æŒ
 	function insert($table, $data, $other = '')
 	{
-		$type = is_array(current($data)) ? 2 : 1;	//±ê¼ÇÊı×éµÄÎ¬Êı
-		//Ò»Î¬Êı×éÊ±¼ì²é×Ö¶ÎºÏ·¨ĞÔ
+		$type = is_array(current($data)) ? 2 : 1;	//æ ‡è®°æ•°ç»„çš„ç»´æ•°
+		//ä¸€ç»´æ•°ç»„æ—¶æ£€æŸ¥å­—æ®µåˆæ³•æ€§
 		if (1 == $type)
 			{
 			$fields = $this->get_fields($table);
@@ -104,7 +104,7 @@ class db_mysql
 				}
 			}
 		$sql_field = join("`,`", array_keys((1 == $type ? $data : current($data))));
-		//ÓÃif·ÖÖ§,±ÈÇ¿ÖÆ×ª»»Îª¶şÎ¬Êı×é¼° switch ½á¹¹¿ìÄÇÃ´Ò»µãµã
+		//ç”¨ifåˆ†æ”¯,æ¯”å¼ºåˆ¶è½¬æ¢ä¸ºäºŒç»´æ•°ç»„åŠ switch ç»“æ„å¿«é‚£ä¹ˆä¸€ç‚¹ç‚¹
 		if (1 == $type)
 			{
 			$sql_value = "('" . join("','", $data) . "')";
@@ -127,7 +127,7 @@ class db_mysql
 		return $ret;
 	}
 
-	//2011-03-17 ggzhu ·ÏÆú£¬ÓÃ insert ¼° $other ²ÎÊıÊµÏÖ
+	//2011-03-17 ggzhu åºŸå¼ƒï¼Œç”¨ insert åŠ $other å‚æ•°å®ç°
 	/*
 	function insert_ignore($tablename, $array)
 	{
@@ -144,7 +144,7 @@ class db_mysql
 	}
 	*/
 
-	//ggzhu 2010-10-22 Ìí¼Ó $is_query ²ÎÊı£¬ÈôÎªfalse,Ôò·µ»ØsqlÓï¾ä,²»Ö´ĞĞ
+	//ggzhu 2010-10-22 æ·»åŠ  $is_query å‚æ•°ï¼Œè‹¥ä¸ºfalse,åˆ™è¿”å›sqlè¯­å¥,ä¸æ‰§è¡Œ
 	function update($tablename, $array, $where = '', $is_query = true)
 	{
 		$fields = $this->get_fields($tablename);
@@ -155,7 +155,7 @@ class db_mysql
 				unset($array[$key]);
 				}
 		}
-		//·ÀÖ¹¿Õ¸üĞÂ
+		//é˜²æ­¢ç©ºæ›´æ–°
 		if (empty($array))
 			{
 			return ;
@@ -210,7 +210,7 @@ class db_mysql
 
 	function get_one($sql, $type = '', $expires = 3600, $dbname = '')
 	{
-		//select Ç¿ÖÆ¼ÓÉÏ limit ×Ó¾ä
+		//select å¼ºåˆ¶åŠ ä¸Š limit å­å¥
 		if ('S' == strtoupper($sql[0]) && 'E' == strtoupper($sql[1]) && !stripos($sql, 'limit'))
 			{
 			$sql .= ' LIMIT 1';
@@ -286,7 +286,7 @@ class db_mysql
 			}
 		$tables = array();
 		$sql = "SHOW TABLES {$like}";
-		//Èç¹ûÓÃ $this->select() ÔÚ select() ÖĞÓĞÒ»´ÎÑ­»·£¬ÕâÀïÓÖÒªÒ»´ÎÑ­»·
+		//å¦‚æœç”¨ $this->select() åœ¨ select() ä¸­æœ‰ä¸€æ¬¡å¾ªç¯ï¼Œè¿™é‡Œåˆè¦ä¸€æ¬¡å¾ªç¯
 		$result = $this->query($sql);
 		while($r = $this->fetch_array($result))
 		{
@@ -332,7 +332,7 @@ class db_mysql
 	{
 		global $debug;
 		$this->error_num++;
-		//ÕÒµ½µ÷ÓÃ±¾ÀàµÄÎ»ÖÃ
+		//æ‰¾åˆ°è°ƒç”¨æœ¬ç±»çš„ä½ç½®
 		$traces = debug_backtrace(0);
 		foreach ($traces as $k => $v)
 			{
@@ -349,7 +349,7 @@ class db_mysql
 		{
 			$msg = (defined('IN_ADMIN') || DEBUG) ? $this->errormsg : "Bad Request. {$LANG['illegal_request_return']}";
 			echo '<div style="font-size:12px;text-align:left; border:1px solid #9cc9e0; padding:1px 4px;color:#000000;font-family:Arial, Helvetica,sans-serif;"><span>'.$msg.'</span></div>';
-			//ggzhu 2011-1-7 ³ö´íÒ²²»ÖĞ¶ÏÔËĞĞ¡£
+			//ggzhu 2011-1-7 å‡ºé”™ä¹Ÿä¸ä¸­æ–­è¿è¡Œã€‚
 			//exit;
 		}
 	}
