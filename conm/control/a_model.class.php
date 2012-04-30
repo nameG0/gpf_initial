@@ -1,5 +1,23 @@
 <?php 
-defined('IN_PHPCMS') or exit('Access Denied');
+// defined('IN_PHPCMS') or exit('Access Denied');
+
+class ctrl_a_model
+{
+	function index()
+	{//{{{
+		echo 'this is a_model';
+	}//}}}
+	/**
+	 * 管理内容模型.
+	 */
+	function manage()
+	{//{{{
+		$infos = $model->listinfo('modeltype=0', 'modelid', 1, 100);
+		include admin_tpl('model_manage');
+	}//}}}
+}
+
+return ;
 
 require_once CONTENT_ROOT . 'include/model.class.php';
 $model = new model();
@@ -67,10 +85,6 @@ switch($action)
 			extract($info);
 			include admin_tpl('model_edit');
 		}
-		break;
-    case 'manage':
-        $infos = $model->listinfo('modeltype=0', 'modelid', 1, 100);
-		include admin_tpl('model_manage');
 		break;
 	case 'export':
 		$result = $model->export($modelid);
