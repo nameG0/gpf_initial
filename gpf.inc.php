@@ -19,6 +19,9 @@ define('G_PATH_MOD_RUN', G_PATH_RUN); //项目模块目录
 //入口文件必须定义常量
 //define('G_PATH_RUN'); //项目目录。
 
+//加载配置文件
+require G_PATH_GPF . "config.inc.php";
+
 //load core
 require G_PATH_GPF_CORE . "module.func.php";
 require G_PATH_GPF_CORE . "log.class.php";
