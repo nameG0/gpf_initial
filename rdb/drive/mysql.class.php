@@ -1,15 +1,6 @@
 <?php
-class db_mysql
+class rdb_mysql extends rdb_drive
 {
-	var $connid;
-	var $dbname;
-	var $querynum = 0;	//SQL 执行次数
-	public $error_num = 0;	//查询出错次数
-	public $sql_select_time_total = 0;	//所有 SELECT 语句总用时
-	public $sql_insert_time_total = 0;
-	public $sql_update_time_total = 0;
-
-	var $debug = 1;
 	var $search = array('/union(\s*(\/\*.*\*\/)?\s*)+select/i', '/load_file(\s*(\/\*.*\*\/)?\s*)+\(/i', '/into(\s*(\/\*.*\*\/)?\s*)+outfile/i');
 	var $replace = array('union &nbsp; select', 'load_file &nbsp; (', 'into &nbsp; outfile');
 
@@ -354,4 +345,3 @@ class db_mysql
 		}
 	}
 }
-?>
