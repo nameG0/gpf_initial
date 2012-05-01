@@ -14,7 +14,8 @@
  */
 function mod_init($mod)
 {//{{{
-	$path = PHPCMS_ROOT . "{$mod}/include/init.inc.php";
+	$mod_path = mod_info($mod, 'path_full');
+	$path = "{$mod_path}/include/init.inc.php";
 	if (!is_file($path))
 		{
 		log::add("无法初始化模块 {$mod}, init 文件不存在", log::NOTEXI, __FILE__, __LINE__, __FUNCTION__);
@@ -45,6 +46,10 @@ function mod_info($mod, $key = NULL)
 	if ('conm' == $mod && 'path_full' == $key)
 		{
 		return G_PATH_MOD . 'conm' . DS;
+		}
+	if ('rdb' == $mod && 'path_full' == $key)
+		{
+		return G_PATH_MOD . 'rdb' . DS;
 		}
 }//}}}
 
