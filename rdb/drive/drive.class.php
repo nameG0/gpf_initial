@@ -213,58 +213,61 @@ class rdb_drive
 	 * 子类实现方法
 	 * @param string $sql SQL 语句.
 	 * @param bool $is_buffer 是否缓存查询结果.
+	 * @return PHP 资源类数据类型
 	 */
 	function query($sql , $is_buffer = true) {}
-
 
 	/**
 	 * 取表主键字段
 	 * 子类实现方法
+	 * @param string $table 表名
+	 * @return string 主键字段名
 	 */
 	function get_primary($table) {}
-
-	function get_fields($table)
-	{//{{{
-		$fields = array();
-		$result = $this->query("SHOW COLUMNS FROM $table");
-		while($r = $this->fetch_array($result))
-			{
-			$fields[] = $r['Field'];
-			}
-		$this->free_result($result);
-		return $fields;
-	}//}}}
-
-
-	function fetch_array($query, $result_type = MYSQL_ASSOC)
-	{//{{{
-		return mysql_fetch_array($query, $result_type);
-	}//}}}
-
-	function affected_rows()
-	{//{{{
-		return mysql_affected_rows($this->connid);
-	}//}}}
-
-	function num_rows($query)
-	{//{{{
-		return mysql_num_rows($query);
-	}//}}}
-
-	function num_fields($query)
-	{//{{{
-		return mysql_num_fields($query);
-	}//}}}
+	/**
+	 * 取表所有字段名
+	 * 子类实现方法
+	 * @param string $table 表名
+	 * @return array 字段名数组. array[] = 字段名
+	 */
+	function get_fields($table) {}
+	/**
+	 * 把查询记录集转为变量数据类型(如数组)
+	 * 子类实现方法
+	 * @param PHP $query 查询记录集
+	 * @return mixed 取决于 $result_type 参数值,默认为数组.
+	 */
+	function fetch_array($query, $result_type = MYSQL_ASSOC) {}
+	/**
+	 * 返回最近一条 SQL 语句影响的行数
+	 * 子类实现方法
+	 * @return int 影响的行数
+	 */
+	function affected_rows() {}
+	/**
+	 * 返回查询记录集的记录条数
+	 * 子类实现方法
+	 * @param PHP $query 查询记录集
+	 * @return int 记录条数
+	 */
+	function num_rows($query) {}
+	/**
+	 * 子类实现方法
+	 */
+	function num_fields($query) {}
 
 	function result($query, $row)
 	{//{{{
 		return @mysql_result($query, $row);
 	}//}}}
 
-	function free_result(&$query)
-	{//{{{
-		return mysql_free_result($query);
-	}//}}}
+	/**
+	 * 释放查询记录集
+	 * 子类实现方法
+	 * @param PHP $query 查询记录集
+	 * @return bool
+	 */
+	function free_result(& $query) {}
 
 	function insert_id()
 	{//{{{
