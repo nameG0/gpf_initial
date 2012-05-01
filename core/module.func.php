@@ -8,11 +8,26 @@
  */
 
 /**
+ * 初始化指定模块
  * 加载模块 include/init.inc.php 文件。
+ * 此处不检查模块是否重复初始化，需要模块 init 文件自行检查。因为本函数可以被跳过而直接 include init 文件。
  */
 function mod_init($mod)
 {//{{{
-	
+	$path = PHPCMS_ROOT . "{$mod}/include/init.inc.php";
+	if (!is_file($path))
+		{
+		log::add("无法初始化模块 {$mod}, init 文件不存在", log::NOTEXI, __FILE__, __LINE__, __FUNCTION__);
+		return false;
+		}
+	log::add($mod, log::INFO, __FILE__, __LINE__, __FUNCTION__);
+	//init 文件可通过返回 true/false 标记模块初始化是否成功
+	$ret = include $path;
+	if (is_bool($ret))
+		{
+		return $ret;
+		}
+	return true;
 }//}}}
 
 /**
