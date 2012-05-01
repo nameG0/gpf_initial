@@ -9,11 +9,6 @@ class rdb_mysql extends rdb_drive
 		$func = $pconnect == 1 ? 'mysql_pconnect' : 'mysql_connect';
 		if(!$this->connid = @$func($dbhost, $dbuser, $dbpw))
 		{
-			if(DB_NAME == '' && file_exists(PHPCMS_ROOT.'install.php'))
-			{
-				header('location:./install.php');
-				exit;
-			}
 			$this->halt('Can not connect to MySQL server');
 			return false;
 		}
