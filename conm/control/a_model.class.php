@@ -39,15 +39,7 @@ class ctrl_a_model
 			}
 		else
 			{
-			?>
-<pre>
-模型名：
-模型表名：
-模型类型：[下拉框]
-模型类型自己的设置表单，在选中模型类型后通过 ajax 加载出来。
-</pre>
-<?php
-			// include admin_tpl('model_add');
+			include tpl_admin('model_add');
 			}
 	}//}}}
 	function edit()

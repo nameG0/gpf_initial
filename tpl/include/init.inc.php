@@ -14,3 +14,4 @@ if (defined('GM_PATH_TPL'))
 define('GM_PATH_TPL', dirname(dirname(__FILE__)) . DS);
 
 include GM_PATH_TPL . 'include/config.inc.php';
+require_once GM_PATH_TPL . "api/tpl.func.php";
