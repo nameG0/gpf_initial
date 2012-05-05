@@ -40,6 +40,11 @@ class gpf
 			{
 			$action = 'index';
 			}
+		if (!defined('CURRENT_MOD'))
+			{
+			//此常量只用于方便取默认值。
+			define('CURRENT_MOD', $mod);
+			}
 		$mod_path = mod_info($mod, 'path_full');
 		//实例化控制器类。
 		$ctrl_path = $mod_path . 'control' . DS . $file . '.class.php';
