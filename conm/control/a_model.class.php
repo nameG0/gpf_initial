@@ -1,6 +1,4 @@
-<?php 
-// defined('IN_PHPCMS') or exit('Access Denied');
-
+<?php
 class ctrl_a_model
 {
 	function index()
@@ -15,23 +13,8 @@ class ctrl_a_model
 		$infos = $model->listinfo('modeltype=0', 'modelid', 1, 100);
 		include admin_tpl('model_manage');
 	}//}}}
-}
-
-return ;
-
-require_once CONTENT_ROOT . 'include/model.class.php';
-$model = new model();
-if(!$action) $action = 'manage';
-if(!$forward) $forward = admin_url("..manage");
-
-$submenu = array(
-	array('添加模型', admin_url("..add")),
-	array('管理模型', admin_url("..manage")),
-	);
-
-switch($action)
-{
-    case 'add':
+	function add()
+	{//{{{
 		if($dosubmit)
 		{
 			$modelid = $model->add($info);
@@ -49,8 +32,9 @@ switch($action)
 		{
 			include admin_tpl('model_add');
 		}
-		break;
-    case 'edit':
+	}//}}}
+	function edit()
+	{//{{{
 		if($dosubmit)
 		{
 			$result = $model->edit($modelid, $info);
@@ -85,14 +69,16 @@ switch($action)
 			extract($info);
 			include admin_tpl('model_edit');
 		}
-		break;
-	case 'export':
+	}//}}}
+	function export()
+	{//{{{
 		$result = $model->export($modelid);
 		$filename = $result['arr_model']['tablename'].'.model';
 		cache_write($filename, $result, CACHE_MODEL_PATH);
 		file_down(CACHE_MODEL_PATH.$filename, $filename);
-		break;
-	case 'import':
+	}//}}}
+	function import()
+	{//{{{
 		if($dosubmit)
 		{
 			if(!$info['name']) showmessage('请输入模型名称');
@@ -144,8 +130,9 @@ switch($action)
 		{
 			include admin_tpl('model_import');
 		}
-		break;
-    case 'delete':
+	}//}}}
+	function delete()
+	{//{{{
 		$result = $model->delete($modelid);
 		if($result)
 		{
@@ -155,8 +142,9 @@ switch($action)
 		{
 			showmessage('操作失败！', $forward);
 		}
-		break;
-    case 'disable':
+	}//}}}
+	function disable()
+	{//{{{
 		$result = $model->disable($modelid, $disabled);
 		if($result)
 		{
@@ -166,10 +154,9 @@ switch($action)
 		{
 			showmessage('操作失败！');
 		}
-		break;
-	case 'urlrule':
+	}//}}}
+	function urlrule()
+	{//{{{
 		echo $type == 'category' ? form::select_urlrule('phpcms', 'category', $ishtml, 'info[category_urlruleid]', 'category_urlruleid', $category_urlruleid) : form::select_urlrule('phpcms', 'show', $ishtml, 'info[show_urlruleid]', 'show_urlruleid', $show_urlruleid);
-		break;
-    default :
+	}//}}}
 }
-?>
