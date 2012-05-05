@@ -2,12 +2,20 @@
 /**
  * GPF 主类。
  * 
- * @version 2012-04-13
+ * @version 2012-05-05
  * @package default
  * @filesource
  */
 class gpf
 {
+	/**
+	 * 进行初始化工作
+	 */
+	static function init()
+	{//{{{
+		//加载 rdb 模块。
+		mod_init('rdb');
+	}//}}}
 	/**
 	 * 调度器
 	 * <pre>
