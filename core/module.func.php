@@ -51,6 +51,10 @@ function mod_info($mod, $key = NULL)
 		{
 		return G_PATH_MOD_SOUR . 'rdb' . DS;
 		}
+	if ('tpl' == $mod && 'path_full' == $key)
+		{
+		return G_PATH_MOD_SOUR . 'tpl' . DS;
+		}
 }//}}}
 
 /**

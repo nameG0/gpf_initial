@@ -15,6 +15,7 @@ class gpf
 	{//{{{
 		//加载 rdb 模块。
 		mod_init('rdb');
+		mod_init('tpl');
 	}//}}}
 	/**
 	 * 调度器
