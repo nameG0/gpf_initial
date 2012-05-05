@@ -26,8 +26,3 @@ function run_time($time = NULL)
 		}
 	return $mt - $time;
 }//}}}
-
-function template($mod, $tpl)
-{//{{{
-	return G_PATH_MOD_RUN . "template/{$mod}/{$tpl}.tpl.php";
-}//}}}

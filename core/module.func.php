@@ -41,15 +41,15 @@ function mod_info($mod, $key = NULL)
 {//{{{
 	if ('main' == $mod && 'path_full' == $key)
 		{
-		return G_PATH_MOD_RUN . 'main' . DS;
+		return G_PATH_MOD_INST . 'main' . DS;
 		}
 	if ('conm' == $mod && 'path_full' == $key)
 		{
-		return G_PATH_MOD . 'conm' . DS;
+		return G_PATH_MOD_SOUR . 'conm' . DS;
 		}
 	if ('rdb' == $mod && 'path_full' == $key)
 		{
-		return G_PATH_MOD . 'rdb' . DS;
+		return G_PATH_MOD_SOUR . 'rdb' . DS;
 		}
 }//}}}
 
