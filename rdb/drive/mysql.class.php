@@ -1,15 +1,6 @@
 <?php
-class db_mysql
+class rdb_mysql extends rdb_drive
 {
-	var $connid;
-	var $dbname;
-	var $querynum = 0;	//SQL 执行次数
-	public $error_num = 0;	//查询出错次数
-	public $sql_select_time_total = 0;	//所有 SELECT 语句总用时
-	public $sql_insert_time_total = 0;
-	public $sql_update_time_total = 0;
-
-	var $debug = 1;
 	var $search = array('/union(\s*(\/\*.*\*\/)?\s*)+select/i', '/load_file(\s*(\/\*.*\*\/)?\s*)+\(/i', '/into(\s*(\/\*.*\*\/)?\s*)+outfile/i');
 	var $replace = array('union &nbsp; select', 'load_file &nbsp; (', 'into &nbsp; outfile');
 
@@ -18,11 +9,6 @@ class db_mysql
 		$func = $pconnect == 1 ? 'mysql_pconnect' : 'mysql_connect';
 		if(!$this->connid = @$func($dbhost, $dbuser, $dbpw))
 		{
-			if(DB_NAME == '' && file_exists(PHPCMS_ROOT.'install.php'))
-			{
-				header('location:./install.php');
-				exit;
-			}
 			$this->halt('Can not connect to MySQL server');
 			return false;
 		}
@@ -354,4 +340,3 @@ class db_mysql
 		}
 	}
 }
-?>

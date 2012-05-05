@@ -10,14 +10,37 @@
 
 class rdb_drive
 {
+	/**
+	 * 保存数据库链接
+	 */
 	var $connid;
+	/**
+	 * 保存当前使用中的数据库
+	 */
 	var $dbname;
-	var $querynum = 0;	//SQL 执行次数
-	public $error_num = 0;	//查询出错次数
-	public $sql_select_time_total = 0;	//所有 SELECT 语句总用时
+	/**
+	 * SQL 执行次数
+	 */
+	var $querynum = 0;
+	/**
+	 * 查询出错次数
+	 */
+	public $error_num = 0;
+	/**
+	 * 使用 select() 方法执行的所有 SELECT 语句总用时
+	 */
+	public $sql_select_time_total = 0;
+	/**
+	 * 使用 insert() 方法执行的所有 INSERT 语句总用时
+	 */
 	public $sql_insert_time_total = 0;
+	/**
+	 * 使用 update() 方法执行的所有 UPDATE 语句总用时
+	 */
 	public $sql_update_time_total = 0;
-
+	/**
+	 * 是否打开 debug 模式.
+	 */
 	var $debug = 1;
 
 	/**
@@ -168,6 +191,34 @@ class rdb_drive
 	{//{{{
 		
 	}//}}}
+	/**
+	 * 处理查询错误
+	 */
+	function halt($message = '', $sql = '')
+	{//{{{
+		global $debug;
+		$this->error_num++;
+		//找到调用本类的位置
+		$traces = debug_backtrace(0);
+		foreach ($traces as $k => $v)
+			{
+			if (__FILE__ != $v["file"])
+				{
+				$trace = $v;
+				break;
+				}
+			}
+		unset($traces);
+		$this->errormsg = "<b>MySQL Query : </b>$sql <br /><b> MySQL Error : </b>".$this->error()." <br /> <b>MySQL Errno : </b>".$this->errno()." <br /><b> Message : </b> $message <br/> <b>FILE :</b> {$trace['file']} : {$trace['line']}";
+		log::add($this->errormsg, log::SQL, $trace['file'], $trace['line'], $trace['func']);
+		if($this->debug)
+			{
+			$msg = (defined('IN_ADMIN') || DEBUG) ? $this->errormsg : "Bad Request. {$LANG['illegal_request_return']}";
+			echo '<div style="font-size:12px;text-align:left; border:1px solid #9cc9e0; padding:1px 4px;color:#000000;font-family:Arial, Helvetica,sans-serif;"><span>'.$msg.'</span></div>';
+			//ggzhu 2011-1-7 出错也不中断运行。
+			//exit;
+			}
+	}//}}}
 
 	/**
 	 * 建立数据库链接
@@ -255,12 +306,6 @@ class rdb_drive
 	 * 子类实现方法
 	 */
 	function num_fields($query) {}
-
-	function result($query, $row)
-	{//{{{
-		return @mysql_result($query, $row);
-	}//}}}
-
 	/**
 	 * 释放查询记录集
 	 * 子类实现方法
@@ -268,102 +313,65 @@ class rdb_drive
 	 * @return bool
 	 */
 	function free_result(& $query) {}
+	/**
+	 * 返回新插入记录的 id
+	 * 子类实现方法
+	 * @return int ID
+	 */
+	function insert_id() {}
+	/**
+	 * 子类实现方法
+	 */
+	function fetch_row($query) {}
 
-	function insert_id()
-	{//{{{
-		return mysql_insert_id($this->connid);
-	}//}}}
-
-	function fetch_row($query)
-	{//{{{
-		return mysql_fetch_row($query);
-	}//}}}
-
-	function escape($string)
-	{//{{{
-		if(!is_array($string)) return str_replace(array('\n', '\r'), array(chr(10), chr(13)), mysql_real_escape_string(preg_replace($this->search, $this->replace, $string), $this->connid));
-		foreach($string as $key=>$val) $string[$key] = $this->escape($val);
-		return $string;
-	}//}}}
-
-	function table_status($table)
-	{//{{{
-		return $this->get_one("SHOW TABLE STATUS LIKE '$table'");
-	}//}}}
-
-	function tables($like = '')
-	{//{{{
-		if ($like)
-			{
-			$like = " LIKE '{$like}'";
-			}
-		$tables = array();
-		$sql = "SHOW TABLES {$like}";
-		//如果用 $this->select() 在 select() 中有一次循环，这里又要一次循环
-		$result = $this->query($sql);
-		while($r = $this->fetch_array($result))
-			{
-			$tables[] = array_shift($r);
-			}
-		$this->free_result($result);
-		return $tables;
-	}//}}}
-
-	function table_exists($table)
-	{//{{{
-		$tables = $this->tables($table);
-		return in_array($table, $tables);
-	}//}}}
-
-	function field_exists($table, $field)
-	{//{{{
-		$fields = $this->get_fields($table);
-		return in_array($field, $fields);
-	}//}}}
-
-	function version()
-	{//{{{
-		return mysql_get_server_info($this->connid);
-	}//}}}
-
-	function close()
-	{//{{{
-		return mysql_close($this->connid);
-	}//}}}
-
-	function error()
-	{//{{{
-		return @mysql_error($this->connid);
-	}//}}}
-
-	function errno()
-	{//{{{
-		return intval(@mysql_errno($this->connid)) ;
-	}//}}}
-
-	function halt($message = '', $sql = '')
-	{//{{{
-		global $debug;
-		$this->error_num++;
-		//找到调用本类的位置
-		$traces = debug_backtrace(0);
-		foreach ($traces as $k => $v)
-			{
-			if (__FILE__ != $v["file"])
-				{
-				$trace = $v;
-				break;
-				}
-			}
-		unset($traces);
-		$this->errormsg = "<b>MySQL Query : </b>$sql <br /><b> MySQL Error : </b>".$this->error()." <br /> <b>MySQL Errno : </b>".$this->errno()." <br /><b> Message : </b> $message <br/> <b>FILE :</b> {$trace['file']} : {$trace['line']}";
-		log::add($this->errormsg, log::SQL, $trace['file'], $trace['line'], $trace['func']);
-		if($this->debug)
-			{
-			$msg = (defined('IN_ADMIN') || DEBUG) ? $this->errormsg : "Bad Request. {$LANG['illegal_request_return']}";
-			echo '<div style="font-size:12px;text-align:left; border:1px solid #9cc9e0; padding:1px 4px;color:#000000;font-family:Arial, Helvetica,sans-serif;"><span>'.$msg.'</span></div>';
-			//ggzhu 2011-1-7 出错也不中断运行。
-			//exit;
-			}
-	}//}}}
+	/**
+	 * 转义特殊字符
+	 * 子类实现方法
+	 * @param array|string $string
+	 * @return array|string
+	 */
+	function escape($string) {}
+	/**
+	 * 子类实现方法
+	 */
+	function table_status($table) {}
+	/**
+	 * 子类实现方法
+	 */
+	function tables($like = '') {}
+	/**
+	 * 检查指定的表是否存在
+	 * 子类实现方法
+	 * @param string $table
+	 * @return bool
+	 */
+	function table_exists($table) {}
+	/**
+	 * 检查指定字段是否在指定的表内存在
+	 * 子类实现
+	 * @param string $table 表名
+	 * @param string $field 字段名
+	 * @param bool 
+	 */
+	function field_exists($table, $field) {}
+	/**
+	 * 返回数据版本号
+	 * 子类实现
+	 */
+	function version() {}
+	/**
+	 * 关闭数据库链接
+	 * 子类实现
+	 */
+	function close() {}
+	/**
+	 * 返回最近一次的错误信息
+	 * 子类实现
+	 */
+	function error() {}
+	/**
+	 * 返回最后一次的错误代号
+	 * 子类实现
+	 */
+	function errno() {}
 }

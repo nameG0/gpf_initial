@@ -1,27 +1,29 @@
 <?php 
 /**
- * db 模块初始化
- * 
+ * rdb 模块初始化
  * 2011-10-14
+ *
+ * @version 20120501
  * @package default
  * @filesource
  */
-if (defined('DB_ROOT'))
+if (defined('RDB_PATH'))
 	{
 	return ;
 	}
-define('DB_ROOT', dirname(dirname(__FILE__)) . '/');
-require_once DB_ROOT . "include/config.inc.php";
-require_once DB_ROOT . "include/global.func.php";
-require_once DB_ROOT . "include/paging.func.php";
+define('RDB_PATH', dirname(dirname(__FILE__)) . '/');
+require_once RDB_PATH . "include/config.inc.php";
+require_once RDB_PATH . "include/global.func.php";
+// require_once RDB_PATH . "include/paging.func.php";
+require_once RDB_PATH . "api/rdb.class.php";
+require_once RDB_PATH . "drive/drive.class.php";
 
 //实例化数据库访问类
-global $db;
-$dbclass = 'db_'.DB_DATABASE;
-require_once DB_ROOT . "include/{$dbclass}.class.php";
-$db = new $dbclass;
-$tmp = $db->connect(DB_HOST, DB_USER, DB_PW, DB_NAME, DB_PCONNECT, DB_CHARSET);
-$tmp = $tmp ? true : false;
-define('IS_DB', $tmp);	//标识数据库是否链接成功
-unset($tmp);
-?>
+// global $db;
+// $dbclass = 'db_'.RDB_DATABASE;
+// require_once RDB_PATH . "include/{$dbclass}.class.php";
+// $db = new $dbclass;
+// $tmp = $db->connect(RDB_HOST, RDB_USER, RDB_PW, RDB_NAME, RDB_PCONNECT, RDB_CHARSET);
+// $tmp = $tmp ? true : false;
+// define('IS_DB', $tmp);	//标识数据库是否链接成功
+// unset($tmp);
