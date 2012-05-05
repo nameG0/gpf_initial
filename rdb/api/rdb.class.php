@@ -43,6 +43,10 @@ class rdb
 				return false;
 				}
 			$db = self::create($cfg['database'], $cfg['host'], $cfg['user'], $cfg['pw'], $cfg['pconnect'], $cfg['charset']);
+			if (is_object($db) && $cfg['name'])
+				{
+				$db->select_db($cfg['name']);
+				}
 			self::$rdb_obj[$name] = $db;
 			return $db;
 			}

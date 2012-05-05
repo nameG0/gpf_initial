@@ -50,20 +50,23 @@ class rdb_drive
 	function select($sql, $keyfield = '')
 	{//{{{
 		$array = array();
-		$tmp = get_time();
+		$tmp = run_time();
 		$result = $this->query($sql);
 		$tmp = run_time($tmp);
 		$this->sql_select_time_total += $tmp;
 		log::add("{$tmp} {$sql}", log::INFO, '', '', __CLASS__.'->'.__FUNCTION__);
 		unset($tmp);
-		while($r = $this->fetch_array($result))
+		if ($keyfield)
 			{
-			if($keyfield)
+			while($r = $this->fetch_array($result))
 				{
 				$key = $r[$keyfield];
 				$array[$key] = $r;
 				}
-			else
+			}
+		else
+			{
+			while($r = $this->fetch_array($result))
 				{
 				$array[] = $r;
 				}
@@ -76,12 +79,12 @@ class rdb_drive
 	 */
 	function find($sql, $type = '', $expires = 3600, $dbname = '')
 	{//{{{
-		//select 强制加上 limit 子句
+		//select 语句强制加上 limit 子句
 		if ('S' == strtoupper($sql[0]) && 'E' == strtoupper($sql[1]) && !stripos($sql, 'limit'))
 			{
 			$sql .= ' LIMIT 1';
 			}
-		$tmp = get_time();
+		$tmp = run_time();
 		$query = $this->query($sql, $type, $expires, $dbname);
 		$tmp = run_time($tmp);
 		$this->sql_select_time_total += $tmp;
@@ -132,7 +135,7 @@ class rdb_drive
 				}
 			}
 		$sql = "INSERT {$other} INTO `{$table}` (`{$sql_field}`) VALUES {$sql_value}";
-		$tmp = get_time();
+		$tmp = run_time();
 		$ret = $this->query($sql);
 		$tmp = run_time($tmp);
 		$this->sql_insert_time_total += $tmp;
@@ -178,7 +181,7 @@ class rdb_drive
 			{
 			return $sql;
 			}
-		$tmp = get_time();
+		$tmp = run_time();
 		$ret = $this->query($sql);
 		$tmp = run_time($tmp);
 		$this->sql_update_time_total += $tmp;

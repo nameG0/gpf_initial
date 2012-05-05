@@ -46,30 +46,30 @@ class rdb_mysql extends rdb_drive
 		return $query;
 	}
 
-	function select($sql, $keyfield = '')
-	{
-		$array = array();
-		$tmp = get_time();
-		$result = $this->query($sql);
-		$tmp = run_time($tmp);
-		$this->sql_select_time_total += $tmp;
-		log::add("{$tmp} {$sql}", log::INFO, '', '', __CLASS__.'->'.__FUNCTION__);
-		unset($tmp);
-		while($r = $this->fetch_array($result))
-		{
-			if($keyfield)
-			{
-				$key = $r[$keyfield];
-				$array[$key] = $r;
-			}
-			else
-			{
-				$array[] = $r;
-			}
-		}
-		$this->free_result($result);
-		return $array;
-	}
+	// function select($sql, $keyfield = '')
+	// {
+		// $array = array();
+		// $tmp = get_time();
+		// $result = $this->query($sql);
+		// $tmp = run_time($tmp);
+		// $this->sql_select_time_total += $tmp;
+		// log::add("{$tmp} {$sql}", log::INFO, '', '', __CLASS__.'->'.__FUNCTION__);
+		// unset($tmp);
+		// while($r = $this->fetch_array($result))
+		// {
+			// if($keyfield)
+			// {
+				// $key = $r[$keyfield];
+				// $array[$key] = $r;
+			// }
+			// else
+			// {
+				// $array[] = $r;
+			// }
+		// }
+		// $this->free_result($result);
+		// return $array;
+	// }
 
 	//2011-03-17 ggzhu 加入 $other 参数，用于输入如 IGNORE 这样的操作符
 	//2011-03-24 ggzhu 加入对二维数组的支持
