@@ -26,15 +26,22 @@ class ctrl_a_model
 	{//{{{
 		if (isset($_POST["dosubmit"]))
 			{
-			$modelid = $model->add($info);
-			if($modelid)
+			$data = _p('data');
+
+			$db = rdb::obj();
+			$db->insert(RDB_PRE . 'model', $data);
+
+			$modelid = $db->insert_id();
+			if ($modelid)
 				{
 				//cache_model();
-				showmessage('操作成功！', admin_url(".model_field.manage.&modelid={$modelid}"));
+				// showmessage('操作成功！', admin_url(".model_field.manage.&modelid={$modelid}"));
+				echo "操作成功！";
 				}
 			else
 				{
-				showmessage('操作失败！');
+				// showmessage('操作失败！');
+				echo '操作失败！';
 				}
 			}
 		else

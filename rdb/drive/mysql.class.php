@@ -73,45 +73,45 @@ class rdb_mysql extends rdb_drive
 
 	//2011-03-17 ggzhu 加入 $other 参数，用于输入如 IGNORE 这样的操作符
 	//2011-03-24 ggzhu 加入对二维数组的支持
-	function insert($table, $data, $other = '')
-	{
-		$type = is_array(current($data)) ? 2 : 1;	//标记数组的维数
-		//一维数组时检查字段合法性
-		if (1 == $type)
-			{
-			$fields = $this->get_fields($table);
-			foreach($data as $key => $value)
-				{
-				if(!in_array($key,$fields))unset($data[$key]);
-				}
-			if (!$data)
-				{
-				return false;
-				}
-			}
-		$sql_field = join("`,`", array_keys((1 == $type ? $data : current($data))));
-		//用if分支,比强制转换为二维数组及 switch 结构快那么一点点
-		if (1 == $type)
-			{
-			$sql_value = "('" . join("','", $data) . "')";
-			}
-		else
-			{
-			$middle = '';
-			$sql_value = '';
-			foreach ($data as $r)
-				{
-				$sql_value .= "{$middle}('" . join("','", $r) . "')";
-				$middle = ', ';
-				}
-			}
-		$sql = "INSERT {$other} INTO `{$table}` (`{$sql_field}`) VALUES {$sql_value}";
-		$tmp = get_time();
-		$ret = $this->query($sql);
-		$tmp = run_time($tmp);
-		$this->sql_insert_time_total += $tmp;
-		return $ret;
-	}
+	// function insert($table, $data, $other = '')
+	// {
+		// $type = is_array(current($data)) ? 2 : 1;	//标记数组的维数
+		// //一维数组时检查字段合法性
+		// if (1 == $type)
+			// {
+			// $fields = $this->get_fields($table);
+			// foreach($data as $key => $value)
+				// {
+				// if(!in_array($key,$fields))unset($data[$key]);
+				// }
+			// if (!$data)
+				// {
+				// return false;
+				// }
+			// }
+		// $sql_field = join("`,`", array_keys((1 == $type ? $data : current($data))));
+		// //用if分支,比强制转换为二维数组及 switch 结构快那么一点点
+		// if (1 == $type)
+			// {
+			// $sql_value = "('" . join("','", $data) . "')";
+			// }
+		// else
+			// {
+			// $middle = '';
+			// $sql_value = '';
+			// foreach ($data as $r)
+				// {
+				// $sql_value .= "{$middle}('" . join("','", $r) . "')";
+				// $middle = ', ';
+				// }
+			// }
+		// $sql = "INSERT {$other} INTO `{$table}` (`{$sql_field}`) VALUES {$sql_value}";
+		// $tmp = get_time();
+		// $ret = $this->query($sql);
+		// $tmp = run_time($tmp);
+		// $this->sql_insert_time_total += $tmp;
+		// return $ret;
+	// }
 
 	//2011-03-17 ggzhu 废弃，用 insert 及 $other 参数实现
 	/*
