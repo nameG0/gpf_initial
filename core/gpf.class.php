@@ -16,6 +16,7 @@ class gpf
 		//加载 rdb 模块。
 		mod_init('rdb');
 		mod_init('tpl');
+		require_once G_PATH_GPF_LIB . "http__var.func.php";
 	}//}}}
 	/**
 	 * 调度器
