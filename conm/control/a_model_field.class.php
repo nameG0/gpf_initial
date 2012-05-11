@@ -58,7 +58,7 @@ class ctrl_a_model_field
 	{//{{{
 		if($dosubmit)
 			{
-			//若是主表的字段，则无数修改表结构
+			//若是主表的字段，则无须修改表结构
 			$issystem = in_array($info['field'], array('thumb', 'description', 'contentid'));
 			$info['issystem'] = $issystem;
 			$info['modelid'] = $modelid;
@@ -117,10 +117,10 @@ class ctrl_a_model_field
 		else
 			{
 			//if(!is_ie()) showmessage('本功能只支持IE浏览器，请用IE浏览器打开。');
-			$unsetgroups = form::checkbox($GROUP, 'unsetgroupids', 'unsetgroupids', '', 4);
-			$unsetroles = form::checkbox($ROLE, 'unsetroleids', 'unsetroleids', '', 4);
-			require_once CONTENT_ROOT . 'fields/patterns.inc.php';
-			include admin_tpl('model_field_add');
+			// $unsetgroups = form::checkbox($GROUP, 'unsetgroupids', 'unsetgroupids', '', 4);
+			// $unsetroles = form::checkbox($ROLE, 'unsetroleids', 'unsetroleids', '', 4);
+			// require_once CONTENT_ROOT . 'fields/patterns.inc.php';
+			include tpl_admin('field_add');
 			}
 	}//}}}
 	function edit()
@@ -200,8 +200,8 @@ class ctrl_a_model_field
 			$unsetgroups = form::checkbox($GROUP, 'unsetgroupids', 'unsetgroupids', $unsetgroupids, 4);
 			$unsetroles = form::checkbox($ROLE, 'unsetroleids', 'unsetroleids', $unsetroleids, 4);
 			require_once CONTENT_ROOT . 'fields/patterns.inc.php';
-			//include admin_tpl('model_field_edit');
-			include admin_tpl('model_field_add');
+			//include tpl_admin('model_field_edit');
+			include tpl_admin('model_field_add');
 			}
 	}//}}}
 	function copy()
@@ -233,7 +233,7 @@ class ctrl_a_model_field
 			$unsetgroups = form::checkbox($GROUP, 'unsetgroupids', 'unsetgroupids', $unsetgroupids, 5);
 			$unsetroles = form::checkbox($ROLE, 'unsetroleids', 'unsetroleids', $unsetroleids, 5);
 			require_once CONTENT_ROOT . 'fields/patterns.inc.php';
-			include admin_tpl('model_field_copy');
+			include tpl_admin('model_field_copy');
 			}
 	}//}}}
 	function delete()
@@ -308,7 +308,7 @@ class ctrl_a_model_field
 		require CONTENT_ROOT . 'include/content_form.class.php';
 		$content_form = new content_form($modelid);
 		$forminfos = $content_form->get();
-		include admin_tpl('content_add');
+		include tpl_admin('content_add');
 	}//}}}
 	function checkfield()
 	{//{{{
