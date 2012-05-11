@@ -58,6 +58,72 @@ function mod_info($mod, $key = NULL)
 }//}}}
 
 /**
- * 进行模块的 callback 操作。包括，注册，提取。
+ * 进行模块的 callback 操作。
+ * <b>查询</b>
+ * <code>
+ * mod_callback('conm');
+ * </code>
+ * <pre>
+ * 返回所有在 conm 模块注册过的模块的 callback 目录绝对路径，一个模块可能会有两个 callback 目录，一个是源目录中，一个在副本目录中。
+ * array[] = callback 目录绝对路径
+ * </pre>
+ * <b>注册</b>
+ * <code>
+ * mod_callback('conm', 'add', 'category');
+ * </code>
+ * <pre>
+ * 把 category 模块注册到 conm 模块的 callback 列表中。
+ * </pre>
+ * <b>删除</b>
+ * <code>
+ * mod_callback('conm', 'del', 'category');
+ * </code>
+ * <pre>
+ * 把 category 模块从 conm 模块的 callback 列表中删除。
+ * </pre>
+ * @param string $target 目标模块。
+ * @param string|NULL $action 操作{add:注册, del:删除, NULL:查询}
+ * @param string|NULL $register 注册模块。
+ * @return array|bool 查询模块的 callback 时返回数组，其它操作返回 t/f 。
  */
-//mod_callback
+function mod_callback($target, $action = NULL, $register = NULL)
+{//{{{
+	static $cache = array(); //把已读取过的数据缓存在内存变量中。
+	static $callback = array(); //缓存查询操作的返回结果。
+
+	//------ 主要思路 ------
+	//所有操作都先把目标模块的 callback 数据缓存在 $cache 变量中，修改及删除操作先修改变量中的数据，再持久化到文件中保存。
+	//文件保存在 project_name_data/gpf/mod_callback/ 下，每个目标模块一个文件，文件内容为注册到此目标模块下的模块列表。
+	//注册模块列表使用数组保存，保存到文件时用 serialize 序列化。
+	//------------
+
+	if (!isset($cache[$target]))
+		{
+		$path = GPF_PATH_DATA . "mod_callback/{$target}";
+		if (is_file($path))
+			{
+			$data = file_get_contents($path);
+			$cache[$target] = unserialize($data);
+			unset($data);
+			}
+		else
+			{
+			$cache[$target] = array();
+			}
+		unset($path);
+		}
+
+	switch ($action)
+		{
+		default:
+			if (is_null($action))
+				{
+				if (!isset($callback[$target]))
+					{
+					
+					}
+				return $callback[$target];
+				}
+			break;
+		}
+}//}}}
