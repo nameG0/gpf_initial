@@ -8,8 +8,14 @@
  */
 error_reporting(E_ALL ^ E_NOTICE);
 
-//入口文件必须定义常量
-//define('G_PATH_INST'); //项目目录。
+// 入口文件必须定义常量：
+// *因为 gencms 并不知道项目的名称，因此如数据目录需要在入口文件中定义。
+// $ds = DIRECTORY_SEPARATOR;$dir = dirname(__FILE__);$pdir = dirname($dir);$name = 'project_name';
+// define('G_PATH_INST', $dir . $ds); //项目目录。
+// define('G_PATH_DATA', "{$pdir}{$ds}{$name}_data{$ds}"); //数据目录。
+// define('G_PATH_UPLOADFILE', "{$pdir}{$ds}{$name}_uploadfile{$ds}"); //上传文件保存目录。
+// define('G_PATH_CACHE', "{$pdir}{$ds}{$name}_cache{$ds}"); //缓存文件目录。
+// unset($ds, $dir, $pdir, $name);
 
 define('DS', DIRECTORY_SEPARATOR);
 //路径常量用 G_PATH_ 前序。

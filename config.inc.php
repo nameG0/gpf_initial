@@ -14,6 +14,7 @@ if (is_file($_tmp))
 	include $_tmp;
 	}
 $_tmp = array(
+	"GPF_PATH_DATA" => G_PATH_DATA . 'gpf' . DS,
 	);
 foreach ($_tmp as $k => $v)
 	{
