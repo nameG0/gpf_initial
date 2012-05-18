@@ -13,7 +13,7 @@ if (defined('RDB_PATH'))
 	}
 define('RDB_PATH', dirname(dirname(__FILE__)) . '/');
 require_once RDB_PATH . "include/config.inc.php";
-require_once RDB_PATH . "include/global.func.php";
+// require_once RDB_PATH . "include/global.func.php";
 // require_once RDB_PATH . "include/paging.func.php";
 require_once RDB_PATH . "api/rdb.class.php";
 require_once RDB_PATH . "drive/drive.class.php";
