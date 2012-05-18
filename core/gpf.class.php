@@ -13,9 +13,10 @@ class gpf
 	 */
 	static function init()
 	{//{{{
-		//加载 rdb 模块。
+		//默认加载的模块。
 		mod_init('rdb');
 		mod_init('tpl');
+		//默认加载的 gpf/lib
 		require_once G_PATH_GPF_LIB . "http__var.func.php";
 	}//}}}
 	/**
@@ -47,18 +48,56 @@ class gpf
 			//此常量只用于方便取默认值。
 			define('CURRENT_MOD', $mod);
 			}
-		$mod_path = mod_info($mod, 'path_full');
-		//实例化控制器类。
-		$ctrl_path = $mod_path . 'control' . DS . $file . '.class.php';
-		log::add("control:{$ctrl_path}", log::INFO, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
-		if (!is_file($ctrl_path))
+		mod_init($mod);
+
+		//------ 源与副本中的控制器 ------
+		//若源目录中有指定的控制器，总是会 include 。
+		//若副本中定义有指定的控制器，将实例化副本中定义的控制器。
+		//副本中控制器定义文件名与源中的定义文件名一致。
+		//副本中的控制器类名为 {源中控制器类名}_inst. eg. ctrl_control_inst
+		//若控制器只定义在副本中，类名不需要加 _inst 后序。 eg. ctrl_control
+		//因为已加载源中的控制器，建议副本中定义的控制器直接继承源中的控制器。
+		//注：此处的“控制器”都是指 GET 参数中指定要调用的控制器。
+		//------
+		$ModInfo = mod_info($mod);
+		$is_include_success = false; //标记是否至少已加载一个控制器。
+		$ctrl_path = $ModInfo['path_sour'] . 'control' . DS . $file . '.class.php';
+		if (is_file($ctrl_path))
+			{
+			include_once $ctrl_path;
+			$is_include_success = true;
+			}
+		$ctrl_path = $ModInfo['path_inst'] . 'control' . DS . $file . '.class.php';
+		if (is_file($ctrl_path))
+			{
+			include_once $ctrl_path;
+			$is_include_success = true;
+			}
+		if (!$is_include_success)
 			{
 			echo "control not exists.";
 			exit;
 			}
-		include_once $ctrl_path;
+
+		//实例化控制器类。
+		$ctrl_class_inst = "ctrl_{$file}_inst";
 		$ctrl_class = "ctrl_{$file}";
-		$o_ctrl = new $ctrl_class();
+		if (class_exists($ctrl_class_inst))
+			{
+			$o_ctrl = new $ctrl_class_inst();
+			log::add("control:{$ctrl_class_inst}", log::INFO, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+			}
+		else if (class_exists($ctrl_class))
+			{
+			$o_ctrl = new $ctrl_class();
+			log::add("control:{$ctrl_class}", log::INFO, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+			}
+		else
+			{
+			echo 'class not exists';
+			exit;
+			}
+
 		//调用控制器方法。
 		if (!method_exists($o_ctrl, $action))
 			{
