@@ -8,6 +8,8 @@
  */
 // defined('IN_PHPCMS') or exit('Access Denied');
 // @set_time_limit(600);
+require_once GM_PATH_CONM . "include/field.func.php";
+
 class ctrl_a_model_field
 {
 	function __construct()
@@ -31,28 +33,6 @@ class ctrl_a_model_field
 			// array('预览模型', admin_url("..preview..modelid")),
 		// );
 		// $menu = admin_menu($modelname.'模型字段管理', $submenu);
-	}//}}}
-	function manage()
-	{//{{{
-		$modelid = _g('modelid', 'intval');
-		$modelid = intval($modelid);
-		if (!$modelid)
-			{
-			echo 'require modelid';
-			exit;
-			}
-
-		$sql = "SELECT * FROM " . RDB_PRE . "model_field WHERE modelid = {$modelid}";
-		$result = rdb::obj()->select($sql);
-		var_dump($result);exit;
-
-		$where = "modelid={$modelid} ";
-		if (!$show_disabled)
-			{
-			$where .= "AND disabled=0";
-			}
-		$infos = $field->listinfo($where, 'listorder,fieldid', 1, 100);
-		include tpl_admin('model_field_manage', 'conm');
 	}//}}}
 	function add()
 	{//{{{
@@ -120,8 +100,31 @@ class ctrl_a_model_field
 			// $unsetgroups = form::checkbox($GROUP, 'unsetgroupids', 'unsetgroupids', '', 4);
 			// $unsetroles = form::checkbox($ROLE, 'unsetroleids', 'unsetroleids', '', 4);
 			// require_once CONTENT_ROOT . 'fields/patterns.inc.php';
+			cm_f_field_list();
 			include tpl_admin('field_add');
 			}
+	}//}}}
+	function manage()
+	{//{{{
+		$modelid = _g('modelid', 'intval');
+		$modelid = intval($modelid);
+		if (!$modelid)
+			{
+			echo 'require modelid';
+			exit;
+			}
+
+		$sql = "SELECT * FROM " . RDB_PRE . "model_field WHERE modelid = {$modelid}";
+		$result = rdb::obj()->select($sql);
+		var_dump($result);exit;
+
+		$where = "modelid={$modelid} ";
+		if (!$show_disabled)
+			{
+			$where .= "AND disabled=0";
+			}
+		$infos = $field->listinfo($where, 'listorder,fieldid', 1, 100);
+		include tpl_admin('model_field_manage', 'conm');
 	}//}}}
 	function edit()
 	{//{{{
