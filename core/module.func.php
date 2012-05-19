@@ -96,58 +96,35 @@ function mod_info($mod, $key = NULL)
 /**
  * 进行模块的 callback 操作。
  * <code>
- * mod_callback('mod', 'lm'); //查询
- * p 模块 callback 目录绝对路径列表
- * rm(register module) callback 模块列表
- * rp callback 目录绝对路径列表
- * add
- * del
+ * mod_callback('module'); //$action 默认使用 rp ,即与下面一至.
+ * mod_callback('module', 'rp'); //rp(register path):返回注册在 {module} 模块下所有 callback 目录绝对路径(包括源与副本 callback 目录)
+ * mod_callback('module', 'rm'); //rm(register module):返回注册在 {module} 模块下所有 callback 模块名.
+ * mod_callback('module', 'p'); //p(path):返回 {module} 模块自己的 callback 目录绝对路径(包括源与副本的 callback 目录)
+ * mod_callback('module', 'add', 'module_2'); //add:把 {module_2} 模块加入 {module} 模块的 callback 注册列表中.
+ * mod_callback('module', 'del', 'module_2'); //del:把 {module_2} 模块从 {module} 模块的 callback 注册列表中删除.
  * </code>
- * <b>查询</b>
- * <code>
- * mod_callback('conm');
- * </code>
+ * <b>返回值</b>
  * <pre>
- * 返回所有在 conm 模块注册过的模块的 callback 目录绝对路径，一个模块可能会有两个 callback 目录，一个是源目录中，一个在副本目录中。
- * array[] = callback 目录绝对路径
+ * rp:array('{module}/sour' => {module}模块源目录 callback 绝对路径, '{module}/inst' => {module}模块副本目录 callback 绝对路径, ...);
+ * p:同 rp 的返回值.
+ * rm:array('{module_1}', '{module_2}', ...)
  * </pre>
- * <b>注册</b>
- * <code>
- * mod_callback('conm', 'add', 'category');
- * </code>
+ * <b>说明</b>
  * <pre>
- * 把 category 模块注册到 conm 模块的 callback 列表中。
- * </pre>
- * <b>删除</b>
- * <code>
- * mod_callback('conm', 'del', 'category');
- * </code>
- * <pre>
- * 把 category 模块从 conm 模块的 callback 列表中删除。
- * </pre>
- * <b>查询操作返回值格式</b>
- * <pre>
- * array(注册模块列表，注册模块 callback 绝对路径列表)
- * 注册模块列表：array({module_name}, ...)
- * callback 绝对路径列表：[{module_name}/{module_type] => callback 目录绝对路径，其中 module_type{sour:模块源, inst:模块副本}
- * </pre>
- * <b>读取目标模块的 callback 绝对路径</b>
- * <pre>
- * mod_callback('conm', 'r')
- * 将返回 conm 模块的 callback 目录绝对路径。格式与查询操作返回值的 callback 列表一样。
+ * 一个模块可能会有两个 callback 目录，一个是源目录中，一个在副本目录中。
  * </pre>
  * @param string $target 目标模块。
  * @param string|NULL $action 操作{add:注册, del:删除, NULL:查询}
  * @param string|NULL $register 注册模块。
  * @return array|bool 查询模块的 callback 时返回数组，其它操作返回 t/f 。
  */
-function mod_callback($target, $action = NULL, $register = NULL)
+function mod_callback($target, $action = 'rp', $register = NULL)
 {//{{{
-	static $cache = array(); //把已读取过的数据缓存在内存变量中。
-	static $callback = array(); //缓存已读取模块的 callback 目录绝对路径，格式：[{module_name}] => 同 $action=NULL 时的 callback 列表。
+	static $cache = array(); //缓存模块的 callback 注册列表。
+	static $callback = array(); //缓存模块的 callback 目录绝对路径.
 
-	//因为函数本身会使用 $action=r 读取模块的 callback 目录，所以优先处理。
-	if ('r' == $action)
+	//因为函数本身会使用 $action=p 读取模块的 callback 目录，所以优先处理。
+	if ('p' == $action)
 		{
 		if (!isset($callback[$target]))
 			{
@@ -162,12 +139,12 @@ function mod_callback($target, $action = NULL, $register = NULL)
 				$path = "{$ModInfo['path_sour']}callback" . DS;
 				if ($ModInfo['path_sour'] && is_dir($path))
 					{
-					$callback[$target]["{$target}/sour"] = $path;
+					$callback[$target]["sour"] = $path;
 					}
 				$path = "{$ModInfo['path_inst']}callback" . DS;
 				if ($ModInfo['path_inst'] && is_dir($path))
 					{
-					$callback[$target]["{$target}/inst"] = $path;
+					$callback[$target]["inst"] = $path;
 					}
 				}
 			}
@@ -206,23 +183,27 @@ function mod_callback($target, $action = NULL, $register = NULL)
 		case "delete":
 			
 			break;
+		case "rm":
+			return $cache[$target];
+			break;
+		case "rp":
 		default:
-			if (is_null($action))
+			$list = array();
+			foreach ($cache[$target] as $m)
 				{
-				$list = array();
-				foreach ($cache[$target] as $m)
+				if (!isset($callback[$m]))
 					{
-					$tmp = mod_callback($m, 'r');
-					if (is_array($tmp))
+					$callback[$m] = mod_callback($m, 'p');
+					}
+				if (is_array($callback[$m]))
+					{
+					foreach ($callback[$m] as $k => $v)
 						{
-						foreach ($tmp as $k => $v)
-							{
-							$list[$k] = $v;
-							}
+						$list["{$m}/{$k}"] = $v;
 						}
 					}
-				return array($cache[$target], $list);
 				}
+			return $list;
 			break;
 		}
 	log::add("参数超出预设范围", log::WARN, __FILE__, __LINE__, __FUNCTION__);
