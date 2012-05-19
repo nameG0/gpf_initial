@@ -38,69 +38,10 @@ class ctrl_a_model_field
 	{//{{{
 		if($dosubmit)
 			{
-			//若是主表的字段，则无须修改表结构
-			$issystem = in_array($info['field'], array('thumb', 'description', 'contentid'));
-			$info['issystem'] = $issystem;
-			$info['modelid'] = $modelid;
-			$info['unsetgroupids'] = isset($unsetgroupids) ? implodeids($unsetgroupids) : '';
-			$info['unsetroleids'] = isset($unsetroleids) ? implodeids($unsetroleids) : '';
-			$result = $field->add($info, $setting);
-			if($result)
-				{
-				if (!$issystem)
-					{
-					//先尝试加载函数式封装的字段
-					$formtype = $info['formtype'];
-					$path = CONTENT_ROOT . "fields/{$formtype}.inc.php";
-					if (is_array($fields[$formtype]))
-						{
-						require_once PHPCMS_ROOT . "{$fields[$formtype][1]}/fields/{$formtype}.inc.php";
-						}
-					else if (is_file($path))
-						{
-						require_once $path;
-						}
-					$func_name = "content_field_{$formtype}_change";
-
-					if (function_exists($func_name))
-						{
-						$func_name($tablename, $info, $setting);
-						}
-					else
-						{
-						extract($setting);
-						extract($info);
-						require_once CONTENT_ROOT . "fields/{$formtype}/field_add.inc.php";
-						}
-					}
-
-				/*如果字段作为搜索条件，增加索引*/
-				// if($issearch) {
-				// $sql = "SHOW INDEX FROM `$tablename`";
-				// $query = $db->query($sql);
-				// while($res = $db->fetch_array($query)) {
-				// $indexarr[] = $res['Column_name'];
-				// }
-				// if(is_array($indexarr) && !in_array($field, $indexarr)) {
-				// $sql = "ALTER TABLE `$tablename` ADD INDEX `$field` (`$field`)";
-				// $db->query($sql);
-				// }
-				// }
-
-				showmessage('操作成功！', admin_url("..manage..modelid"));
-				}
-			else
-				{
-				showmessage('操作失败！');
-				}
+			//siud::save('model_field')->pk('field_id')->data($data)->fvar('1,2,3')->fser('4,5,6')->
 			}
 		else
 			{
-			//if(!is_ie()) showmessage('本功能只支持IE浏览器，请用IE浏览器打开。');
-			// $unsetgroups = form::checkbox($GROUP, 'unsetgroupids', 'unsetgroupids', '', 4);
-			// $unsetroles = form::checkbox($ROLE, 'unsetroleids', 'unsetroleids', '', 4);
-			// require_once CONTENT_ROOT . 'fields/patterns.inc.php';
-			cm_f_field_list();
 			include tpl_admin('field_add');
 			}
 	}//}}}
@@ -279,32 +220,24 @@ class ctrl_a_model_field
 			showmessage('操作失败！');
 			}
 	}//}}}
-	function setting_add()
+	/**
+	 * AJAX 使用,显示指定字段类型的设置表单.
+	 * @param string $field_id CMFTid
+	 */
+	function ajax_setting()
 	{//{{{
-		if ($fieldid)
+		$CMFTid = _g('field_id');
+
+		cm_f_field_load($CMFTid);
+		list($mod, $name) = explode("/", $CMFTid);
+		$func_name = "cm_ft_{$mod}_{$name}_setting";
+		if (!function_exists($func_name))
 			{
-			$info = $field->get($fieldid);
-			if(!$info)
-				{
-				exit('指定的字段不存在！');
-				}
-			$setting = array();
-			if ($info['setting'])
-				{
-				eval("\$setting = {$info['setting']};");
-				}
+			echo "字段类型无法加载";
+			exit;
 			}
-		require_once CONTENT_ROOT . 'fields/patterns.inc.php';
-		content_field_inc($formtype);
-		$func_name = "content_field_{$formtype}_setting";
-		if (function_exists($func_name))
-			{
-			$func_name($info, $setting);
-			}
-		else
-			{
-			require_once CONTENT_ROOT . 'fields/'.$formtype.'/field_add_form.inc.php';
-			}
+
+		$func_name(array());
 	}//}}}
 	function preview()
 	{//{{{

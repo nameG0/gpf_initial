@@ -3,7 +3,7 @@
 2011-10-17
 标题 字段类型
 */
-function content_field_title_add($tablename, $info, $setting)
+function cm_ft_conm_title_add($tablename, $info, $setting)
 {//{{{
 	global $db;
 	if(!$maxlength) $maxlength = 255;
@@ -13,13 +13,13 @@ function content_field_title_add($tablename, $info, $setting)
 	$db->query($sql);
 }//}}}
 
-function content_field_title_drop($tablename, $info, $setting)
+function cm_ft_conm_title_drop($tablename, $info, $setting)
 {//{{{
 	global $db;
 	$db->query("ALTER TABLE `$tablename` DROP `$field`");
 }//}}}
 
-function content_field_title_change($tablename, $info, $setting)
+function cm_ft_conm_title_change($tablename, $info, $setting)
 {//{{{
 	global $db;
 	extract($setting);
@@ -31,7 +31,7 @@ function content_field_title_change($tablename, $info, $setting)
 	$db->query($sql);
 }//}}}
 
-function content_field_title_setting($info, $setting)
+function cm_ft_conm_title_setting($setting)
 {//{{{
 	?>
 <table cellpadding="2" cellspacing="1">
@@ -47,7 +47,7 @@ function content_field_title_setting($info, $setting)
 	<?php
 }//}}}
 
-function content_field_title_form($field, $value, $fieldinfo)
+function cm_ft_conm_title_form($field, $value, $fieldinfo)
 {//{{{
 	global $catid;
 	extract($fieldinfo);
@@ -64,27 +64,27 @@ function content_field_title_form($field, $value, $fieldinfo)
 	return form::text('info['.$field.']', $field, $value, 'text', $size, $css, $formattribute, $minlength, $maxlength).$data;
 }//}}}
 
-function content_field_title_input()
+function cm_ft_conm_title_input()
 {//{{{
 	
 }//}}}
 
-function content_field_title_update()
+function cm_ft_conm_title_update()
 {//{{{
 	
 }//}}}
 
-function content_field_title_search_form($field, $value, $fieldinfo)
+function cm_ft_conm_title_search_form($field, $value, $fieldinfo)
 {
 	return form::text($field, $field, $value, 'text', 20);
 }
 
-function content_field_title_search($field, $value)
+function cm_ft_conm_title_search($field, $value)
 {
 	return $value === '' ? '' : " `$field` LIKE '%$value%' ";
 }
 
-function content_field_title_output($field, $value)
+function cm_ft_conm_title_output($field, $value)
 {
 	$value = htmlspecialchars($value);
 	return output::style($value, $content['style']);
