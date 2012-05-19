@@ -18,6 +18,7 @@ class gpf
 		mod_init('tpl');
 		//默认加载的 gpf/lib
 		require_once G_PATH_GPF_LIB . "http__var.func.php";
+		require_once G_PATH_GPF_LIB . "gpf.func.php";
 	}//}}}
 	/**
 	 * 调度器
@@ -43,10 +44,12 @@ class gpf
 			{
 			$action = 'index';
 			}
-		if (!defined('CURRENT_MOD'))
+		if (!defined('CTRL_MOD'))
 			{
 			//此常量只用于方便取默认值。
-			define('CURRENT_MOD', $mod);
+			define('CTRL_MOD', $mod);
+			define('CTRL_FILE', $file);
+			define('CTRL_ACTION', $action);
 			}
 		mod_init($mod);
 
