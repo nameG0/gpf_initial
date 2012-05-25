@@ -1,5 +1,5 @@
 <script type="text/javascript" src="static/gencms/jquery/jquery-1.7.2.min.js" ></script>
-<form action="" method="POST" enctype="multipart/form-data">
+<form action="<?=ctrl_url('..save')?>" method="POST" enctype="multipart/form-data">
 字段名：
 <input type="text" name="data[field]" value="" />
 <br />

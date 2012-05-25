@@ -34,16 +34,16 @@ class ctrl_a_model_field
 		// );
 		// $menu = admin_menu($modelname.'模型字段管理', $submenu);
 	}//}}}
+	function save()
+	{//{{{
+		$data = _p('data');
+		$data['setting'] = _p('setting');
+
+		siud::save(RDB_PRE . 'model_field')->pk('field_id')->data($data)->fser('setting')->error($error)->ing();
+	}//}}}
 	function add()
 	{//{{{
-		if($dosubmit)
-			{
-			//siud::save('model_field')->pk('field_id')->data($data)->fvar('1,2,3')->fser('4,5,6')->
-			}
-		else
-			{
-			include tpl_admin('field_add');
-			}
+		include tpl_admin('field_add');
 	}//}}}
 	function manage()
 	{//{{{
@@ -226,6 +226,8 @@ class ctrl_a_model_field
 	 */
 	function ajax_setting()
 	{//{{{
+		log::is_print(false);
+
 		$CMFTid = _g('field_id');
 
 		cm_f_field_load($CMFTid);
