@@ -8,7 +8,7 @@
  * @filesource
  */
 //加载项目默认配置
-$_tmp = G_PATH_MOD_RUN . "include/config.inc.php";
+$_tmp = G_PATH_INST . "include/config.inc.php";
 if (is_file($_tmp))
 	{
 	include $_tmp;

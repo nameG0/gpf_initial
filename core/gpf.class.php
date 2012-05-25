@@ -15,6 +15,7 @@ class gpf
 	{//{{{
 		//默认加载的模块。
 		mod_init('rdb');
+		mod_init('siud');
 		mod_init('tpl');
 		//默认加载的 gpf/lib
 		require_once G_PATH_GPF_LIB . "http__var.func.php";
