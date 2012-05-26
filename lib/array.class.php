@@ -19,6 +19,7 @@ class a
 	private $data = NULL;
 	private $zh = array(); //字段对应的中文名.
 	private $error = '';
+	private $is_adds = false; //表示数组值是否已转义引号,一般表单提交的数据会自动转义.
 
 	static private $obj = NULL;
 
@@ -93,6 +94,29 @@ class a
 			}
 		return false;
 	}//}}}
+	/**
+	 * 根据 is_adds 的值返回没引号转义的值.
+	 */
+	private function _no_adds($f)
+	{//{{{
+		$value = $this->data[$f];
+		if ($this->is_adds && is_string($value))
+			{
+			$value = gstripslashes($value);
+			}
+		return $value;
+	}//}}}
+	/**
+	 * 把 $value 转为 is_adds 对应的状态
+	 */
+	private function _if_adds($value)
+	{//{{{
+		if ($this->is_adds)
+			{
+			$value = gaddslashes($value);
+			}
+		return $value;
+	}//}}}
 
 	//------ 辅助方法 ------
 	//包括入口方法
@@ -114,6 +138,7 @@ class a
 
 		unset(self::$obj->data);
 		self::$obj->error = '';
+		self::$obj->is_adds = false;
 
 		self::$obj->data = & $data;
 		return self::$obj;
@@ -147,7 +172,7 @@ class a
 	 */
 	function get($f, & $value)
 	{//{{{
-		$value = $this->data[$f];
+		$value = $this->_no_adds($f);
 		return $this;
 	}//}}}
 	/**
@@ -159,7 +184,16 @@ class a
 	 */
 	function set($f, $value)
 	{//{{{
+		$value = $this->_if_adds($value);
 		$this->data[$f] = $value;
+		return $this;
+	}//}}}
+	/**
+	 * 标记出数据是否已转义引号
+	 */
+	function is_adds($tf)
+	{//{{{
+		$this->is_adds = $tf;
 		return $this;
 	}//}}}
 
@@ -240,12 +274,28 @@ class a
 			}
 		return $this;
 	}//}}}
+	/**
+	 * 只允许出现指定的键名, 禁止指定键名出现可以用 requ() 实现
+	 */
+	function allow($Fl, $error = self::ERROR)
+	{//{{{
+		$Fl = $this->_Fl($Fl);
+		foreach ($this->data as $k => $v)
+			{
+			$name = $this->zh[$k] ? $this->zh[$k] : $k;
+			if (!in_array($k, $Fl))
+				{
+				$this->error .= ",{$name} {$error}";
+				}
+			}
+		return $this;
+	}//}}}
 
 	//------ 数组值填充方法 ------
 	//填充方法会改写数组值.
 	//------
 	/**
-	 * 按条件写值
+	 * 按条件写值,可用于设置数据的默认值
 	 */
 	function d($Fl, $value, $Is = self::NSET)
 	{//{{{
@@ -261,7 +311,6 @@ class a
 	}//}}}
 	/**
 	 * 格式化为数字
-	 * @param Fl $Fl
 	 */
 	function int($Fl, $Is = self::ALL)
 	{//{{{
@@ -300,6 +349,161 @@ class a
 			if ($this->_Is($f, $Is) && isset($this->data[$f][$len]))
 				{
 				$this->data[$f] = substr($this->data[$f], 0, $len);
+				}
+			}
+		return $this;
+	}//}}}
+	/**
+	 * 复制数组值
+	 * @param array $map [键名] => [新键名], 新键名可以是数组
+	 */
+	function cp($map, $Is = self::ALL)
+	{//{{{
+		foreach ($map as $k => $v)
+			{
+			if ($this->_Is($k, $Is))
+				{
+				if (is_array($v))
+					{
+					foreach ($v as $n)
+						{
+						$this->data[$n] = $this->data[$k];
+						}
+					}
+				else
+					{
+					$this->data[$v] = $this->data[$k];
+					}
+				}
+			}
+		return $this;
+	}//}}}
+	/**
+	 * 重命名键名
+	 * @param array $map [键名] => [新键名], 新键名可以是数组
+	 */
+	function mv($map, $Is = self::ALL)
+	{//{{{
+		foreach ($map as $k => $v)
+			{
+			if ($this->_Is($k, $Is))
+				{
+				if (is_array($v))
+					{
+					foreach ($v as $n)
+						{
+						$this->data[$n] = $this->data[$k];
+						}
+					}
+				else
+					{
+					$this->data[$v] = $this->data[$k];
+					}
+				unset($this->data[$k]);
+				}
+			}
+		return $this;
+	}//}}}
+	/**
+	 * 使用 var_export 字符串化值
+	 */
+	function vars($Fl, $Is = self::SET)
+	{//{{{
+		$Fl = $this->_Fl($Fl);
+		foreach ($Fl as $f)
+			{
+			if ($this->_Is($f, $Is))
+				{
+				$this->data[$f] = $this->_if_adds(var_export($this->_no_adds($f), 1));
+				}
+			}
+		return $this;
+	}//}}}
+	/**
+	 * 重新生成 var_export 字符串化的数据
+	 */
+	function unvars($Fl, $Is = self::SET)
+	{//{{{
+		$Fl = $this->_Fl($Fl);
+		foreach ($Fl as $f)
+			{
+			if ($this->_Is($f, $Is))
+				{
+				$str = $this->_no_adds($f);
+				eval("\$tmp = {$str};");
+				$this->data[$f] = $this->_if_adds($tmp);
+				}
+			}
+		return $this;
+	}//}}}
+	/**
+	 * 使用 serialize 字符串化值
+	 */
+	function sers($Fl, $Is = self::SET)
+	{//{{{
+		$Fl = $this->_Fl($Fl);
+		foreach ($Fl as $f)
+			{
+			if ($this->_Is($f, $Is))
+				{
+				$this->data[$f] = $this->_if_adds(serialize($this->_no_adds($f)));
+				}
+			}
+		return $this;
+	}//}}}
+	/**
+	 * 重新生成 serialize 字符串化的数据
+	 */
+	function unsers($Fl, $Is = self::SET)
+	{//{{{
+		$Fl = $this->_Fl($Fl);
+		foreach ($Fl as $f)
+			{
+			if ($this->_Is($f, $Is))
+				{
+				$this->data[$f] = $this->_if_adds(unserialize($this->_no_adds($f)));
+				}
+			}
+		return $this;
+	}//}}}
+	/**
+	 * 对数据进行引号转义
+	 * @param NULL|Fl $Fl 可对部份键进行转换,但不推荐这样做,因为会导至引号转义混乱.
+	 */
+	function adds($Fl = NULL)
+	{//{{{
+		if (is_null($Fl))
+			{
+			$this->is_adds = true;
+			$this->data = gaddslashes($this->data);
+			}
+		else
+			{
+			$Fl = $this->_Fl($Fl);
+			foreach ($Fl as $f)
+				{
+				$this->data[$f] = gaddslashes($this->data[$f]);
+				}
+			}
+		return $this;
+	}//}}}
+	/**
+	 * 去除引号转义
+	 * @param NULL|Fl $Fl 可对部份键进行转换,但不推荐这样做,因为会导至引号转义混乱.
+	 */
+	function unadds($Fl = NULL)
+	{//{{{
+		if (is_null($Fl))
+			{
+			$this->is_adds = false;
+			$this->data = gstripslashes($this->data);
+			}
+		else
+			{
+			$Fl = $this->_Fl($Fl);
+			foreach ($Fl as $f)
+				{
+				$this->data[$f] = gstripslashes($this->data[$f]);
 				}
 			}
 		return $this;
