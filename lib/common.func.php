@@ -26,3 +26,19 @@ function run_time($time = NULL)
 		}
 	return $mt - $time;
 }//}}}
+/**
+ * 支持数组的 stripslashes
+ * @param string|array $data
+ */
+function gstripslashes($data)
+{//{{{
+	return is_array($data) ? array_map(__FUNCTION__, $data) : stripslashes($data);
+}//}}}
+/**
+ * 支持数组的 addslashes
+ * @param string|array $data
+ */
+function gaddslashes($data)
+{//{{{
+	return is_array($data) ? array_map(__FUNCTION__, $data) : addslashes($data);
+}//}}}
