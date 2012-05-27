@@ -14,12 +14,13 @@
  * @package default
  * @filesource
  */
+
 class a
 {
 	private $data = NULL;
 	private $zh = array(); //字段对应的中文名.
 	private $error = '';
-	private $is_adds = false; //表示数组值是否已转义引号,一般表单提交的数据会自动转义.
+	private $is_adds = NULL; //表示数组值是否已转义引号, {NULL:未确认, true:已转义, false:未转义}
 
 	static private $obj = NULL;
 
@@ -53,44 +54,49 @@ class a
 	 * 判断指定的键 Is 判断是否为真
 	 * @param string $f 键名
 	 * @param Is $Is
+	 * @param array|NULL $data 检查目标数组,为 NULL 使用 this#data
 	 */
-	private function _Is($f, $Is)
+	private function _Is($f, $Is, $data = NULL)
 	{//{{{
+		if (!is_array($data))
+			{
+			$data = $this->data;
+			}
 		if (self::ALL == $Is)
 			{
 			return true;
 			}
 		if (self::SET == $Is)
 			{
-			return isset($this->data[$f]);
+			return isset($data[$f]);
 			}
 		if (self::NSET == $Is)
 			{
-			return !isset($this->data[$f]);
+			return !isset($data[$f]);
 			}
 		if (self::EM == $Is)
 			{
-			return empty($this->data[$f]);
+			return empty($data[$f]);
 			}
 		if (self::NEM == $Is)
 			{
-			return !empty($this->data[$f]);
+			return !empty($data[$f]);
 			}
 		if (self::T == $Is)
 			{
-			return $this->data[$f];
+			return $data[$f];
 			}
 		if (self::F == $Is)
 			{
-			return !$this->data[$f];
+			return !$data[$f];
 			}
 		if (self::STR == $Is)
 			{
-			return is_string($this->data[$f]);
+			return is_string($data[$f]);
 			}
 		if (self::INT == $Is)
 			{
-			return is_int($this->data[$f]);
+			return is_int($data[$f]);
 			}
 		return false;
 	}//}}}
@@ -107,7 +113,7 @@ class a
 		return $value;
 	}//}}}
 	/**
-	 * 把 $value 转为 is_adds 对应的状态
+	 * 把未转义引号的 $value 转为 is_adds 对应的状态
 	 */
 	private function _if_adds($value)
 	{//{{{
@@ -116,6 +122,104 @@ class a
 			$value = gaddslashes($value);
 			}
 		return $value;
+	}//}}}
+	/**
+	 * 返回 POST, GET 中的键
+	 * @param string $f 若为空字符串则返回整个 POST 或 GET.
+	 * @param string $order 从 POST, GET 中取的顺序,{g:只从GET中取, p:只从POST中取, gp:优先从GET中取, pg:优先从POST中取}
+	 */
+	private function _get_form($f, $order)
+	{//{{{
+		if (!$f)
+			{
+			if ('p' == $order[0])
+				{
+				return $_POST;
+				}
+			else
+				{
+				return $_GET;
+				}
+			}
+		$data = 'p' == $order[0] ? $_POST : $_GET;
+		if (isset($data[$f]))
+			{
+			return $data[$f];
+			}
+		if (!isset($order[1]))
+			{
+			return NULL;
+			}
+		$data = 'p' == $order[1] ? $_POST : $_GET;
+		return $data[$f];
+	}//}}}
+	/**
+	 * 从POST或GET表单中取一个数据并自动转换引号
+	 * @param string $f 若为空字符串则返回整个 POST 或 GET.
+	 * @param string $form {p:POST, g:GET}
+	 */
+	private function _fform($f, $form)
+	{//{{{
+		$gpf_is_form_adds = gpf::cfg('gpf_is_form_adds');
+		$gpf_need_form_adds = gpf::cfg('gpf_need_form_adds');
+
+		$data = $this->_get_form($f, $form);
+
+		if (is_null($this->is_adds))
+			{
+			//若引号转义未确定,则根据 gpf_need_form_adds 来决定引号转义状态.
+			$this->is_adds = $gpf_need_form_adds;
+			}
+		if ($this->is_adds && !$gpf_is_form_adds)
+			{
+			//要转义但表单未转义
+			$data = gaddslashes($data);
+			}
+		else if (!$this->is_adds && $gpf_is_form_adds)
+			{
+			//不转义但表单已转义
+			$data = gstripslashes($data);
+			}
+		return $data;
+	}//}}}
+	/**
+	 * 从POST或GET添加一个或多个元素入数组
+	 * @param string|array $f_or_Fl_or_map 表示一个键的 f 或字段列表 Fl 或跟 this#mv() 一样的 map
+	 * @param string $form {g:GET, p:POST}
+	 * @param NULL|mixed $default_value 当表单没有此值时的默认值
+	 */
+	private function _aform($f_or_Fl_or_map, $form, $default_value)
+	{//{{{
+		$map = array(); //把 f_or_Fl_or_map 格式化为 map
+		if (!is_array($f_or_Fl_or_map) || is_int(key($f_or_Fl_or_map)))
+			{
+			$Fl = $this->_Fl($f_or_Fl_or_map);
+			foreach ($Fl as $f)
+				{
+				$map[$f] = $f;
+				}
+			}
+		else
+			{
+			$map = $f_or_Fl_or_map;
+			}
+		foreach ($map as $f => $n)
+			{
+			$n = (array)$n;
+			$value = $this->_fform($f, $form);
+			if (is_null($value))
+				{
+				if (is_null($default_value))
+					{
+					continue;
+					}
+				$value = $default_value;
+				}
+			foreach ($n as $v)
+				{
+				$this->data[$v] = $value;
+				}
+			}
 	}//}}}
 
 	//------ 辅助方法 ------
@@ -138,7 +242,7 @@ class a
 
 		unset(self::$obj->data);
 		self::$obj->error = '';
-		self::$obj->is_adds = false;
+		self::$obj->is_adds = NULL;
 
 		self::$obj->data = & $data;
 		return self::$obj;
@@ -194,6 +298,51 @@ class a
 	function is_adds($tf)
 	{//{{{
 		$this->is_adds = $tf;
+		return $this;
+	}//}}}
+	/**
+	 * 从 POST 中取一个数组作为数组,根据 is_adds 及 gpf_is_form_adds, gpf_need_form_adds 的值自动转义引号
+	 * @param string $f 若为空则把整个 POST 作为数组.
+	 */
+	function fpost($f = '')
+	{//{{{
+		$data = $this->_fform($f, 'p');
+		if (!is_array($data))
+			{
+			$data = array();
+			}
+		$this->data = $data;
+		return $this;
+	}//}}}
+	/**
+	 * 同fpost, 不同为从GET中取数据.
+	 */
+	function fget($f = '')
+	{//{{{
+		$data = $this->_fform($f, 'g');
+		if (!is_array($data))
+			{
+			$data = array();
+			}
+		$this->data = $data;
+		return $this;
+	}//}}}
+	/**
+	 * 从 POST 添加一个或多个元素入数组
+	 * @param string|array $f_or_Fl_or_map 表示一个键的 f 或字段列表 Fl 或跟 this#mv() 一样的 map
+	 * @param NULL|mixed $default_value 当表单没有此值时的默认值
+	 */
+	function apost($f_or_Fl_or_map, $default_value = NULL)
+	{//{{{
+		$this->_aform($f_or_Fl_or_map, 'p', $default_value);
+		return $this;
+	}//}}}
+	/**
+	 * 同this#apost(),不过是从GET取数据
+	 */
+	function aget($f_or_Fl_or_map, $default_value = NULL)
+	{//{{{
+		$this->_aform($f_or_Fl_or_map, 'g', $default_value);
 		return $this;
 	}//}}}
 
