@@ -120,9 +120,7 @@ class log
 	/**
 	 * 构造方法声明为private，防止直接创建对象
 	 */
-	private function __construct() 
-	{
-	}
+	private function __construct() {}
 
 	//添加信息
 		//$msg(string)	信息内容
