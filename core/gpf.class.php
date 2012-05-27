@@ -8,6 +8,12 @@
  */
 class gpf
 {
+	static private $cfg = array(); //存放非常量配置项的值.
+
+	/**
+	 * 构造方法声明为private，防止直接创建对象
+	 */
+	private function __construct() {}
 	/**
 	 * 进行初始化工作
 	 */
@@ -20,6 +26,9 @@ class gpf
 		//默认加载的 gpf/lib
 		require_once G_PATH_GPF_LIB . "http__var.func.php";
 		require_once G_PATH_GPF_LIB . "gpf.func.php";
+		require_once G_PATH_GPF_LIB . "array.class.php";
+
+		self::$cfg = require G_PATH_GPF . "cfg.inc.php";
 	}//}}}
 	/**
 	 * 调度器
@@ -110,5 +119,16 @@ class gpf
 			}
 		log::add("action:{$action}", log::INFO, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
 		$o_ctrl->$action();
+	}//}}}
+	/**
+	 * 取非常量配置项的值
+	 */
+	static function cfg($name)
+	{//{{{
+		return self::$cfg[$name];
+	}//}}}
+	static function cfg_set($name, $value)
+	{//{{{
+		self::$cfg[$name] = $value;
 	}//}}}
 }
