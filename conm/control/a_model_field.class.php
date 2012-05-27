@@ -36,10 +36,15 @@ class ctrl_a_model_field
 	}//}}}
 	function save()
 	{//{{{
-		$data = _p('data');
-		$data['setting'] = _p('setting');
+		// $data = _p('data');
+		// $data['setting'] = _p('setting');
+		a::i($data)->fpost('data')->apost('setting')->sers('setting');
 
-		siud::save(RDB_PRE . 'model_field')->pk('field_id')->data($data)->fser('setting')->error($error)->ing();
+		siud::save(RDB_PRE . 'model_field')->pk('field_id')->data($data)->error($error)->ing();
+		if ($error)
+			{
+			echo $error;
+			}
 	}//}}}
 	function add()
 	{//{{{
