@@ -49,7 +49,7 @@ class rdb_mysql extends rdb_drive
 	// function select($sql, $keyfield = '')
 	// {
 		// $array = array();
-		// $tmp = get_time();
+		// $tmp = run_time();
 		// $result = $this->query($sql);
 		// $tmp = run_time($tmp);
 		// $this->sql_select_time_total += $tmp;
@@ -106,7 +106,7 @@ class rdb_mysql extends rdb_drive
 				// }
 			// }
 		// $sql = "INSERT {$other} INTO `{$table}` (`{$sql_field}`) VALUES {$sql_value}";
-		// $tmp = get_time();
+		// $tmp = run_time();
 		// $ret = $this->query($sql);
 		// $tmp = run_time($tmp);
 		// $this->sql_insert_time_total += $tmp;
@@ -164,7 +164,7 @@ class rdb_mysql extends rdb_drive
 			{
 			return $sql;
 			}
-		$tmp = get_time();
+		$tmp = run_time();
 		$ret = $this->query($sql);
 		$tmp = run_time($tmp);
 		$this->sql_update_time_total += $tmp;
@@ -201,7 +201,7 @@ class rdb_mysql extends rdb_drive
 			{
 			$sql .= ' LIMIT 1';
 			}
-		$tmp = get_time();
+		$tmp = run_time();
 		$query = $this->query($sql, $type, $expires, $dbname);
 		$tmp = run_time($tmp);
 		$this->sql_select_time_total += $tmp;
