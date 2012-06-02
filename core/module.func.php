@@ -1,13 +1,12 @@
 <?php
 /**
  * 模块间通讯函数
- * <b>info:模块信息<b>
+ *
  * <pre>
+ * <b>info:模块信息</b>
  * path_sour 源绝对路径，不存在则为空字符串。
  * path_inst 副本绝对路径，不存在则为空字符串。
- * </pre>
  * <b>数据结构</b>
- * <pre>
  * $ModInfo array mod_info() 的返回值，包含模块信息的数组。
  * </pre>
  * 
@@ -51,6 +50,7 @@ function mod_init($mod)
 
 /**
  * 读取指定模块信息。
+ *
  * @param string $mod 模块名。
  * @param NULL|string $key 信息名，NULL 表示返回所有信息，此时会返回数组。
  * @return mixed|false 若模块可用返回模块信息，否则返回 false
@@ -95,6 +95,7 @@ function mod_info($mod, $key = NULL)
 
 /**
  * 进行模块的 callback 操作。
+ *
  * <code>
  * mod_callback('module'); //$action 默认使用 rp ,即与下面一至.
  * mod_callback('module', 'rp'); //rp(register path):返回注册在 {module} 模块下所有 callback 目录绝对路径(包括源与副本 callback 目录)
@@ -103,14 +104,12 @@ function mod_info($mod, $key = NULL)
  * mod_callback('module', 'add', 'module_2'); //add:把 {module_2} 模块加入 {module} 模块的 callback 注册列表中.
  * mod_callback('module', 'del', 'module_2'); //del:把 {module_2} 模块从 {module} 模块的 callback 注册列表中删除.
  * </code>
- * <b>返回值</b>
  * <pre>
+ * <b>返回值</b>
  * rp:array('{module}/sour' => {module}模块源目录 callback 绝对路径, '{module}/inst' => {module}模块副本目录 callback 绝对路径, ...);
  * p:同 rp 的返回值.
  * rm:array('{module_1}', '{module_2}', ...)
- * </pre>
  * <b>说明</b>
- * <pre>
  * 一个模块可能会有两个 callback 目录，一个是源目录中，一个在副本目录中。
  * </pre>
  * @param string $target 目标模块。
@@ -212,13 +211,12 @@ function mod_callback($target, $action = 'rp', $register = NULL)
 
 /**
  * 注册或删除模块信息
- * <b>注册</b>
+ *
  * <pre>
+ * <b>注册</b>
  * mod_setting('name', array('setting' => array(), ...)
  * 注册 name 模块。 $info 参数为模块的信息。
- * </pre>
  * <b>删除</b>
- * <pre>
  * mod_setting('name', NULL);
  * </pre>
  * @param string $mod 模块名。
