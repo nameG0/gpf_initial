@@ -224,42 +224,14 @@ class rdb_drive
 	}//}}}
 
 	/**
-	 * 建立数据库链接
-	 *
+	 * 建立数据库链接(子类实现方法)
 	 */
-	function connect($dbhost, $dbuser, $dbpw, $dbname = '', $pconnect = 0, $charset = '')
-	{//{{{
-		$func = $pconnect == 1 ? 'mysql_pconnect' : 'mysql_connect';
-		if(!$this->connid = @$func($dbhost, $dbuser, $dbpw))
-			{
-			if(DB_NAME == '' && file_exists(PHPCMS_ROOT.'install.php'))
-				{
-				header('location:./install.php');
-				exit;
-				}
-			$this->halt('Can not connect to MySQL server');
-			return false;
-			}
-		if($this->version() > '4.1')
-			{
-			$serverset = $charset ? "character_set_connection='$charset',character_set_results='$charset',character_set_client=binary" : '';
-			$serverset .= $this->version() > '5.0.1' ? ((empty($serverset) ? '' : ',')." sql_mode='' ") : '';
-			$serverset && mysql_query("SET $serverset", $this->connid);
-			}
-		if($dbname && !@mysql_select_db($dbname , $this->connid))
-			{
-			$this->halt('Cannot use database '.$dbname);
-			return false;
-			}
-		$this->dbname = $dbname;
-		return $this->connid;
-	}//}}}
+	function connect($dbhost, $dbuser, $dbpw, $dbname = '', $pconnect = 0, $charset = '') {}
 
 	/**
 	 * 选择数据库
 	 * 子类实现方法
 	 * @param string $dbname 数据库名
-	 *
 	 */
 	function select_db($dbname) {}
 	/**
