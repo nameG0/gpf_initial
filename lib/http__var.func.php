@@ -13,13 +13,21 @@
  * @param NULL|string 若为 NULL 表示返回整个 $_GET 数组，否则返回指定的值。
  * @todo 原型应为 key, func_name(过滤函数且支持多个), default_value(默认值), default_type(使用默认值条件：empty, !isset)
  */
-function _g($key = NULL)
+function _g($key = NULL, $func_name = '')
 {//{{{
 	if (is_null($key))
 		{
 		return $_GET;
 		}
-	return $_GET[$key];
+	$value = $_GET[$key];
+	if ($func_name)
+		{
+		if ('int' == $func_name)
+			{
+			$value = intval($value);
+			}
+		}
+	return $value;
 }//}}}
 
 /**
