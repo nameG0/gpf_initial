@@ -175,4 +175,67 @@ class ctrl_a_model
 	{//{{{
 		echo $type == 'category' ? form::select_urlrule('phpcms', 'category', $ishtml, 'info[category_urlruleid]', 'category_urlruleid', $category_urlruleid) : form::select_urlrule('phpcms', 'show', $ishtml, 'info[show_urlruleid]', 'show_urlruleid', $show_urlruleid);
 	}//}}}
+	/**
+	 * 内容模型数据同步到数据库表。
+	 */
+	function sync()
+	{//{{{
+		$modelid = _g('modelid', 'int');
+
+		$CMMr = siud::find('model')->wis('modelid', $modelid)->ing();
+		if (!$CMMr)
+			{
+			exit('模型不存在');
+			}
+		if (0 == $CMMr['modeltype'])
+			{
+			$CMMTid = 'conm/table';
+			}
+		else
+			{
+			//todo
+			exit('未完成其它内容模型的同步功能');
+			}
+		//加载内容模型处理函数
+		list($mod, $name) = explode("/", $CMMTid);
+		$callback = mod_callback($mod, 'p');
+		foreach ($callback as $k => $v)
+			{
+			$p = "{$v}conm_model/{$name}/function.func.php";
+			if (is_file($p))
+				{
+				include_once $p;
+				}
+			}
+		$func_per = "cm_mt_{$mod}__{$name}_";
+		$func_name = "{$func_per}is_make";
+		if (!function_exists($func_name))
+			{
+			exit("未定义内容模型处理函数 {$func_name}");
+			}
+
+		//查出模型下的字段数据。
+		$result = siud::select('model_field')->wis('modelid', $modelid)->ing();
+		$CMFl = array();
+		foreach ($result as $k => $r)
+			{
+			a::i($r)->unsers('setting');
+			$CMFl[$r['field']] = $r;
+			}
+		unset($result);
+		//检查是否初始化数据表
+		$is_make = $func_name($CMMr);
+		if (!$is_make)
+			{
+			//进行数据表初始化
+			$func_name = "{$func_per}make";
+			}
+		else
+			{
+			$func_name = "{$func_pre}sync";
+			}
+		$func_name($CMMr, $CMFl);
+		//把 is_sync 改为 1
+		//siud::update('model')->wis()->data()->ing();
+	}//}}}
 }

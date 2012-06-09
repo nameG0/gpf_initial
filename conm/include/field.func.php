@@ -2,17 +2,15 @@
 /**
  * 字段类型相关函数
  * 2012-05-11
- * <pre>
  *
+ * <pre>
  * 各模块字段类型存放规则：
  * 存放目录： {module_name}/callback/conm_field/
  * 字段类型索引文件： fields.inc.php
  * 字段类型定义文件： {field_name}.func.php
  * 索引文件定义格式： return array('字段名' => '字段昵称', ...);
  * 其中字段名可由英文和数字组可，昵称可使用中文。若需要禁用某个字段类型，只需不包含在索引文件中即或。
- * </pre>
  * <b>数据结构</b>
- * <pre>
  * $CMFTid(content module field type ID): 字段类型ID
  * 字段类型ID命名规则：{module_name}/{field_name} eg. conm/title
  *
@@ -21,10 +19,7 @@
  *
  * $CMFTl(content module field type list): 字段类型列表
  * array[字段类型ID] = $CMFTr
- *
- * </pre>
  * <b>字段类型接口</b>
- * <pre>
  * 前序:cm_ft_ (content model field type)
  * void cm_ft_{mod}_{name}_setting($setting): 显示字段类型设置表单
  * </pre>

@@ -1,34 +1,17 @@
 <?php 
-/*
-2011-10-17
-标题 字段类型
-*/
-function cm_ft_conm_title_add($tablename, $info, $setting)
+/**
+ * 标题 字段类型
+ * 2011-10-17
+ * 
+ * @package default
+ * @filesource
+ */
+function cm_ft_conm__title_sql($set, $rdb_type = NULL)
 {//{{{
-	global $db;
-	if(!$maxlength) $maxlength = 255;
-	$maxlength = min($maxlength, 255);
-	$sql = "ALTER TABLE `$tablename` ADD `$field` CHAR( $maxlength ) NOT NULL DEFAULT '$defaultvalue'";
-	if($isstyle) $sql .= ", ADD `style` VARCHAR( 30 ) NOT NULL";
-	$db->query($sql);
-}//}}}
-
-function cm_ft_conm_title_drop($tablename, $info, $setting)
-{//{{{
-	global $db;
-	$db->query("ALTER TABLE `$tablename` DROP `$field`");
-}//}}}
-
-function cm_ft_conm_title_change($tablename, $info, $setting)
-{//{{{
-	global $db;
-	extract($setting);
-	extract($info);
-	if(!$maxlength) $maxlength = 255;
-	$maxlength = min($maxlength, 255);
-	$fieldtype = $issystem ? 'CHAR' : 'VARCHAR';
-	$sql = "ALTER TABLE `$tablename` CHANGE `$field` `$field` $fieldtype( $maxlength ) NOT NULL DEFAULT '$defaultvalue'";
-	$db->query($sql);
+	//todo 目前 $rdb_type 参数无效。
+	if(!$set['maxlength']) $set['maxlength'] = 255;
+	$maxlength = min($set['maxlength'], 255);
+	return "CHAR( {$maxlength} ) NOT NULL DEFAULT '{$set['defaultvalue']}'";
 }//}}}
 
 function cm_ft_conm_title_setting($setting)
@@ -75,18 +58,17 @@ function cm_ft_conm_title_update()
 }//}}}
 
 function cm_ft_conm_title_search_form($field, $value, $fieldinfo)
-{
+{//{{{
 	return form::text($field, $field, $value, 'text', 20);
-}
+}//}}}
 
 function cm_ft_conm_title_search($field, $value)
-{
+{//{{{
 	return $value === '' ? '' : " `$field` LIKE '%$value%' ";
-}
+}//}}}
 
 function cm_ft_conm_title_output($field, $value)
-{
+{//{{{
 	$value = htmlspecialchars($value);
 	return output::style($value, $content['style']);
-}
-?>
+}//}}}
