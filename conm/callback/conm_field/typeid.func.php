@@ -1,27 +1,31 @@
 <?php 
 /**
- * 标题 字段类型
+ * typeid 字段类型
  * 2011-10-17
  * 
  * @package default
  * @filesource
  */
-function cm_ft_conm__title_sql($set, $rdb_type = NULL)
+function cm_ft_conm__typeid_sql($set, $rdb_type = NULL)
 {//{{{
 	//todo 目前 $rdb_type 参数无效。
-	if(!$set['maxlength']) $set['maxlength'] = 255;
-	$maxlength = min($set['maxlength'], 255);
-	return "CHAR( {$maxlength} ) NOT NULL DEFAULT '{$set['defaultvalue']}'";
+	$minnumber = intval($set['minnumber']);
+	$defaultvalue = $set['decimaldigits'] == 0 ? intval($set['defaultvalue']) : floatval($set['defaultvalue']);
+	$field_type = $set['decimaldigits'] == 0 ? 'INT' : 'FLOAT';
+	$unsigned = $set['minnumber'] >= 0 ? 'UNSIGNED' : '';
+	return "{$field_type}(10) {$unsigned} NOT NULL DEFAULT {$defaultvalue}";
 }//}}}
 
-function cm_ft_conm__title_FString($set)
+function cm_ft_conm__typeid_FString($set)
 {//{{{
-	if(!$set['maxlength']) $set['maxlength'] = 255;
-	$maxlength = min($set['maxlength'], 255);
-	return "char({$maxlength})|NO||{$set['defaultvalue']}|";
+	$minnumber = intval($set['minnumber']);
+	$defaultvalue = $set['decimaldigits'] == 0 ? intval($set['defaultvalue']) : floatval($set['defaultvalue']);
+	$field_type = $set['decimaldigits'] == 0 ? 'INT' : 'FLOAT';
+	$unsigned = $set['minnumber'] >= 0 ? ' unsigned' : '';
+	return "int(10){$unsigned}|NO||{$defaultvalue}|";
 }//}}}
 
-function cm_ft_conm__title_setting($setting)
+function cm_ft_conm__typeid_setting($setting)
 {//{{{
 	?>
 <table cellpadding="2" cellspacing="1">
@@ -37,7 +41,7 @@ function cm_ft_conm__title_setting($setting)
 	<?php
 }//}}}
 
-function cm_ft_conm__title_form($field, $value, $fieldinfo)
+function cm_ft_conm__typeid_form($field, $value, $fieldinfo)
 {//{{{
 	global $catid;
 	extract($fieldinfo);
@@ -54,27 +58,27 @@ function cm_ft_conm__title_form($field, $value, $fieldinfo)
 	return form::text('info['.$field.']', $field, $value, 'text', $size, $css, $formattribute, $minlength, $maxlength).$data;
 }//}}}
 
-function cm_ft_conm__title_input()
+function cm_ft_conm__typeid_input()
 {//{{{
 	
 }//}}}
 
-function cm_ft_conm__title_update()
+function cm_ft_conm__typeid_update()
 {//{{{
 	
 }//}}}
 
-function cm_ft_conm__title_search_form($field, $value, $fieldinfo)
+function cm_ft_conm__typeid_search_form($field, $value, $fieldinfo)
 {//{{{
 	return form::text($field, $field, $value, 'text', 20);
 }//}}}
 
-function cm_ft_conm__title_search($field, $value)
+function cm_ft_conm__typeid_search($field, $value)
 {//{{{
 	return $value === '' ? '' : " `$field` LIKE '%$value%' ";
 }//}}}
 
-function cm_ft_conm__title_output($field, $value)
+function cm_ft_conm__typeid_output($field, $value)
 {//{{{
 	$value = htmlspecialchars($value);
 	return output::style($value, $content['style']);

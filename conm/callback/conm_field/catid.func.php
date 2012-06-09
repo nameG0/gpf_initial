@@ -1,27 +1,23 @@
 <?php 
 /**
- * 标题 字段类型
+ * 栏目ID 字段类型
  * 2011-10-17
  * 
  * @package default
  * @filesource
  */
-function cm_ft_conm__title_sql($set, $rdb_type = NULL)
+function cm_ft_conm__catid_sql($set, $rdb_type = NULL)
 {//{{{
 	//todo 目前 $rdb_type 参数无效。
-	if(!$set['maxlength']) $set['maxlength'] = 255;
-	$maxlength = min($set['maxlength'], 255);
-	return "CHAR( {$maxlength} ) NOT NULL DEFAULT '{$set['defaultvalue']}'";
+	return "INT(11) NOT NULL DEFAULT 0";
 }//}}}
 
-function cm_ft_conm__title_FString($set)
+function cm_ft_conm__catid_FString($set)
 {//{{{
-	if(!$set['maxlength']) $set['maxlength'] = 255;
-	$maxlength = min($set['maxlength'], 255);
-	return "char({$maxlength})|NO||{$set['defaultvalue']}|";
+	return "int(11)|NO||0|";
 }//}}}
 
-function cm_ft_conm__title_setting($setting)
+function cm_ft_conm__catid_setting($setting)
 {//{{{
 	?>
 <table cellpadding="2" cellspacing="1">
@@ -37,7 +33,7 @@ function cm_ft_conm__title_setting($setting)
 	<?php
 }//}}}
 
-function cm_ft_conm__title_form($field, $value, $fieldinfo)
+function cm_ft_conm__catid_form($field, $value, $fieldinfo)
 {//{{{
 	global $catid;
 	extract($fieldinfo);
@@ -54,27 +50,27 @@ function cm_ft_conm__title_form($field, $value, $fieldinfo)
 	return form::text('info['.$field.']', $field, $value, 'text', $size, $css, $formattribute, $minlength, $maxlength).$data;
 }//}}}
 
-function cm_ft_conm__title_input()
+function cm_ft_conm__catid_input()
 {//{{{
 	
 }//}}}
 
-function cm_ft_conm__title_update()
+function cm_ft_conm__catid_update()
 {//{{{
 	
 }//}}}
 
-function cm_ft_conm__title_search_form($field, $value, $fieldinfo)
+function cm_ft_conm__catid_search_form($field, $value, $fieldinfo)
 {//{{{
 	return form::text($field, $field, $value, 'text', 20);
 }//}}}
 
-function cm_ft_conm__title_search($field, $value)
+function cm_ft_conm__catid_search($field, $value)
 {//{{{
 	return $value === '' ? '' : " `$field` LIKE '%$value%' ";
 }//}}}
 
-function cm_ft_conm__title_output($field, $value)
+function cm_ft_conm__catid_output($field, $value)
 {//{{{
 	$value = htmlspecialchars($value);
 	return output::style($value, $content['style']);

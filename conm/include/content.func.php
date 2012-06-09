@@ -125,4 +125,3 @@ function content_field_error($msg = '')
 		}
 	return $error;
 }//}}}
-?>

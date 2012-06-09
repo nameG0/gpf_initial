@@ -1,36 +1,15 @@
 <?php 
-function cm_ft_conm__textarea_sql($set, $rdb_type = NULL)
+function cm_ft_conm__editor_sql($set, $rdb_type = NULL)
 {//{{{
 	//todo 目前 $rdb_type 参数无效。
-	if(!$set['maxlength']) $set['maxlength'] = 255;
-	$maxlength = min($set['maxlength'], 255);
-	if ($maxlength && $maxlength <= 255)
-		{
-		$sql = "VARCHAR( {$maxlength} ) NOT NULL DEFAULT '{$set['defaultvalue']}'";
-		}
-	else
-		{
-		$sql = "MEDIUMTEXT NOT NULL";
-		}
-	return $sql;
+	return "MEDIUMTEXT NOT NULL";
 }//}}}
-
-function cm_ft_conm__textarea_FString($set)
+function cm_ft_conm__editor_FString($set)
 {//{{{
-	if(!$set['maxlength']) $set['maxlength'] = 255;
-	$maxlength = min($set['maxlength'], 255);
-	if ($maxlength && $maxlength <= 255)
-		{
-		$field_type = 'varchar';
-		}
-	else
-		{
-		$field_type = 'mediumtext';
-		}
-	return "varchar({$maxlength})|NO||{$set['defaultvalue']}|";
+	return "mediumtext|NO|||";
 }//}}}
 
-function content_field_textarea_change($tablename, $info, $setting)
+function cm_ft_conm__editor_change($tablename, $info, $setting)
 {//{{{
 	global $db;
 	$maxlength = max(intval($maxlength), 0);
@@ -40,13 +19,13 @@ function content_field_textarea_change($tablename, $info, $setting)
 	$db->query($sql);
 }//}}}
 
-function content_field_textarea_drop($tablename, $info)
+function cm_ft_conm__editor_drop($tablename, $info)
 {//{{{
 	global $db;
 	$db->query("ALTER TABLE `$tablename` DROP `$field`");
 }//}}}
 
-function content_field_textarea_setting($info, $setting)
+function cm_ft_conm__editor_setting($info, $setting)
 {//{{{
 	?>
 <table cellpadding="2" cellspacing="1">
@@ -74,7 +53,7 @@ function content_field_textarea_setting($info, $setting)
 	<?php
 }//}}}
 
-function content_field_textarea_form($field, $value, $fieldinfo)
+function cm_ft_conm__editor_form($field, $value, $fieldinfo)
 {//{{{
 	extract($fieldinfo);
 	if(!$value) $value = $defaultvalue;
@@ -90,14 +69,14 @@ function content_field_textarea_form($field, $value, $fieldinfo)
 	return form::textarea('info['.$field.']', $field, $value, $rows, $cols, $css, $formattribute, $checkcharacter, $maxlength).$html;
 }//}}}
 
-function content_field_textarea_save($field, $value)
+function cm_ft_conm__editor_save($field, $value)
 {//{{{
 	//phpcms 的旧代码
 	//if(!fields[$field]['enablehtml']) $value = strip_tags($value);
 	//return $value;
 }//}}}
 
-function content_field_textarea_output($field, $value)
+function cm_ft_conm__editor_output($field, $value)
 {//{{{
 	//phpcms 的旧代码
 	// if($this->fields[$field]['enablekeylink'])

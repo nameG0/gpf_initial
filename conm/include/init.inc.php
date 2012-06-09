@@ -1,6 +1,11 @@
 <?php
-// defined('IN_PHPCMS') or exit('Access Denied');
+if (defined('GM_PATH_CONM'))
+	{
+	return ;
+	}
 define('GM_PATH_CONM', dirname(dirname(__FILE__)) . '/');
+require GM_PATH_CONM . "include/model.func.php";
+// require GM_PATH_CONM . "include/field.func.php";
 // include CONTENT_ROOT . 'include/global.func.php';
 // include CONTENT_ROOT . 'include/config.inc.php';
 // include CONTENT_ROOT . 'include/cache.func.php';

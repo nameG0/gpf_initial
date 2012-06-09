@@ -207,8 +207,8 @@ class ctrl_a_model
 				include_once $p;
 				}
 			}
-		$func_per = "cm_mt_{$mod}__{$name}_";
-		$func_name = "{$func_per}is_make";
+		$func_pre = "cm_mt_{$mod}__{$name}_";
+		$func_name = "{$func_pre}is_make";
 		if (!function_exists($func_name))
 			{
 			exit("未定义内容模型处理函数 {$func_name}");
@@ -219,6 +219,7 @@ class ctrl_a_model
 		$CMFl = array();
 		foreach ($result as $k => $r)
 			{
+			//todo 移除没有实际表字段的虚拟字段类型.
 			a::i($r)->unsers('setting');
 			$CMFl[$r['field']] = $r;
 			}
@@ -228,7 +229,7 @@ class ctrl_a_model
 		if (!$is_make)
 			{
 			//进行数据表初始化
-			$func_name = "{$func_per}make";
+			$func_name = "{$func_pre}make";
 			}
 		else
 			{
@@ -236,6 +237,6 @@ class ctrl_a_model
 			}
 		$func_name($CMMr, $CMFl);
 		//把 is_sync 改为 1
-		//siud::update('model')->wis()->data()->ing();
+		// siud::update('model')->wis()->data()->ing();
 	}//}}}
 }
