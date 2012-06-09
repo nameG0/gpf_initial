@@ -18,7 +18,20 @@ class ctrl_a_model
 	{//{{{
 		$sql = "SELECT * FROM " . RDB_PRE . "model";
 		$result = rdb::obj()->select($sql);
-		var_dump($result);
+		?>
+		<a href="">添加</a>
+		<hr />
+		<?php
+		foreach ($result as $k => $r)
+			{
+			?>
+			<div >
+				<?=$r['name']?>
+				<a href="">修改</a>
+				<a href="">删除</a>
+			</div>
+			<?php
+			}
 		// $infos = $model->listinfo('modeltype=0', 'modelid', 1, 100);
 		// include admin_tpl('model_manage');
 	}//}}}

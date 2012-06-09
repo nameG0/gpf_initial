@@ -8,7 +8,6 @@
  */
 // defined('IN_PHPCMS') or exit('Access Denied');
 // @set_time_limit(600);
-require_once GM_PATH_CONM . "include/field.func.php";
 
 class ctrl_a_model_field
 {
@@ -62,15 +61,22 @@ class ctrl_a_model_field
 
 		$sql = "SELECT * FROM " . RDB_PRE . "model_field WHERE modelid = {$modelid}";
 		$result = rdb::obj()->select($sql);
-		var_dump($result);exit;
 
-		$where = "modelid={$modelid} ";
-		if (!$show_disabled)
+		?>
+		<a href="">添加</a>
+		<hr />
+		<?php
+		foreach ($result as $k => $r)
 			{
-			$where .= "AND disabled=0";
+			?>
+			<div >
+				<?=$r['field']?>
+				<a href="">修改</a>
+				<a href="">删除</a>
+			</div>
+			<?php
 			}
-		$infos = $field->listinfo($where, 'listorder,fieldid', 1, 100);
-		include tpl_admin('model_field_manage', 'conm');
+		// include tpl_admin('model_field_manage', 'conm');
 	}//}}}
 	function edit()
 	{//{{{
