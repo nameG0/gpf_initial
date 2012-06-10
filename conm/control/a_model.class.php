@@ -19,7 +19,7 @@ class ctrl_a_model
 		$sql = "SELECT * FROM " . RDB_PRE . "model";
 		$result = rdb::obj()->select($sql);
 		?>
-		<a href="">添加</a>
+		<a href="<?=gpf::url('..add')?>">添加</a>
 		<hr />
 		<?php
 		foreach ($result as $k => $r)
@@ -27,8 +27,12 @@ class ctrl_a_model
 			?>
 			<div >
 				<?=$r['name']?>
-				<a href="">修改</a>
-				<a href="">删除</a>
+				<a href="<?=gpf::url(".a_model_field.manage.&modelid={$r['modelid']}")?>">管理字段</a>
+				<a href="<?=gpf::url("..sync.&modelid={$r['modelid']}")?>">同步</a>
+				<a href="<?=gpf::url("..edit.&modelid={$r['modelid']}")?>">修改</a>
+				<a href="<?=gpf::url("..delete.&modelid={$r['modelid']}")?>">删除</a>
+				|
+				<a href="<?=gpf::url(".a_content.manage.&modelid={$r['modelid']}")?>">管理内容</a>
 			</div>
 			<?php
 			}
@@ -193,6 +197,7 @@ class ctrl_a_model
 	 */
 	function sync()
 	{//{{{
+		//todo 加一个参数令 is_sync=1 时可强制同步。
 		$modelid = _g('modelid', 'int');
 
 		$CMMr = siud::find('model')->wis('modelid', $modelid)->ing();
@@ -209,6 +214,8 @@ class ctrl_a_model
 			//todo
 			exit('未完成其它内容模型的同步功能');
 			}
+		//todo 在同步之前检查一下模型的 is_sync 字段是否为1,为1一般不同步。
+		
 		//加载内容模型处理函数
 		list($mod, $name) = explode("/", $CMMTid);
 		$callback = mod_callback($mod, 'p');
@@ -248,8 +255,21 @@ class ctrl_a_model
 			{
 			$func_name = "{$func_pre}sync";
 			}
-		$func_name($CMMr, $CMFl);
+		$sql = $func_name($CMMr, $CMFl);
+		if (is_string($sql))
+			{
+			$sql = (array)$sql;
+			}
+		$o_db = rdb::obj();
+		foreach ($sql as $k => $v)
+			{
+			log::add($v, log::INFO, __FILE__, __LINE__);
+			$o_db->query($v);
+			}
 		//把 is_sync 改为 1
 		// siud::update('model')->wis()->data()->ing();
+		?>
+		<a href="<?=gpf::url("..manage")?>">管理模型</a>
+		<?php
 	}//}}}
 }

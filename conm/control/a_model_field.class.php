@@ -63,14 +63,16 @@ class ctrl_a_model_field
 		$result = rdb::obj()->select($sql);
 
 		?>
-		<a href="">添加</a>
+		<a href="<?=gpf::url('.a_model.manage')?>">管理模型</a>
+		<a href="<?=gpf::url(".a_model.sync.&modelid={$modelid}")?>">同步</a>
+		<a href="<?=gpf::url('..add')?>">添加</a>
 		<hr />
 		<?php
 		foreach ($result as $k => $r)
 			{
 			?>
 			<div >
-				<?=$r['field']?>
+				<?=$r['field']?>(<?=$r['formtype']?>)
 				<a href="">修改</a>
 				<a href="">删除</a>
 			</div>

@@ -1,3 +1,5 @@
+<a href="<?=gpf::url('..manage')?>">管理</a>
+<hr />
 <form action="" method="POST" enctype="multipart/form-data">
 模型名：
 <input type="text" name="data[name]" value="" />

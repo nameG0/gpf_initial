@@ -16,8 +16,6 @@ function cm_mt_conm__table_is_make($CMMr)
 
 function cm_mt_conm__table_make($CMMr, $CMFl)
 {//{{{
-	$o_db = rdb::obj();
-
 	$table_name = RDB_PRE . $CMMr['tablename'];
 	$sql = "CREATE TABLE  `{$table_name}` (\n";
 	foreach ($CMFl as $f => $CMFr)
@@ -42,7 +40,7 @@ function cm_mt_conm__table_make($CMMr, $CMFl)
 	//去除最后一个,号
 	$sql = substr($sql, 0, -2);
 	$sql .= "\n) ENGINE = MYISAM";
-	$o_db->query($sql);
+	return $sql;
 }//}}}
 
 /**
@@ -51,7 +49,7 @@ function cm_mt_conm__table_make($CMMr, $CMFl)
  */
 function cm_mt_conm__table_sync($CMMr, $CMFl)
 {//{{{
-	$o_db = rdb::obj();
+	$ret = array();
 
 	//------ 加载字段类型文件 ------
 	$field_list = array();
@@ -71,7 +69,7 @@ function cm_mt_conm__table_sync($CMMr, $CMFl)
 		if (!$CMFl[$k] || $CMFl[$k]['is_rebuild'])
 			{
 			$sql = "ALTER TABLE `{$table}` DROP `{$k}`";
-			$o_db->query($sql);
+			$ret[] = $sql;
 			unset($FString[$k]);
 			}
 		}
@@ -92,7 +90,7 @@ function cm_mt_conm__table_sync($CMMr, $CMFl)
 		$sql_field = $func_name($CMFl[$k]);
 		$change_name = $CMFl[$k]['new_name'] ? $CMFl[$k]['new_name'] : $k;
 		$sql = "ALTER TABLE `{$table}` CHANGE `{$k}` `{$change_name}` {$sql_field}";
-		$o_db->query($sql);
+		$ret[] = $sql;
 		//更改后不再需要在后面的流程中处理
 		unset($CMFl[$k], $FString[$k]);
 		}
@@ -107,6 +105,7 @@ function cm_mt_conm__table_sync($CMMr, $CMFl)
 		$sql_field = $func_name($v);
 		$field_name = $v['new_name'] ? $v['new_name'] : $k;
 		$sql = "ALTER TABLE `{$table}` ADD `{$field_name}` {$sql_field}";
-		$o_db->query($sql);
+		$ret[] = $sql;
 		}
+	return $ret;
 }//}}}

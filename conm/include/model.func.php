@@ -2,12 +2,14 @@
 /**
  * 内容模型相关函数
  * <pre>
+ * <b>文件路径</b>
  * 各模块字段类型存放规则：
  * 存放目录： {module_name}/callback/conm_field/
  * 字段类型索引文件： fields.inc.php
  * 字段类型定义文件： {field_name}.func.php
  * 索引文件定义格式： return array('字段名' => '字段昵称', ...);
  * 其中字段名可由英文和数字组可，昵称可使用中文。若需要禁用某个字段类型，只需不包含在索引文件中即或。
+ *
  * <b>数据结构</b>
  * FString(field string) string 一个字段的指纹值,用于比较内容模型字段设置是否与实际表字段一致.
  * MySQL的指纹值为SHOW COLUMNS语句返回的字段值组合,但不包含Field字段的值.
@@ -20,11 +22,16 @@
  *
  * $CMFTl(content module field type list): 字段类型列表
  * array[字段类型ID] = $CMFTr
+ *
  * <b>字段类型接口</b>
  * 前序:cm_ft_ (content model field type)
  * 命名规则:前序_{mod}_{name}_接口名. eg. cm_ft_conm__example_setting
  * void setting($setting): 显示字段类型设置表单
  * string FString($set) 返回字段类型指纹值.
+ *
+ * <b>字段类型控制常量</b>
+ * (使用大写字母作为常量名)
+ * _{mod}__{name}_VIRTUAL_TABLE true 是否虚拟字段（即非数据表实际字段），不定义时默认为否。
  * </pre>
  * 
  * @package default
