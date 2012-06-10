@@ -1,4 +1,10 @@
 <?php
+/**
+ * MySQL 数据库的驱动类
+ * 
+ * @package default
+ * @filesource
+ */
 class rdb_mysql extends rdb_drive
 {
 	var $search = array('/union(\s*(\/\*.*\*\/)?\s*)+select/i', '/load_file(\s*(\/\*.*\*\/)?\s*)+\(/i', '/into(\s*(\/\*.*\*\/)?\s*)+outfile/i');
@@ -8,21 +14,21 @@ class rdb_mysql extends rdb_drive
 	{
 		$func = $pconnect == 1 ? 'mysql_pconnect' : 'mysql_connect';
 		if(!$this->connid = @$func($dbhost, $dbuser, $dbpw))
-		{
+			{
 			$this->halt('Can not connect to MySQL server');
 			return false;
-		}
+			}
 		if($this->version() > '4.1')
-		{
+			{
 			$serverset = $charset ? "character_set_connection='$charset',character_set_results='$charset',character_set_client=binary" : '';
 			$serverset .= $this->version() > '5.0.1' ? ((empty($serverset) ? '' : ',')." sql_mode='' ") : '';
 			$serverset && mysql_query("SET $serverset", $this->connid);
-		}
+			}
 		if($dbname && !@mysql_select_db($dbname , $this->connid))
-		{
+			{
 			$this->halt('Cannot use database '.$dbname);
 			return false;
-		}
+			}
 		$this->dbname = $dbname;
 		return $this->connid;
 	}
@@ -32,85 +38,85 @@ class rdb_mysql extends rdb_drive
 		if(!@mysql_select_db($dbname , $this->connid)) return false;
 		$this->dbname = $dbname;
 		return true;
-    }
+	}
 
 	function query($sql , $type = '')
 	{
 		$func = $type == 'UNBUFFERED' ? 'mysql_unbuffered_query' : 'mysql_query';
 		if(!($query = @$func($sql , $this->connid)) && $type != 'SILENT')
-		{
+			{
 			$this->halt('MySQL Query Error', $sql);
 			return false;
-		}
+			}
 		$this->querynum++;
 		return $query;
 	}
 
 	// function select($sql, $keyfield = '')
 	// {
-		// $array = array();
-		// $tmp = run_time();
-		// $result = $this->query($sql);
-		// $tmp = run_time($tmp);
-		// $this->sql_select_time_total += $tmp;
-		// log::add("{$tmp} {$sql}", log::INFO, '', '', __CLASS__.'->'.__FUNCTION__);
-		// unset($tmp);
-		// while($r = $this->fetch_array($result))
-		// {
-			// if($keyfield)
-			// {
-				// $key = $r[$keyfield];
-				// $array[$key] = $r;
-			// }
-			// else
-			// {
-				// $array[] = $r;
-			// }
-		// }
-		// $this->free_result($result);
-		// return $array;
+	// $array = array();
+	// $tmp = run_time();
+	// $result = $this->query($sql);
+	// $tmp = run_time($tmp);
+	// $this->sql_select_time_total += $tmp;
+	// log::add("{$tmp} {$sql}", log::INFO, '', '', __CLASS__.'->'.__FUNCTION__);
+	// unset($tmp);
+	// while($r = $this->fetch_array($result))
+	// {
+	// if($keyfield)
+	// {
+	// $key = $r[$keyfield];
+	// $array[$key] = $r;
+	// }
+	// else
+	// {
+	// $array[] = $r;
+	// }
+	// }
+	// $this->free_result($result);
+	// return $array;
 	// }
 
 	//2011-03-17 ggzhu 加入 $other 参数，用于输入如 IGNORE 这样的操作符
 	//2011-03-24 ggzhu 加入对二维数组的支持
 	// function insert($table, $data, $other = '')
 	// {
-		// $type = is_array(current($data)) ? 2 : 1;	//标记数组的维数
-		// //一维数组时检查字段合法性
-		// if (1 == $type)
-			// {
-			// $fields = $this->get_fields($table);
-			// foreach($data as $key => $value)
-				// {
-				// if(!in_array($key,$fields))unset($data[$key]);
-				// }
-			// if (!$data)
-				// {
-				// return false;
-				// }
-			// }
-		// $sql_field = join("`,`", array_keys((1 == $type ? $data : current($data))));
-		// //用if分支,比强制转换为二维数组及 switch 结构快那么一点点
-		// if (1 == $type)
-			// {
-			// $sql_value = "('" . join("','", $data) . "')";
-			// }
-		// else
-			// {
-			// $middle = '';
-			// $sql_value = '';
-			// foreach ($data as $r)
-				// {
-				// $sql_value .= "{$middle}('" . join("','", $r) . "')";
-				// $middle = ', ';
-				// }
-			// }
-		// $sql = "INSERT {$other} INTO `{$table}` (`{$sql_field}`) VALUES {$sql_value}";
-		// $tmp = run_time();
-		// $ret = $this->query($sql);
-		// $tmp = run_time($tmp);
-		// $this->sql_insert_time_total += $tmp;
-		// return $ret;
+	// $type = is_array(current($data)) ? 2 : 1;	//标记数组的维数
+	// //一维数组时检查字段合法性
+	// if (1 == $type)
+	// {
+	// $fields = $this->get_fields($table);
+	// foreach($data as $key => $value)
+	// {
+	// if(!in_array($key,$fields))unset($data[$key]);
+	// }
+	// if (!$data)
+	// {
+	// return false;
+	// }
+	// }
+	// $sql_field = join("`,`", array_keys((1 == $type ? $data : current($data))));
+	// //用if分支,比强制转换为二维数组及 switch 结构快那么一点点
+	// if (1 == $type)
+	// {
+	// $sql_value = "('" . join("','", $data) . "')";
+	// }
+	// else
+	// {
+	// $middle = '';
+	// $sql_value = '';
+	// foreach ($data as $r)
+	// {
+	// $sql_value .= "{$middle}('" . join("','", $r) . "')";
+	// $middle = ', ';
+	// }
+	// }
+	// $sql = "INSERT {$other} INTO `{$table}` (`{$sql_field}`) VALUES {$sql_value}";
+	// $tmp = run_time();
+	// $ret = $this->query($sql);
+	// $tmp = run_time($tmp);
+	// $this->sql_insert_time_total += $tmp;
+	// return $ret;
 	// }
 
 	//2011-03-17 ggzhu 废弃，用 insert 及 $other 参数实现
@@ -128,38 +134,38 @@ class rdb_mysql extends rdb_drive
 			}
 		return $this->query("INSERT IGNORE INTO `$tablename`(`".implode('`,`', array_keys($array))."`) VALUES('".implode("','", $array)."')");
 	}
-	*/
+	 */
 
 	//ggzhu 2010-10-22 添加 $is_query 参数，若为false,则返回sql语句,不执行
 	function update($tablename, $array, $where = '', $is_query = true)
 	{
 		$fields = $this->get_fields($tablename);
 		foreach($array as $key => $value)
-		{
+			{
 			if(!in_array($key,$fields))
 				{
 				unset($array[$key]);
 				}
-		}
+			}
 		//防止空更新
 		if (empty($array))
 			{
 			return ;
 			}
 		if($where)
-		{
+			{
 			$sql = '';
 			foreach($array as $k=>$v)
-			{
+				{
 				$sql .= ", `$k`='$v'";
-			}
+				}
 			$sql = substr($sql, 1);
 			$sql = "UPDATE `$tablename` SET $sql WHERE $where";
-		}
+			}
 		else
-		{
+			{
 			$sql = "REPLACE INTO `$tablename`(`".implode('`,`', array_keys($array))."`) VALUES('".implode("','", $array)."')";
-		}
+			}
 		if (!$is_query)
 			{
 			return $sql;
@@ -175,9 +181,9 @@ class rdb_mysql extends rdb_drive
 	{
 		$result = $this->query("SHOW COLUMNS FROM $table");
 		while($r = $this->fetch_array($result))
-		{
+			{
 			if($r['Key'] == 'PRI') break;
-		}
+			}
 		$this->free_result($result);
 		return $r['Field'];
 	}
@@ -187,9 +193,9 @@ class rdb_mysql extends rdb_drive
 		$fields = array();
 		$result = $this->query("SHOW COLUMNS FROM $table");
 		while($r = $this->fetch_array($result))
-		{
+			{
 			$fields[] = $r['Field'];
-		}
+			}
 		$this->free_result($result);
 		return $fields;
 	}
@@ -275,9 +281,9 @@ class rdb_mysql extends rdb_drive
 		//如果用 $this->select() 在 select() 中有一次循环，这里又要一次循环
 		$result = $this->query($sql);
 		while($r = $this->fetch_array($result))
-		{
+			{
 			$tables[] = array_shift($r);
-		}
+			}
 		$this->free_result($result);
 		return $tables;
 	}
@@ -332,11 +338,11 @@ class rdb_mysql extends rdb_drive
 		$this->errormsg = "<b>MySQL Query : </b>$sql <br /><b> MySQL Error : </b>".$this->error()." <br /> <b>MySQL Errno : </b>".$this->errno()." <br /><b> Message : </b> $message <br/> <b>FILE :</b> {$trace['file']} : {$trace['line']}";
 		log::add($this->errormsg, log::SQL, $trace['file'], $trace['line'], $trace['func']);
 		if($this->debug)
-		{
+			{
 			$msg = (defined('IN_ADMIN') || DEBUG) ? $this->errormsg : "Bad Request. {$LANG['illegal_request_return']}";
 			echo '<div style="font-size:12px;text-align:left; border:1px solid #9cc9e0; padding:1px 4px;color:#000000;font-family:Arial, Helvetica,sans-serif;"><span>'.$msg.'</span></div>';
 			//ggzhu 2011-1-7 出错也不中断运行。
 			//exit;
-		}
+			}
 	}
 }
