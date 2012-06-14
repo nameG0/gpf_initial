@@ -1,6 +1,6 @@
 <?php
 /**
- * 2012-05-05
+ * 模型管理
  * 
  * @package default
  * @filesource
@@ -29,7 +29,7 @@ class ctrl_a_model
 				<?=$r['name']?>
 				<a href="<?=gpf::url(".a_model_field.manage.&modelid={$r['modelid']}")?>">管理字段</a>
 				<a href="<?=gpf::url("..sync.&modelid={$r['modelid']}")?>">同步</a>
-				<a href="<?=gpf::url("..edit.&modelid={$r['modelid']}")?>">修改</a>
+				<a href="<?=gpf::url("..form.&modelid={$r['modelid']}")?>">修改</a>
 				<a href="<?=gpf::url("..delete.&modelid={$r['modelid']}")?>">删除</a>
 				|
 				<a href="<?=gpf::url(".a_content.manage.&modelid={$r['modelid']}")?>">管理内容</a>
@@ -37,71 +37,51 @@ class ctrl_a_model
 			<?php
 			}
 		// $infos = $model->listinfo('modeltype=0', 'modelid', 1, 100);
-		// include admin_tpl('model_manage');
+		// include tpl_admin('model_manage');
 	}//}}}
-	function add()
+	/**
+	 * 保存[添加/修改]一条模型数据
+	 */
+	function save()
 	{//{{{
-		if (isset($_POST["dosubmit"]))
+		if (!isset($_POST["dosubmit"]))
 			{
-			$data = _p('data');
+			showmessage('没有表单数据');
+			}
+		a::i($CMMr)->fpost('CMMr')->apost('setting')->sers('setting');
 
-			$db = rdb::obj();
-			$db->insert(RDB_PRE . 'model', $data);
+		siud::save('model')->pk('modelid')->data($CMMr)->error($error)->id($modelid)->ing();
 
-			$modelid = $db->insert_id();
-			if ($modelid)
-				{
-				//cache_model();
-				// showmessage('操作成功！', admin_url(".model_field.manage.&modelid={$modelid}"));
-				echo "操作成功！";
-				}
-			else
-				{
-				// showmessage('操作失败！');
-				echo '操作失败！';
-				}
+		if ($modelid)
+			{
+			//cache_model();
+			// showmessage('操作成功！', admin_url(".model_field.manage.&modelid={$modelid}"));
+			echo "操作成功！";
 			}
 		else
 			{
-			include tpl_admin('model_add');
+			// showmessage('操作失败！');
+			echo '操作失败！';
 			}
 	}//}}}
-	function edit()
+	/**
+	 * 显示模型[添加/修改]表单。
+	 * @param int modelid 修改时传入
+	 */
+	function form()
 	{//{{{
-		if($dosubmit)
+		$modelid = _g('modelid', 'int');
+
+		$CMMr = array();
+		if ($modelid)
 			{
-			$result = $model->edit($modelid, $info);
-			if($result)
+			$CMMr = conm_model_get($modelid);
+			if (!$CMMr)
 				{
-				require_once 'admin/category.class.php';
-				$cat = new category('phpcms');
-				$cat->repair();
-				cache_model();
-
-				if(is_array($CATEGORY) && $ishtml != $info['ishtml'])
-					{
-					$forward = '?mod=phpcms&file=url'.$catids.'&forward='.urlencode(URL);
-					foreach($CATEGORY AS $k=>$v)
-						{
-						if($v['modelid'] != $modelid) continue;
-						showmessage('内容模型修改成功！请更新对应的栏目URL链接', $forward,'4000');
-						}
-
-					}
-				showmessage('操作成功！', $forward);
-				}
-			else
-				{
-				showmessage('操作失败！');
+				showmessage('指定的模块不存在！');
 				}
 			}
-		else
-			{
-			$info = $model->get($modelid);
-			if(!$info) showmessage('指定的模块不存在！');
-			extract($info);
-			include admin_tpl('model_edit');
-			}
+		include tpl_admin('model_form');
 	}//}}}
 	function export()
 	{//{{{
@@ -161,7 +141,7 @@ class ctrl_a_model
 			}
 		else
 			{
-			include admin_tpl('model_import');
+			include tpl_admin('model_import');
 			}
 	}//}}}
 	function delete()
@@ -271,5 +251,20 @@ class ctrl_a_model
 		?>
 		<a href="<?=gpf::url("..manage")?>">管理模型</a>
 		<?php
+	}//}}}
+	/**
+	 * 加载模型设置表单
+	 * @param int $modeltype
+	 */
+	function ajax_setting_form()
+	{//{{{
+		$modeltype = _g('modeltype', 'int');
+
+		log::is_print(0);
+
+		if (0 == $modeltype)
+			{
+			cm_m_setting_form('conm/table');
+			}
 	}//}}}
 }

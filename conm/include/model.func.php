@@ -14,6 +14,9 @@
  * FString(field string) string 一个字段的指纹值,用于比较内容模型字段设置是否与实际表字段一致.
  * MySQL的指纹值为SHOW COLUMNS语句返回的字段值组合,但不包含Field字段的值.
  *
+ * CMMTid(content module model type ID):模型类型ID
+ * 命名规则：{module_name}/{model_name} eg. conm/table
+ *
  * $CMFTid(content module field type ID): 字段类型ID
  * 字段类型ID命名规则：{module_name}/{field_name} eg. conm/title
  *
@@ -23,15 +26,24 @@
  * $CMFTl(content module field type list): 字段类型列表
  * array[字段类型ID] = $CMFTr
  *
+ * $CMFr(content module field row) array 一条字段数据。
+ *
+ * $CMFs(content module field s): 多条内容字段数据。数组键只是数字编号。
+ * array[] => $CMFr
+ *
+ * $CMFl(content module field list):多条内容字段数据，且数组键为字段名。
+ * array[field] => $CMFr
+ *
  * <b>字段类型接口</b>
  * 前序:cm_ft_ (content model field type)
  * 命名规则:前序_{mod}_{name}_接口名. eg. cm_ft_conm__example_setting
  * void setting($setting): 显示字段类型设置表单
  * string FString($set) 返回字段类型指纹值.
+ * string form($value, $set, $data): 返回字段类型编辑表单HTML代码
  *
  * <b>字段类型控制常量</b>
  * (使用大写字母作为常量名)
- * _{mod}__{name}_VIRTUAL_TABLE true 是否虚拟字段（即非数据表实际字段），不定义时默认为否。
+ * _{mod}__{name}_VIRTUAL_FIELD true 是否虚拟字段（即非数据表实际字段），不定义时默认为否。
  * </pre>
  * 
  * @package default
@@ -57,6 +69,25 @@ function cm_m_get_FString($table)
 		}
 	return $FString_list;
 }//}}}
+/**
+ * 显示模型类型设置表单
+ * @param array $setting 模型类型配置参数
+ */
+function cm_m_setting_form($CMMTid, $setting = array())
+{//{{{
+	list($mod, $name) = explode("/", $CMMTid);
+	$callback = mod_callback($mod, 'p');
+	foreach ($callback as $k => $v)
+		{
+		$path = "{$v}conm_model/{$name}/setting.inc.php";
+		if (is_file($path))
+			{
+			include $path;
+			return ;
+			}
+		}
+}//}}}
+
 /**
  * 取所有字段类型
  * @param string $mod 字段类型所属模块，为空则返回所有模块的字段类型。
@@ -142,7 +173,6 @@ function cm_f_field_list($mod = '')
 		}
 	return $ret;
 }//}}}
-
 /**
  * 加载一个字段类型或加载一组字段类型
  * @param string|array 字段类型ID , 数组则由字段类型ID组成. eg. conm/title
@@ -183,40 +213,20 @@ function cm_f_field_load($CMFTid)
 		}
 }//}}}
 
-function content_field_output($data)
+/**
+ * 返回模型编辑表单（调用者需要使用 cm_f_field_load() 加载字段类型）
+ * @param array $data 表单项值，对模型内容修改时使用。
+ * @return array [field] => HTML代码
+ */
+function cm_m_content_form($CMFl, $data = array())
 {//{{{
-
-	$this->data = $data;
-	$this->contentid = $data['contentid'];
-	$this->set_catid($data['catid']);
-	
-	//格式化输出
-	$info = array();
-	foreach($this->fields as $field => $v)
-	{
-		if(!isset($data[$field]))
-			{
-			continue;
-			}
-		$func = $formtype = $v['formtype'];
-		$value = $data[$field];
-		//调用函数式字段类型
-		$func_name = "content_field_{$formtype}_output";
-		if (function_exists($func_name))
+	foreach ($CMFl as $f => $set)
 		{
-			$result = call_user_func($func_name, $field, $value, $v);
+		
 		}
-		else
-		{
-			$result = method_exists($this, $func) ? $this->$func($field, $data[$field]) : $data[$field];
-		}
-		if($result !== false)
-			{
-			$info[$field] = $result;
-			}
-	}
-	return $info;
 }//}}}
+
+//------ 旧函数，待改进 ------
 
 /**
  * 供字段类型进行报错
@@ -243,4 +253,3 @@ function content_field_error($msg = '')
 		}
 	return $error;
 }//}}}
-
