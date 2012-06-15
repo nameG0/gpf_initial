@@ -610,6 +610,12 @@ class a
 			{
 			if ($this->_Is($f, $Is))
 				{
+				//ggzhu@2012-06-11 为空时默认为空数组。
+				if (!$this->data[$f])
+					{
+					$this->data[$f] = array();
+					continue;
+					}
 				$this->data[$f] = $this->_if_adds(unserialize($this->_no_adds($f)));
 				}
 			}
