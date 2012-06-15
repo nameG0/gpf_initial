@@ -120,6 +120,10 @@ class gpf
 		log::add("action:{$action}", log::INFO, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
 		$o_ctrl->$action();
 	}//}}}
+	static function url($arg)
+	{//{{{
+		return ctrl_url($arg);
+	}//}}}
 	/**
 	 * 取非常量配置项的值
 	 */

@@ -13,7 +13,7 @@
  * get 部份只需提供键值，会自动从get中取出对应的值
  */
 function ctrl_url($arg = '...')
-{
+{//{{{
 	list($_mod, $_file, $_action, $other, $get) = explode(".", $arg);
 	$id = array();
 	//list($mod, $file, $action) = explode(",", $id);
@@ -31,4 +31,4 @@ function ctrl_url($arg = '...')
 			}
 		}
 	return $ret;
-}
+}//}}}
