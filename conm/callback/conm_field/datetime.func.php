@@ -35,6 +35,8 @@ function cm_ft_conm__datetime_setting($setting)
 
 function cm_ft_conm__datetime_form($field, $value, $fieldinfo)
 {//{{{
+	return 'datetime';
+
 	global $catid;
 	extract($fieldinfo);
 	if(!$value) $value = $defaultvalue;

@@ -55,6 +55,8 @@ function cm_ft_conm__editor_setting($info, $setting)
 
 function cm_ft_conm__editor_form($field, $value, $fieldinfo)
 {//{{{
+	return 'editor';
+
 	extract($fieldinfo);
 	if(!$value) $value = $defaultvalue;
 	if($checkcharacter && $maxlength)

@@ -43,6 +43,8 @@ function cm_ft_conm__typeid_setting($setting)
 
 function cm_ft_conm__typeid_form($field, $value, $fieldinfo)
 {//{{{
+	return 'typeid';
+
 	global $catid;
 	extract($fieldinfo);
 	if(!$value) $value = $defaultvalue;

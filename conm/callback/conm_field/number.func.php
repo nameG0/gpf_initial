@@ -40,8 +40,12 @@ function cm_ft_conm__number_setting($setting)
 	<?php
 }//}}}
 
-function cm_ft_conm__number_form($field, $value, $fieldinfo)
+function cm_ft_conm__number_form($field, $value, $set)
 {//{{{
+	return <<<EOT
+<input type="text" name="info[{$field}]" value="{$value}" />
+EOT;
+
 	global $catid;
 	extract($fieldinfo);
 	if(!$value) $value = $defaultvalue;

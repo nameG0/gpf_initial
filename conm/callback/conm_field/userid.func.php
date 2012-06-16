@@ -34,6 +34,8 @@ function cm_ft_conm__userid_setting($setting)
 
 function cm_ft_conm__userid_form($field, $value, $fieldinfo)
 {//{{{
+	return 'userid';
+
 	global $catid;
 	extract($fieldinfo);
 	if(!$value) $value = $defaultvalue;

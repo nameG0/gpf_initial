@@ -39,6 +39,10 @@ function cm_ft_conm__title_setting($setting)
 
 function cm_ft_conm__title_form($field, $value, $fieldinfo)
 {//{{{
+	return <<<EOT
+<input type="text" name="info[{$field}]" value="{$value}" />
+EOT;
+
 	global $catid;
 	extract($fieldinfo);
 	if(!$value) $value = $defaultvalue;

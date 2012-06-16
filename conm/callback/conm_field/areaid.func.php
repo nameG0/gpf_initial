@@ -42,6 +42,8 @@ function cm_ft_conm__areaid_setting($setting)
 
 function cm_ft_conm__areaid_form($field, $value, $fieldinfo)
 {//{{{
+	return 'areaid';
+
 	global $catid;
 	extract($fieldinfo);
 	if(!$value) $value = $defaultvalue;

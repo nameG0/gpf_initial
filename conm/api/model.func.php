@@ -25,86 +25,34 @@ function conm_model_get($modelid)
 /**
  * 返回指定模型的编辑表单HTML代码
  * @param array $data 表单项值，对模型内容修改时使用。
- * @return array [field] => HTML代码
+ * @return array [field] => {form:HTML代码, name:字段中文名, tips:字段提示信息, }
  */
 function conm_content_form($modelid, $data = array())
 {//{{{
-	$info = array();
-	$this->content_url = $data['url'];
-	//加载其它模块的字段类型
-	$field_list = require CONTENT_ROOT . "fields/fields.inc.php";
-	foreach ($this->fields as $field => $setting)
-	{
-		$formtype = $setting['formtype'];
-		if (function_exists("content_field_{$formtype}_form"))
+	$CMFs = siud::select('model_field')->wis('modelid', $modelid)->ing();
+	$CMFl = array();
+	$CMFTid_list = array();
+	foreach ($CMFs as $k => $r)
 		{
-			continue;
+		$CMFl[$r['field']] = $r;
+		$CMFTid_list[] = $r['formtype'];
 		}
-		if (is_array($field_list[$setting['formtype']]) && $field_list[$setting['formtype']][1])
+	unset($CMFs);
+
+	cm_f_field_load($CMFTid_list);
+
+	$form = cm_m_content_form($CMFl, $data);
+	$ret = array();
+	foreach ($CMFl as $f => $set)
 		{
-			require_once PHPCMS_ROOT . "{$field_list[$formtype][1]}/fields/{$formtype}.inc.php";
-		}
-		else
-		{
-			$path = CONTENT_ROOT . "fields/{$formtype}.inc.php";
-			if (is_file($path))
-			{
-				require_once $path;
-			}
-		}
-	}
-	//生成表单
-	foreach($this->fields as $field=>$v)
-	{
-		if(defined('IN_ADMIN'))
-		{
-			if($v['iscore'] || check_in($_roleid, $v['unsetroleids']) || check_in($_groupid, $v['unsetgroupids'])) continue;
-		}
-		else
-		{
-			if($v['iscore'] || !$v['isadd'] || check_in($_roleid, $v['unsetroleids']) || check_in($_groupid, $v['unsetgroupids'])) continue;
-		}
-		$formtype = $v['formtype'];
-		$value = isset($data[$field]) ? htmlspecialchars($data[$field], ENT_QUOTES) : '';
-		if($func=='pages' && isset($data['maxcharperpage']))
-		{
-			$value = $data['paginationtype'].'|'.$data['maxcharperpage'];
+		$ret[$f] = array(
+			"form" => $form[$f],
+			"name" => $set['name'],
+			"tips" => $set['tips'],
+			);
 		}
 
-		//调用函数式字段类型
-		$func_name = "content_field_{$formtype}_form";
-		if (function_exists($func_name))
-		{
-			$form = call_user_func($func_name, $field, $value, $v);
-		}
-		else
-		{
-			$form = call_user_func(array($this, $formtype), $field, $value, $v);
-		}
-
-		if($form !== false)
-		{
-			if(defined('IN_ADMIN'))
-			{
-				if($v['isbase'])
-				{
-					$star = $v['minlength'] || $v['pattern'] ? 1 : 0;
-					$info['base'][$field] = array('name'=>$v['name'], 'tips'=>$v['tips'], 'form'=>$form, 'star'=>$star);
-				}
-				else
-				{
-					$star = $v['minlength'] || $v['pattern'] ? 1 : 0;
-					$info['senior'][$field] = array('name'=>$v['name'], 'tips'=>$v['tips'], 'form'=>$form, 'star'=>$star);
-				}
-			}
-			else
-			{
-				$star = $v['minlength'] || $v['pattern'] ? 1 : 0;
-				$info[$field] = array('name'=>$v['name'], 'tips'=>$v['tips'], 'form'=>$form, 'star'=>$star);
-			}
-		}
-	}
-	return $info;
+	return $ret;
 }//}}}
 
 //------ 旧函数，待改进 ------

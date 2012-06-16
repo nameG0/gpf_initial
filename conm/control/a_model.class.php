@@ -19,7 +19,7 @@ class ctrl_a_model
 		$sql = "SELECT * FROM " . RDB_PRE . "model";
 		$result = rdb::obj()->select($sql);
 		?>
-		<a href="<?=gpf::url('..add')?>">添加</a>
+		<a href="<?=gpf::url('..form')?>">添加</a>
 		<hr />
 		<?php
 		foreach ($result as $k => $r)
@@ -32,7 +32,7 @@ class ctrl_a_model
 				<a href="<?=gpf::url("..form.&modelid={$r['modelid']}")?>">修改</a>
 				<a href="<?=gpf::url("..delete.&modelid={$r['modelid']}")?>">删除</a>
 				|
-				<a href="<?=gpf::url(".a_content.manage.&modelid={$r['modelid']}")?>">管理内容</a>
+				<a href="<?=gpf::url(".a_table.manage.&modelid={$r['modelid']}")?>">管理内容</a>
 			</div>
 			<?php
 			}

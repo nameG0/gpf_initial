@@ -35,6 +35,10 @@ function cm_ft_conm__catid_setting($setting)
 
 function cm_ft_conm__catid_form($field, $value, $fieldinfo)
 {//{{{
+	return <<<EOT
+catid
+EOT;
+
 	global $catid;
 	extract($fieldinfo);
 	if(!$value) $value = $defaultvalue;

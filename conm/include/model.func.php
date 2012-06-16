@@ -27,6 +27,7 @@
  * array[字段类型ID] = $CMFTr
  *
  * $CMFr(content module field row) array 一条字段数据。
+ * {formtype:字段类型}
  *
  * $CMFs(content module field s): 多条内容字段数据。数组键只是数字编号。
  * array[] => $CMFr
@@ -39,7 +40,7 @@
  * 命名规则:前序_{mod}_{name}_接口名. eg. cm_ft_conm__example_setting
  * void setting($setting): 显示字段类型设置表单
  * string FString($set) 返回字段类型指纹值.
- * string form($value, $set, $data): 返回字段类型编辑表单HTML代码
+ * string form($field, $value, $set): 返回字段类型编辑表单HTML代码,$field方便输出表单项名
  *
  * <b>字段类型控制常量</b>
  * (使用大写字母作为常量名)
@@ -174,7 +175,7 @@ function cm_f_field_list($mod = '')
 	return $ret;
 }//}}}
 /**
- * 加载一个字段类型或加载一组字段类型
+ * 加载一个或一组字段类型
  * @param string|array 字段类型ID , 数组则由字段类型ID组成. eg. conm/title
  */
 function cm_f_field_load($CMFTid)
@@ -220,10 +221,18 @@ function cm_f_field_load($CMFTid)
  */
 function cm_m_content_form($CMFl, $data = array())
 {//{{{
+	$ret = array();
 	foreach ($CMFl as $f => $set)
 		{
-		
+		list($_mod, $_name) = explode("/", $set['formtype']);
+		$func_name = "cm_ft_{$_mod}__{$_name}_form";
+		if (!function_exists($func_name))
+			{
+			continue;
+			}
+		$ret[$f] = $func_name($f, $data[$f], $set);
 		}
+	return $ret;
 }//}}}
 
 //------ 旧函数，待改进 ------

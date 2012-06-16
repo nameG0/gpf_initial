@@ -34,7 +34,7 @@ class ctrl_a_table
 
 		list($result, $pages, $total) = siud::select($tablename)->tfield($field)->pagesize(15)->ing();
 		?>
-		<a href="<?=gpf::url('..add')?>">添加</a>
+		<a href="<?=gpf::url('..form..modelid')?>">添加</a>
 		<hr />
 		<?php
 		foreach ($result as $k => $r)
@@ -42,12 +42,8 @@ class ctrl_a_table
 			?>
 			<div >
 				<?=$r['title']?>
-				<a href="<?=gpf::url(".a_model_field.manage.&modelid={$r['modelid']}")?>">管理字段</a>
-				<a href="<?=gpf::url("..sync.&modelid={$r['modelid']}")?>">同步</a>
-				<a href="<?=gpf::url("..edit.&modelid={$r['modelid']}")?>">修改</a>
-				<a href="<?=gpf::url("..delete.&modelid={$r['modelid']}")?>">删除</a>
-				|
-				<a href="<?=gpf::url(".a_content.manage.&modelid={$r['modelid']}")?>">管理内容</a>
+				<a href="<?=gpf::url("..form.&id={$r['id']}.modelid")?>">修改</a>
+				<a href="<?=gpf::url("..delete.&id={$r['id']}.modelid")?>">删除</a>
 			</div>
 			<?=$pages?>
 			<?php
@@ -57,52 +53,69 @@ class ctrl_a_table
 	}//}}}
 	/**
 	 * 保存一条内容
+	 * @param int $modelid 模型ID
+	 * @param array $info 内容数据数组
 	 */
 	function save()
 	{//{{{
-		
+		$modelid = _g('modelid', 'int');
+		$data = _p('info');
+
+		//todo 应取也模型缓存,缓存内标有模型表主键键名
+		$CMMr = conm_model_get($modelid);
+		siud::save($CMMr['tablename'])->pk('id')->data($data)->ing();
+		?>
+		成功.
+		<br />
+		<a href="<?=gpf::url('..manage..modelid')?>">管理</a>
+		<?php
 	}//}}}
 	/**
 	 * 显示内容编辑表单
+	 * @param int $modelid 模型ID
+	 * @param int $id 修改内容时传入内容ID
 	 */
 	function form()
 	{//{{{
-		if (isset($_POST["dosubmit"]))
-			{
-			$data = _p('data');
+		$modelid = _g('modelid', 'int');
+		$id = _g('id', 'int');
 
-			$db = rdb::obj();
-			$db->insert(RDB_PRE . 'model', $data);
-
-			$modelid = $db->insert_id();
-			if ($modelid)
-				{
-				//cache_model();
-				// showmessage('操作成功！', admin_url(".model_field.manage.&modelid={$modelid}"));
-				echo "操作成功！";
-				}
-			else
-				{
-				// showmessage('操作失败！');
-				echo '操作失败！';
-				}
-			}
-		else
+		if (!$id)
 			{
-			include tpl_admin('model_add');
+			$data = array();
 			}
+		?>
+		<a href="<?=gpf::url('..manage..modelid')?>">管理</a>
+		<hr />
+		<form action="<?=gpf::url('..save..modelid')?>" method="POST" enctype="multipart/form-data">
+		<?php
+		$form = conm_content_form($modelid, $data);
+		foreach ($form as $f => $html)
+			{
+			echo $html['name'], ':', $html['form'], "<hr/>\n";
+			}
+		?>
+		<input type="submit" name="dosubmit" value="提交" />
+		</form>
+		<?php
 	}//}}}
+	/**
+	 * 删除内容
+	 * @param int $modelid 模型ID
+	 * @param int $id 内容ID
+	 */
 	function delete()
 	{//{{{
-		$result = $model->delete($modelid);
-		if($result)
-			{
-			showmessage('操作成功！', $forward);
-			}
-		else
-			{
-			showmessage('操作失败！', $forward);
-			}
+		$modelid = _g('modelid', 'int');
+		$id = _g('id', 'int');
+
+		$CMMr = conm_model_get($modelid);
+		siud::delete($CMMr['tablename'])->wis('id', $id)->ing();
+		?>
+		成功
+		<br />
+		<a href="<?=gpf::url('..manage..modelid')?>">管理</a>
+		<?php
 	}//}}}
 	function disable()
 	{//{{{

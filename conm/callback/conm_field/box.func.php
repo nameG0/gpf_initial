@@ -101,6 +101,8 @@ function cm_ft_conm__box_setting($setting)
 
 function cm_ft_conm__box_form($field, $value, $fieldinfo)
 {//{{{
+	return 'box';
+
 	global $catid;
 	extract($fieldinfo);
 	if(!$value) $value = $defaultvalue;

@@ -233,27 +233,6 @@ class ctrl_a_model_field
 			showmessage('操作失败！');
 			}
 	}//}}}
-	/**
-	 * AJAX 使用,显示指定字段类型的设置表单.
-	 * @param string $field_id CMFTid
-	 */
-	function ajax_setting()
-	{//{{{
-		log::is_print(false);
-
-		$CMFTid = _g('field_id');
-
-		cm_f_field_load($CMFTid);
-		list($mod, $name) = explode("/", $CMFTid);
-		$func_name = "cm_ft_{$mod}_{$name}_setting";
-		if (!function_exists($func_name))
-			{
-			echo "字段类型无法加载";
-			exit;
-			}
-
-		$func_name(array());
-	}//}}}
 	function preview()
 	{//{{{
 		require CONTENT_ROOT . 'include/content_form.class.php';
@@ -275,5 +254,26 @@ class ctrl_a_model_field
 			{
 			exit('success');
 			}
+	}//}}}
+	/**
+	 * AJAX 使用,显示指定字段类型的设置表单.
+	 * @param string $field_id CMFTid
+	 */
+	function ajax_setting()
+	{//{{{
+		log::is_print(false);
+
+		$CMFTid = _g('field_id');
+
+		cm_f_field_load($CMFTid);
+		list($mod, $name) = explode("/", $CMFTid);
+		$func_name = "cm_ft_{$mod}_{$name}_setting";
+		if (!function_exists($func_name))
+			{
+			echo "字段类型无法加载";
+			exit;
+			}
+
+		$func_name(array());
 	}//}}}
 }

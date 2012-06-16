@@ -39,6 +39,10 @@ function cm_ft_conm__image_setting($setting)
 
 function cm_ft_conm__image_form($field, $value, $fieldinfo)
 {//{{{
+	return <<<EOT
+image
+EOT;
+
 	global $catid;
 	extract($fieldinfo);
 	if(!$value) $value = $defaultvalue;
