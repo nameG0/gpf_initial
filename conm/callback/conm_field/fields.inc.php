@@ -1,5 +1,6 @@
 <?php
 return array(
+	"auto_increment" => '自动编号',
 	'text'=>'单行文本',
 	'textarea'=>'多行文本',
 	'box'=>'选项',

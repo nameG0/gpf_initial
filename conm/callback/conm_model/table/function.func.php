@@ -62,6 +62,24 @@ function cm_mt_conm__table_sync($CMMr, $CMFl)
 	$FString = cm_m_get_FString($CMMr['tablename']);
 	$table = RDB_PRE . $CMMr['tablename'];
 
+	//------ 添加字段 ------
+	//如果表中原只有一个字段，若把这个字段删除，MySQL会报错，不让删除表中最后一个字段。
+	//所以需要先添加新字段，避免出现删除最后一个字段的情况。
+	//------
+	foreach ($CMFl as $k => $v)
+		{
+		if ($FString[$k])
+			{
+			continue;
+			}
+		list($mod, $name) = explode("/", $v['formtype']);
+		$func_name = "cm_ft_{$mod}__{$name}_sql";
+		$sql_field = $func_name($v['setting']);
+		$field_name = $v['new_name'] ? $v['new_name'] : $k;
+		$sql = "ALTER TABLE `{$table}` ADD `{$field_name}` {$sql_field}";
+		$ret[] = $sql;
+		}
+
 	//------ 删除字段 -----
 	foreach ($FString as $k => $v)
 		{
@@ -87,7 +105,7 @@ function cm_mt_conm__table_sync($CMMr, $CMFl)
 			continue;
 			}
 		$func_name = "cm_ft_{$mod}__{$name}_sql";
-		$sql_field = $func_name($CMFl[$k]);
+		$sql_field = $func_name($CMFl[$k]['setting']);
 		$change_name = $CMFl[$k]['new_name'] ? $CMFl[$k]['new_name'] : $k;
 		$sql = "ALTER TABLE `{$table}` CHANGE `{$k}` `{$change_name}` {$sql_field}";
 		$ret[] = $sql;
@@ -95,17 +113,5 @@ function cm_mt_conm__table_sync($CMMr, $CMFl)
 		unset($CMFl[$k], $FString[$k]);
 		}
 
-	//------ 添加字段 ------
-	//运行到这里 $CMFl 中所剩的都是新添加的字段
-	//------
-	foreach ($CMFl as $k => $v)
-		{
-		list($mod, $name) = explode("/", $v['formtype']);
-		$func_name = "cm_ft_{$mod}__{$name}_sql";
-		$sql_field = $func_name($v);
-		$field_name = $v['new_name'] ? $v['new_name'] : $k;
-		$sql = "ALTER TABLE `{$table}` ADD `{$field_name}` {$sql_field}";
-		$ret[] = $sql;
-		}
 	return $ret;
 }//}}}

@@ -243,13 +243,14 @@ class ctrl_a_model
 		$o_db = rdb::obj();
 		foreach ($sql as $k => $v)
 			{
-			log::add($v, log::INFO, __FILE__, __LINE__);
+			log::add("model sync:{$v}", log::INFO, __FILE__, __LINE__);
 			$o_db->query($v);
 			}
 		//把 is_sync 改为 1
 		// siud::update('model')->wis()->data()->ing();
 		?>
 		<a href="<?=gpf::url("..manage")?>">管理模型</a>
+		<a href="<?=gpf::url(".a_model_field.manage..modelid")?>">管理字段</a>
 		<?php
 	}//}}}
 	/**

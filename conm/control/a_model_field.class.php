@@ -35,19 +35,34 @@ class ctrl_a_model_field
 	}//}}}
 	function save()
 	{//{{{
-		// $data = _p('data');
-		// $data['setting'] = _p('setting');
-		a::i($data)->fpost('data')->apost('setting')->sers('setting');
+		a::i($data)->fpost('data')->apost('setting')->aget('modelid')->sers('setting');
 
-		siud::save(RDB_PRE . 'model_field')->pk('field_id')->data($data)->error($error)->ing();
+		siud::save('model_field')->pk('field_id')->data($data)->error($error)->ing();
 		if ($error)
 			{
 			echo $error;
 			}
+		?>
+		<a href="<?=gpf::url("..manage..modelid")?>">管理字段</a>
+		<a href="<?=gpf::url("..form..modelid")?>">添加字段</a>
+		<?php
 	}//}}}
-	function add()
+	/**
+	 * 字段类型编辑表单
+	 * @param int $modelid 字段所属模型ID
+	 * @param int $field_id 修改字段时传入
+	 */
+	function form()
 	{//{{{
-		include tpl_admin('field_add');
+		$field_id = _g('field_id', 'int');
+
+		if ($field_id)
+			{
+			$data = siud::find('model_field')->wis('field_id', $field_id)->ing();
+			a::i($data)->unsers('setting');
+			}
+
+		include tpl_admin('field_form');
 	}//}}}
 	function manage()
 	{//{{{
@@ -64,8 +79,8 @@ class ctrl_a_model_field
 
 		?>
 		<a href="<?=gpf::url('.a_model.manage')?>">管理模型</a>
-		<a href="<?=gpf::url(".a_model.sync.&modelid={$modelid}")?>">同步</a>
-		<a href="<?=gpf::url('..add')?>">添加</a>
+		<a href="<?=gpf::url(".a_model.sync..modelid")?>">同步</a>
+		<a href="<?=gpf::url('..form..modelid')?>">添加</a>
 		<hr />
 		<?php
 		foreach ($result as $k => $r)
@@ -73,93 +88,12 @@ class ctrl_a_model_field
 			?>
 			<div >
 				<?=$r['field']?>(<?=$r['formtype']?>)
-				<a href="">修改</a>
-				<a href="">删除</a>
+				<a href="<?=gpf::url("..form.&field_id={$r['field_id']}.modelid")?>">修改</a>
+				<a href="<?=gpf::url("..delete.&field_id={$r['field_id']}.modelid")?>">删除</a>
 			</div>
 			<?php
 			}
 		// include tpl_admin('model_field_manage', 'conm');
-	}//}}}
-	function edit()
-	{//{{{
-		if($dosubmit)
-			{
-			$info['unsetgroupids'] = isset($unsetgroupids) ? implodeids($unsetgroupids) : '';
-			$info['unsetroleids'] = isset($unsetroleids) ? implodeids($unsetroleids) : '';
-			$result = $field->edit($fieldid, $info, $setting);
-			if($result)
-				{
-				$formtype = $info['formtype'];
-				$path = CONTENT_ROOT . "fields/{$formtype}.inc.php";
-				//todo:对修改的字段进行判断，若是主表的字段则不修改表结构。
-				//todo:调用自动加载模块字段的函数
-				if (is_array($fields[$formtype]))
-					{
-					require_once PHPCMS_ROOT . "{$fields[$formtype][1]}/fields/{$formtype}.inc.php";
-					$func_name = "content_field_{$formtype}_change";
-					$func_name($tablename, $info, $setting);
-					}
-				else if (is_file($path))
-					{
-					require_once $path;
-					$func_name = "content_field_{$formtype}_change";
-					$func_name($tablename, $info, $setting);
-					}
-				else
-					{
-					extract($setting);
-					extract($info);
-					if($issystem) $tablename = DB_PRE.'content';
-					require_once CONTENT_ROOT . "fields/{$formtype}/field_edit.inc.php";
-					}
-
-				/*非系统且作为搜索条件字段，增加索引*/
-				// if(!$issystem) {
-				// $sql = "SHOW INDEX FROM `$tablename`";
-				// $query = $db->query($sql);
-				// while($res = $db->fetch_array($query)) {
-				// $indexarr[] = $res['Column_name'];
-				// }
-				// if(is_array($indexarr) && in_array($field, $indexarr)) {
-				// if(!$issearch) {
-				// $sql = "ALTER TABLE `$tablename` DROP INDEX `$field`";
-				// $db->query($sql);
-				// }
-				// } else {
-				// if($issearch) {
-				// $sql = "ALTER TABLE `$tablename` ADD INDEX `$field` (`$field`)";
-				// $db->query($sql);
-				// }
-				// }
-				// }
-
-				showmessage('操作成功！', $forward);
-				}
-			else
-				{
-				showmessage('操作失败！');
-				}
-			}
-		else
-			{
-			//if(!is_ie()) showmessage('本功能只支持IE浏览器，请用IE浏览器打开。');
-			$info = $field->get($fieldid);
-			if(!$info)
-				{
-				showmessage('指定的字段不存在！');
-				}
-			$setting = array();
-			if ($info['setting'])
-				{
-				eval("\$setting = {$info['setting']};");
-				}
-			$info = new_htmlspecialchars($info);
-			$unsetgroups = form::checkbox($GROUP, 'unsetgroupids', 'unsetgroupids', $unsetgroupids, 4);
-			$unsetroles = form::checkbox($ROLE, 'unsetroleids', 'unsetroleids', $unsetroleids, 4);
-			require_once CONTENT_ROOT . 'fields/patterns.inc.php';
-			//include tpl_admin('model_field_edit');
-			include tpl_admin('model_field_add');
-			}
 	}//}}}
 	function copy()
 	{//{{{
@@ -193,21 +127,20 @@ class ctrl_a_model_field
 			include tpl_admin('model_field_copy');
 			}
 	}//}}}
+	/**
+	 * 删除字段
+	 * @param int $field_id 所删除的字段ID
+	 * @param int $modelid 字段所属模型ID
+	 */
 	function delete()
 	{//{{{
-		$info = $field->get($fieldid);
-		$result = $field->delete($fieldid);
-		if($result)
-			{
-			extract($info);
-			@extract(unserialize($setting));
-			require_once CONTENT_ROOT . 'fields/'.$formtype.'/field_delete.inc.php';
-			showmessage('操作成功！', admin_url("..manage..modelid"));
-			}
-		else
-			{
-			showmessage('操作失败！');
-			}
+		$field_id = _g('field_id', 'int');
+		$modelid = _g('modelid', 'int');
+
+		siud::delete('model_field')->wis('field_id', $field_id)->ing();
+		?>
+		<a href="<?=gpf::url("..manage..modelid")?>">管理字段</a>
+		<?php
 	}//}}}
 	function listorder()
 	{//{{{
@@ -267,10 +200,9 @@ class ctrl_a_model_field
 
 		cm_f_field_load($CMFTid);
 		list($mod, $name) = explode("/", $CMFTid);
-		$func_name = "cm_ft_{$mod}_{$name}_setting";
+		$func_name = "cm_ft_{$mod}__{$name}_setting";
 		if (!function_exists($func_name))
 			{
-			echo "字段类型无法加载";
 			exit;
 			}
 

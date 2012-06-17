@@ -53,6 +53,11 @@
 
 /**
  * 返回一个表所有字段的指纹值
+ * <pre>
+ * SHOW COLUMNS 语句返回的字段有：Field, Type, Null, Key, Default, Extra
+ * 不使用 Field,Key 两列，因为字段类型SQL语句不需包含字段名。
+ * Key列为索引情况，由模型类型设置，也与单个字段无关。
+ * </pre>
  * @param string $table 表名,无需包含表前序
  * @return array [field] => FString
  */
@@ -62,11 +67,10 @@ function cm_m_get_FString($table)
 
 	$table = RDB_PRE . $table;
 	$result = $db->select("SHOW COLUMNS FROM {$table}");
-	//Field, Type, Null, Key, Default, Extra
 	$FString_list = array();
 	foreach ($result as $k => $r)
 		{
-		$FString_list[$r['Field']] = "{$r['Type']}|{$r['Null']}|{$r['Key']}|{$r['Default']}|{$r['Extra']}";
+		$FString_list[$r['Field']] = "{$r['Type']}|{$r['Null']}|{$r['Default']}|{$r['Extra']}";
 		}
 	return $FString_list;
 }//}}}
