@@ -234,7 +234,7 @@ function cm_m_content_form($CMFl, $data = array())
 			{
 			continue;
 			}
-		$ret[$f] = $func_name($f, $data[$f], $set);
+		$ret[$f] = $func_name($f, $data[$f], $set['setting']);
 		}
 	return $ret;
 }//}}}

@@ -25,6 +25,10 @@ function cm_ft_conm__auto_increment_setting($set)
 </div>
 	<?php
 }//}}}
+function cm_ft_conm__auto_increment_form($field, $value, $CMFr)
+{//{{{
+	return intval($value);
+}//}}}
 
 function cm_ft_conm__auto_increment_input()
 {//{{{

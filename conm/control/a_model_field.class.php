@@ -62,6 +62,10 @@ class ctrl_a_model_field
 			a::i($data)->unsers('setting');
 			}
 
+		?>
+		<a href="<?=gpf::url('..manage..modelid')?>">管理字段</a>
+		<hr />
+		<?php
 		include tpl_admin('field_form');
 	}//}}}
 	function manage()

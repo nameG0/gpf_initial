@@ -98,12 +98,13 @@ function cm_mt_conm__table_sync($CMMr, $CMFl)
 		list($mod, $name) = explode("/", $CMFl[$k]['formtype']);
 		//比较字段指纹
 		$func_name = "cm_ft_{$mod}__{$name}_FString";
-		$FString_ft = $func_name($CMFl[$k]);
+		$FString_ft = $func_name($CMFl[$k]['setting']);
 		if ($FString_ft == $v)
 			{
 			unset($FString[$k], $CMFl[$k]);
 			continue;
 			}
+		log::add("FString {$k}:{$v} ---> {$FString_ft}", log::INFO, __FILE__, __LINE__, __FUNCTION__);
 		$func_name = "cm_ft_{$mod}__{$name}_sql";
 		$sql_field = $func_name($CMFl[$k]['setting']);
 		$change_name = $CMFl[$k]['new_name'] ? $CMFl[$k]['new_name'] : $k;

@@ -33,6 +33,15 @@ if ($data['formtype'])
 		}
 	}
 ?></div>
+<?php
+echo
+hd("text|label=默认值|name=setting[defaultvalue]|value={$data['setting']['defaultvalue']}|size=40|br"),
+hd("text|label=字段最小长度|name=setting[minlength]|value={$data['setting']['minlength']}|br"),
+hd("text|label=字段最大长度|name=setting[maxlength]|value={$data['setting']['maxlength']}|br"),
+hd("text|label=CSS|name=setting[css]|value={$data['setting']['css']}|br"),
+hd("text|label=正则验证|name=data[pattern]|value={$data['pattern']}|br")
+;
+?>
 <br />
 <input type="submit" name="dosubmit" value="提交" />
 </form>

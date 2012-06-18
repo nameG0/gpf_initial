@@ -34,6 +34,7 @@ function conm_content_form($modelid, $data = array())
 	$CMFTid_list = array();
 	foreach ($CMFs as $k => $r)
 		{
+		a::i($r)->unsers('setting');
 		$CMFl[$r['field']] = $r;
 		$CMFTid_list[] = $r['formtype'];
 		}

@@ -1,46 +1,56 @@
 <?php 
 /**
- * 多行字段 字段类型
+ * 单行文本 字段类型
  * 2011-10-17
  * 
  * @package default
  * @filesource
  */
+/**
+ * 根据字段配置返回MySQL数据字段相关属性
+ */
+function _cm_ft_conm__text_mysql($set)
+{//{{{
+	if(!$set['maxlength']) $set['maxlength'] = 255;
+	$maxlength = min($set['maxlength'], 255);
+	$ret = array(
+		"type" => $set['field_type'],
+		"maxlength" => $maxlength,
+		);
+	return $ret;
+}//}}}
+
 function cm_ft_conm__text_sql($set, $rdb_type = NULL)
 {//{{{
 	//todo 目前 $rdb_type 参数无效。
-	if(!$set['maxlength']) $set['maxlength'] = 255;
-	$maxlength = min($set['maxlength'], 255);
-	return "VARCHAR( {$maxlength} ) NOT NULL DEFAULT '{$set['defaultvalue']}'";
+	$field = _cm_ft_conm__text_mysql($set);
+	return "{$field['type']}( {$field['maxlength']} ) NOT NULL DEFAULT '{$set['defaultvalue']}'";
 }//}}}
 
 function cm_ft_conm__text_FString($set)
 {//{{{
-	if(!$set['maxlength']) $set['maxlength'] = 255;
-	$maxlength = min($set['maxlength'], 255);
-	return "varchar({$maxlength})|NO|{$set['defaultvalue']}||";
+	$field = _cm_ft_conm__text_mysql($set);
+	return "{$field['type']}({$field['maxlength']})|NO|{$set['defaultvalue']}|";
 }//}}}
 
 function cm_ft_conm__text_setting($setting)
 {//{{{
 	?>
-<table cellpadding="2" cellspacing="1">
-	<tr> 
-      <td>文本框长度</td>
-      <td><input type="text" name="setting[size]" value="<?=$size?>" size="10"></td>
-    </tr>
-	<tr> 
-      <td>默认值</td>
-      <td><input type="text" name="setting[defaultvalue]" value="<?=$defaultvalue?>" size="40"></td>
-    </tr>
-</table>
+<div >
+字段类型：
+<?=hd("radio|name=setting[field_type]|value={$setting['field_type']}|_default=char",
+array("_data" => array("char" => 'char', "varchar" => 'varchar',),))?>
+</div>
+<div >
+<?=hd("text|label=文本框长度|name=setting[size]|value={$setting['size']}|size=10")?>
+</div>
 	<?php
 }//}}}
 
 function cm_ft_conm__text_form($field, $value, $fieldinfo)
 {//{{{
 	return <<<EOT
-<input type="text" name="info[{$field}]" value="{$value}" />
+<input type="text" name="data[{$field}]" value="{$value}" />
 EOT;
 
 	global $catid;
