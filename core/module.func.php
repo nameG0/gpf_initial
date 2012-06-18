@@ -119,8 +119,10 @@ function mod_info($mod, $key = NULL)
  */
 function mod_callback($target, $action = 'rp', $register = NULL)
 {//{{{
-	static $cache = array(); //缓存模块的 callback 注册列表。
-	static $callback = array(); //缓存模块的 callback 目录绝对路径.
+	//缓存模块的 callback 注册列表。[mod] => array(call_1, call_2, ...)
+	static $cache = array();
+	//缓存模块的 callback 目录绝对路径. [mod] => array("sour" => path, "inst" => path,)
+	static $callback = array();
 
 	//因为函数本身会使用 $action=p 读取模块的 callback 目录，所以优先处理。
 	if ('p' == $action)
@@ -157,38 +159,53 @@ function mod_callback($target, $action = 'rp', $register = NULL)
 	//注册模块列表使用数组保存，保存到文件时用 serialize 序列化。
 	//------------
 
+	$callback_file_path = GPF_PATH_DATA . "module/{$target}.callback";
 	if (!isset($cache[$target]))
 		{
-		$path = GPF_PATH_DATA . "mod_callback/{$target}";
-		//模块本身总是存在于 callback 注册列表中。
-		if (is_file($path))
+		if (is_file($callback_file_path))
 			{
-			$cache[$target] = unserialize(file_get_contents($path));
-			array_unshift($cache[$target], $target);
+			$cache[$target] = unserialize(file_get_contents($callback_file_path));
 			}
 		else
 			{
-			$cache[$target] = array($target);
+			$cache[$target] = array();
 			}
-		unset($path);
 		}
 
 	switch ($action)
 		{
-		//todo 未做注册与删除操作。
+		//callback注册。
 		case "add":
-			
+			//避免重复注册
+			if (is_string($register) && !in_array($register, $cache[$target]))
+				{
+				$cache[$target][] = $register;
+				return file_put_contents($callback_file_path, serialize($cache[$target]));
+				}
+			return true;
 			break;
+		//删除callback注册
 		case "delete":
-			
+			$seek = array_search($register, $cache[$target]);
+			if (false !== $seek)
+				{
+				unset($cache[$target][$seek]);
+				return file_put_contents($callback_file_path, serialize($cache[$target]));
+				}
+			return true;
 			break;
 		case "rm":
-			return $cache[$target];
+			//模块本身总是存在于 callback 注册列表中。
+			$ret = $cache[$target];
+			$ret[] = $target;
+			return $ret;
 			break;
 		case "rp":
 		default:
 			$list = array();
-			foreach ($cache[$target] as $m)
+			$c_list = $cache[$target];
+			$c_list[] = $target;
+			foreach ($c_list as $m)
 				{
 				if (!isset($callback[$m]))
 					{

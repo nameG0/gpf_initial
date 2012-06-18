@@ -463,6 +463,7 @@ class a
 	 */
 	function int($Fl, $Is = self::ALL)
 	{//{{{
+		$Fl = $this->_Fl($Fl);
 		foreach ($Fl as $f)
 			{
 			if ($this->_Is($f, $Is))
