@@ -8,10 +8,12 @@
 <input type="text" name="data[name]" value="<?=$data['name']?>" />
 <br />
 模型类型：
+<?php
+$CMFTl = cm_f_field_list();
+?>
 <select name="data[formtype]" id="modeltype">
 	<option value="">请选择</option>
 <?php
-$CMFTl = cm_f_field_list();
 foreach ($CMFTl as $k => $v)
 	{
 ?>
