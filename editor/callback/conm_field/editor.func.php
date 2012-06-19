@@ -38,7 +38,7 @@ function cm_ft_editor__editor_form($field, $value, $set)
 {//{{{
 	if(!$value) $value = $set['defaultvalue'];
 
-	$data = "<textarea name=\"info[{$field}]\" id=\"{$field}\" style=\"display:none\">{$value}</textarea>\n";
+	$data = "<textarea name=\"data[{$field}]\" id=\"{$field}\" style=\"display:none\">{$value}</textarea>\n";
 	return $data . hd("editor.fck|textareaid={$field}|toolbar={$set['toolbar']}|width={$set['width']}|height={$set['height']}");
 }//}}}
 
