@@ -5,96 +5,56 @@
  * @package default
  * @filesource
  */
-
-function content_field_image_add($tablename, $info, $setting)
+function _cm_ft_attachment__image_mysql($set)
 {//{{{
-	global $db;
-	$maxlength = $info['maxlength'];
-	$field = $info['field'];
-	$defaultvalue = $setting['defaultvalue'];
-
+	$maxlength = $set['maxlength'];
 	if(!$maxlength) $maxlength = 255;
 	$maxlength = min($maxlength, 255);
-
-	$sql = "ALTER TABLE `$tablename` ADD `$field` VARCHAR( $maxlength ) NOT NULL DEFAULT '$defaultvalue'";
-	echo $sql;exit;
-	$db->query($sql);
+	return array(
+		"maxlength" => $maxlength,
+		);
 }//}}}
 
-function content_field_image_change($tablename, $info, $setting)
+function cm_ft_attachment__image_sql($setting)
 {//{{{
-	global $db;
-	if(!$maxlength) $maxlength = 255;
-	$maxlength = min($maxlength, 255);
-	$db->query("ALTER TABLE `$tablename` CHANGE `$field` `$field` CHAR( $maxlength ) NOT NULL DEFAULT '$defaultvalue'");
+	$field = _cm_ft_attachment__image_mysql($setting);
+	return "VARCHAR( {$field['maxlength']} ) NOT NULL DEFAULT '{$setting['defaultvalue']}'";
 }//}}}
 
-function content_field_image_drop($tablename, $info, $setting)
+function cm_ft_attachment__image_FString($setting)
 {//{{{
-	global $db;
-	$sql = "ALTER TABLE `$tablename` DROP `$field` ";
-	$db->query($sql);
+	$field = _cm_ft_attachment__image_mysql($setting);
+	return "varchar({$field['maxlength']})|NO|{$setting['defaultvalue']}|";
 }//}}}
 
-function content_field_image_setting($info, $setting)
+function cm_ft_attachment__image_setting($setting)
 {//{{{
-	?>
-<table cellpadding="2" cellspacing="1" onclick="javascript:$('#minlength').val(0);$('#maxlength').val(255);">
-	<tr> 
-      <td>文本框长度</td>
-      <td><input type="text" name="setting[size]" value="<?=$size?>" size="10"></td>
-    </tr>
-	<tr> 
-      <td>默认值</td>
-      <td><input type="text" name="setting[defaultvalue]" value="<?=$defaultvalue?>" size="40"></td>
-    </tr>
-	<tr> 
-      <td>允许上传的图片大小</td>
-      <td><input type="text" name="setting[upload_maxsize]" value="1024" size="5">KB 提示：1KB=1024Byte，1MB=1024KB *</td>
-    </tr>
-	<tr> 
-      <td>允许上传的图片类型</td>
-      <td><input type="text" name="setting[upload_allowext]" value="gif|jpg|jpeg|png|bmp" size="40"></td>
-    </tr>
-    <!--
-	<tr> 
-      <td>是否从已上传中选择</td>
-      <td><input type="radio" name="setting[isselectimage]" value="1"> 是 <input type="radio" name="setting[isselectimage]" value="0" checked> 否</td>
-    </tr>
-	<tr> 
-      <td>是否产生缩略图</td>
-      <td><input type="radio" name="setting[isthumb]" value="1" <?=($PHPCMS['thumb_enable'] ? 'checked' : '')?> onclick="$('#thumb_size').show()"/> 是 <input type="radio" name="setting[isthumb]" value="0"  <?=($PHPCMS['thumb_enable'] ? '' : 'checked')?> onclick="$('#thumb_size').hide()"/> 否</td>
-    </tr>
-	<tr id="thumb_size" style="display:<?=($PHPCMS['thumb_enable'] ? 'block' : 'none')?>"> 
-      <td>缩略图大小</td>
-      <td>宽 <input type="text" name="setting[thumb_width]" value="<?=$PHPCMS['thumb_width']?>" size="3">px 高 <input type="text" name="setting[thumb_height]" value="<?=$PHPCMS['thumb_height']?>" size="3">px</td>
-    </tr>
-	<tr> 
-      <td>是否加图片水印</td>
-      <td><input type="radio" name="setting[iswatermark]" value="1" <?=($PHPCMS['watermark_enable'] ? 'checked' : '')?> onclick="$('#watermark_img').show()"/> 是 <input type="radio" name="setting[iswatermark]" value="0"  <?=($PHPCMS['watermark_enable'] ? '' : 'checked')?> onclick="$('#watermark_img').hide()"/> 否</td>
-    </tr>
-	<tr id="watermark_img" style="display:<?=($PHPCMS['watermark_enable'] ? 'block' : 'none')?>"> 
-      <td>水印图片路径</td>
-      <td><input type="text" name="setting[watermark_img]" value="<?=$PHPCMS['watermark_img']?>" size="40"></td>
-    </tr>
-    -->
-</table>
-	<?php
+	a::i($setting)->d('upload_maxsize', 1024)->d('upload_allowext', 'gif|jpg|jpeg|png|bmp')->d('isselectimage', 0);
+	echo 
+		hd("text|label=录入框长度|name=setting[size]|value={$setting['size']}|size=10|br"),
+			hd("text|label=允许上传的图片大小|name=setting[upload_maxsize]|value={$setting['upload_maxsize']}|size=5"),
+			"KB 提示：1KB=1024Byte，1MB=1024KB<br/>",
+			hd("text|label=允许上传的图片类型|name=setting[upload_allowext]|size=40|br", array("value" => $setting['upload_allowext'],)),
+			'是否从已上传中选择',
+			hd("radio|name=setting[isselectimage]|value={$setting['isselectimage']}", array("_data" => array("1" => '是', "0" => '否',),)),
+			"<br/>是否产生缩略图",
+			hd("radio|name=setting[isthumb]|value={$setting['isthumb']}|_default=0", array("_data" => array("1" => '是',"0" => '否',),)),
+			'缩略图大小',
+			hd("text|label=宽|name=setting[thumb_width]|value={$setting['thumb_width']}|size=3"),
+			'px',
+			hd("text|label=高|name=setting[thumb_height]|value={$setting['thumb_height']}|size=3"),
+			'px<br/>是否加图片水印',
+			hd("radio|name=setting[iswatermark]|value={$setting['iswatermark']}|_default=0", array("_data" => array("1" => '是',"0" => '否', ),)),
+			hd("text|label=水印图片路径|name=setting[watermark_img]|value={$setting['watermark_img']}|size=40")
+			;
 }//}}}
 
-function content_field_image_form($field, $value, $fieldinfo)
+function cm_ft_attachment__image_form($field, $value, $fieldinfo)
 {//{{{
-	global $catid,$PHPCMS;
-	extract($fieldinfo);
-	if(!$value) $value = $defaultvalue;
-	$data = $isselectimage ? " <input type='button' value='浏览...' style='cursor:pointer;' onclick=\"file_select('$field', $catid, 1)\">" : '';
-	$getimg = $get_img ? '<input type="checkbox" name="info[getpictothumb]" value="1" checked /> 保存文章第一张图片为缩略图' : '';
-	?>
-	<?php
 	return <<<EOT
 输入 
-<input type="text" name="info[{$field}]" value="{$value}" />
-<input type="hidden" name="info[{$field}_old]" value="{$value}" />
+<input type="text" name="data[{$field}]" value="{$value}" />
+<input type="hidden" name="data[{$field}_old]" value="{$value}" />
 或上传：<input type="file" name="{$field}" size="20" />
 EOT;
 	//下面是旧的代码
@@ -108,7 +68,7 @@ EOT;
 	}
 }//}}}
 
-function content_field_image_save($field, & $data, $setting)
+function cm_ft_attachment__image_save($field, & $data, $setting)
 {//{{{
 	global $db;
 	$is_del_old_image = false;	//开关，是否删除旧图片文件
@@ -151,7 +111,7 @@ function content_field_image_save($field, & $data, $setting)
 	$data[$field] = $new_image;
 }//}}}
 
-function content_field_image_output($field, $value)
+function cm_ft_attachment__image_output($field, $value)
 {//{{{
 	if($value !='')
 	{
@@ -163,5 +123,3 @@ function content_field_image_output($field, $value)
 	}
 	return $value;
 }//}}}
-
-?>
