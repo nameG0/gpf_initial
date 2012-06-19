@@ -12,11 +12,11 @@
  * @return string HTML代码
  */
 function hd_editor__fck($set)
-{
+{//{{{
 	a::i($set)->d('textareaid', 'content')->d('toolbar', 'standard')->d('width', '100%')->d('height', 400)->d('isshowext', false);
-	define('SITE_URL', '/gz/');
-	// global $PHPCMS, $mod, $file, $catid, $_userid;
-	$str = "<script type=\"text/javascript\" src=\"static/editor/fckeditor/fckeditor.js\"></script>\n<script language=\"JavaScript\" type=\"text/JavaScript\">var SiteUrl = \"".SITE_URL."\"; var Module = \"".$mod."\"; var sBasePath = \"".SITE_URL."\" + 'static/editor/fckeditor/'; var oFCKeditor = new FCKeditor( '".$set['textareaid']."' ) ; oFCKeditor.BasePath = sBasePath ; oFCKeditor.Height = '".$set['height']."'; oFCKeditor.Width	= '".$set['width']."' ; oFCKeditor.ToolbarSet	= '".$set['toolbar']."' ;oFCKeditor.ReplaceTextarea();";
+	define('SITE_URL', '/gz/inst/');
+	$SITE_URL = SITE_URL;
+	$str = "<script type=\"text/javascript\" src=\"{$SITE_URL}static/editor/fckeditor/fckeditor.js\"></script>\n<script language=\"JavaScript\" type=\"text/JavaScript\">var SiteUrl = \"".SITE_URL."\"; var Module = \"".$mod."\"; var sBasePath = \"".SITE_URL."\" + 'static/editor/fckeditor/'; var oFCKeditor = new FCKeditor( '".$set['textareaid']."' ) ; oFCKeditor.BasePath = sBasePath ; oFCKeditor.Height = '".$set['height']."'; oFCKeditor.Width	= '".$set['width']."' ; oFCKeditor.ToolbarSet	= '".$set['toolbar']."' ;oFCKeditor.ReplaceTextarea();";
 	if($_userid && $isshowext)
 	{
 		$str .= "editor_data_id += '".$textareaid."|';if(typeof(MM_time)=='undefined'){MM_time = setInterval(update_editor_data,".($PHPCMS['editor_interval_data']*1000).");}";
@@ -52,4 +52,4 @@ function hd_editor__fck($set)
 	}
 	$str .= "<div id=\"MM_file_list_".$textareaid."\" style=\"text-align:left\"></div><div id='FilePreview' style='Z-INDEX: 1000; LEFT: 0px; WIDTH: 10px; POSITION: absolute; TOP: 0px; HEIGHT: 10px; display: none;'></div><div id='".$textareaid."_save'></div>";
 	return $str;
-}
+}//}}}
