@@ -30,14 +30,13 @@ function cm_ft_conm__auto_increment_form($field, $value, $CMFr)
 	return intval($value);
 }//}}}
 
-function cm_ft_conm__auto_increment_input()
+function cm_ft_conm__auto_increment_save($field, $data, $keep, $set)
 {//{{{
-	
-}//}}}
-
-function cm_ft_conm__auto_increment_update()
-{//{{{
-	
+	if ($data[$field])
+		{
+		return $data[$field];
+		}
+	return 0;
 }//}}}
 
 function cm_ft_conm__auto_increment_search_form($field, $value, $fieldinfo)

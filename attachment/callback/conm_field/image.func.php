@@ -68,14 +68,15 @@ EOT;
 	}
 }//}}}
 
-function cm_ft_attachment__image_save($field, & $data, $setting)
+function cm_ft_attachment__image_save($field, $data, $keep, $setting)
 {//{{{
 	global $db;
+	mod_init('attachment');
+
 	$is_del_old_image = false;	//开关，是否删除旧图片文件
 	$new_image = $data[$field];	//手动输入的图片地址，若是修改文章，则为当前的图片地址
 	$old_image = $data["{$field}_old"];	//表中的字段值，用隐藏域保存
 	unset($data["{$field}_old"]);
-	module_init('attachment');
 	$upload = atta_upload_init($field);
 	//若上传了新文件，则更新字段值,并删除旧文件
 	if ($upload)

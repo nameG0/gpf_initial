@@ -68,16 +68,6 @@ EOT;
 	return form::text('info['.$field.']', $field, $value, 'text', $size, $css, $formattribute, $minlength, $maxlength).$data;
 }//}}}
 
-function cm_ft_conm__text_input()
-{//{{{
-	
-}//}}}
-
-function cm_ft_conm__text_update()
-{//{{{
-	
-}//}}}
-
 function cm_ft_conm__text_search_form($field, $value, $fieldinfo)
 {//{{{
 	return form::text($field, $field, $value, 'text', 20);

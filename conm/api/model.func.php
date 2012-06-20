@@ -9,7 +9,7 @@
 /**
  * 取指定模型数据
  * @param int $modelid 模型ID
- * @return CMMr
+ * @return array $CMMr
  */
 function conm_model_get($modelid)
 {//{{{
@@ -20,6 +20,25 @@ function conm_model_get($modelid)
 		}
 	a::i($CMMr)->unsers('setting');
 	return $CMMr;
+}//}}}
+/**
+ * 取指定模型的字段数据
+ * @return array $CMFl
+ */
+function conm_field_get($modelid)
+{//{{{
+	$CMFs = siud::select('model_field')->wis('modelid', $modelid)->ing();
+	if (!$CMFs)
+		{
+		return array();
+		}
+	$CMFl = array();
+	foreach ($CMFs as $k => $r)
+		{
+		a::i($r)->unsers('setting');
+		$CMFl[$r['field']] = $r;
+		}
+	return $CMFl;
 }//}}}
 
 /**
@@ -57,7 +76,60 @@ function conm_content_form($modelid, $data = array())
 }//}}}
 
 //------ 旧函数，待改进 ------
+function content_model($modelid = 0)
+{//{{{
+	if (!$modelid)
+		{
+		$cache = cache_read('model.php', CONTENT_DATA_DIR, 0, true);
+		if (!$cache)
+			{
+			$cache = _content_model_cache_all();
+			}
+		}
+	else
+		{
+		$cache = cache_read("model_{$catid}.php", CONTENT_DATA_DIR, 0, true);
+		if (!$cache)
+			{
+			$cache = _content_model_cache_modelid($modelid);
+			}
+		}
+	return $cache;
+}//}}}
 
+function _content_model_cache_all()
+{//{{{
+	global $db;
+	$data = array();
+	$result = $db->select("SELECT * FROM `".DB_PRE."model` WHERE `disabled`=0");
+	foreach ($result as $k => $r)
+		{
+		$data[$r['modelid']] = $r;
+		}
+	cache_write('model.php', $data, CONTENT_DATA_DIR, true);
+	return $data;
+}//}}}
+function _content_model_cache_modelid($modelid)
+{//{{{
+	global $db;
+	$sql = "SELECT * FROM " . DB_PRE . "model WHERE modelid={$catid}";
+	$r = $db->get_one($sql);
+	if (!empty($r['setting']))
+		{
+		$setting = $r['setting'];
+		eval("\$setting = $setting;"); 
+		unset($r['setting']);
+		if (is_array($setting))
+			{
+			foreach ($setting as $k => $v)
+				{
+				$r[$k] = $v;
+				}
+			}
+		}
+	cache_write("modelid_{$modelid}.php", $r, CONTENT_DATA_DIR, true);
+	return $r;
+}//}}}
 function content_field_output($data)
 {//{{{
 

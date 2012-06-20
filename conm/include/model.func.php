@@ -180,7 +180,7 @@ function cm_f_field_list($mod = '')
 }//}}}
 /**
  * 加载一个或一组字段类型
- * @param string|array 字段类型ID , 数组则由字段类型ID组成. eg. conm/title
+ * @param string|array 字段类型ID , 数组则由字段类型ID组成. eg. conm/title eg. array[] => 'conm/title'
  */
 function cm_f_field_load($CMFTid)
 {//{{{
@@ -239,6 +239,41 @@ function cm_m_content_form($CMFl, $data = array())
 	return $ret;
 }//}}}
 
+/**
+ * 填充字段数据。
+ * <pre>
+ * 调用字段类型的接口为：save($field, $data, $keep, $ft_setting, $id)
+ * $id 主键ID字段名。
+ * </pre>
+ * @param array $CMFl
+ * @param array $data 表单提交，待录入数据。
+ * @param array $keep 助手性质，比如保存字段的旧值。
+ */
+function conm_fill($CMFl, $data, $keep = array())
+{//{{{
+	//加载字段类型文件
+	$CMFTid_list = array();
+	foreach ($CMFl as $f => $r)
+		{
+		$CMFTid_list[] = $r['formtype'];
+		}
+	cm_f_field_load($CMFTid_list);
+
+	//按字段类型进行填充，在表单输入值为空的情况下也可以填入默认值。
+	foreach ($CMFl as $f => $r)
+		{
+		list($mod, $name) = explode("/", $r['formtype']);
+		$func_name = "cm_ft_{$mod}__{$name}_save";
+		if (!function_exists($func_name))
+			{
+			continue;
+			}
+		//todo id 还没有
+		$data[$f] = $func_name($f, $data, $keep, $r['setting'], 'id');
+		}
+	return $data;
+}//}}}
+
 //------ 旧函数，待改进 ------
 
 /**
@@ -265,4 +300,20 @@ function content_field_error($msg = '')
 		return ;
 		}
 	return $error;
+}//}}}
+
+/**
+ * 方便地在列表页输出文章 title 字段，带 a 标签，自动截取标题长度
+ *
+ * 输出的 html 代码看上去像：
+ * <code>
+ * <a href="content/show.php?contentid=1" title="full title">short title ...<a/>
+ * </code>
+ */
+function content_output_title($r, $length = 18, $target = '', $title_before = '')
+{//{{{
+	$url = $r['url'] ? $r['url'] : "content/show.php?contentid={$r['contentid']}";
+	$title = $length ? str_cut($r['title'], $length) : $r['title'];
+	$target = $target ? "target=\"{$target}\"" : '';
+	return "<a href=\"{$url}\" title=\"{$r['title']}\" {$target} >{$title_before}{$title}</a>";
 }//}}}

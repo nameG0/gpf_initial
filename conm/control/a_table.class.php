@@ -63,6 +63,9 @@ class ctrl_a_table
 
 		//todo 应取也模型缓存,缓存内标有模型表主键键名
 		$CMMr = conm_model_get($modelid);
+		$CMFl = conm_field_get($modelid);
+		$data = conm_fill($CMFl, $data);
+		var_dump($data);exit;
 		siud::save($CMMr['tablename'])->pk('id')->data($data)->ing();
 		?>
 		成功.
