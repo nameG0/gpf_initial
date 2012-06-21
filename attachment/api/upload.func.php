@@ -10,9 +10,11 @@ function atta_make_name($fileext)
 	return date('Ymdhis') . rand(100, 999) . $fileext;
 }//}}}
 
-//格式化 $_FILES 数据，改为一维数组
-//键 _is_error 是原 error 的简化，只有 true/false 两种值,true表示上传成功
-//_fileext	后缀
+/**
+ * 格式化 $_FILES 数据，改为一维数组
+ * 键 _is_error 是原 error 的简化，只有 true/false 两种值,true表示上传成功
+ * 键 _fileext 后缀
+ */
 function atta_upload_init($field)
 {//{{{
 	$upload = array();
@@ -33,7 +35,7 @@ function atta_upload_init($field)
 		}
 	foreach ($files['error'] as $key => $error)
 		{
-		$fileext = fileext($files['name'][$key]);
+		$fileext = trim(substr(strrchr($files['name'][$key], '.'), 1, 10));
 		$dir = date("Y/md/");
 		$name = atta_make_name($fileext);
 		$upload[$key] = array(
