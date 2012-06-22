@@ -11,4 +11,4 @@ if (defined('EDITOR_ROOT'))
 	return ;
 	}
 define('EDITOR_ROOT', dirname(dirname(__FILE__)) . '/');
-require_once EDITOR_ROOT . "include/form.func.php";
+// require_once EDITOR_ROOT . "include/form.func.php";
