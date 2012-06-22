@@ -15,6 +15,7 @@
 模型类型：
 <select name="CMMr[modeltype]" id="modeltype">
 	<option value="0">单表</option>
+	<option value="1">文章模型</option>
 </select>
 <br />
 <div id="model_setting"><?php cm_m_setting_form('conm/table', $CMMr['setting']); ?></div>

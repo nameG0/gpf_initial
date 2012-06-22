@@ -19,13 +19,14 @@ class ctrl_a_table
 	{//{{{
 		$modelid = _g('modelid', 'int');
 
-		$CMMr = conm_model_get($modelid);
+		$CMMr = conm_CMMR($modelid);
 		if (!$CMMr)
 			{
 			showmessage('模型不存在');
 			}
 
 		$tablename = $CMMr['tablename'];
+		$pk = $CMMr['setting']['pk'];
 		$field = $CMMr['setting']['list_show_field'];
 		if (!$field)
 			{
@@ -41,9 +42,14 @@ class ctrl_a_table
 			{
 			?>
 			<div >
-				<?=$r['title']?>
-				<a href="<?=gpf::url("..form.&id={$r['id']}.modelid")?>">修改</a>
-				<a href="<?=gpf::url("..delete.&id={$r['id']}.modelid")?>">删除</a>
+				<?php
+				foreach ($r as $f => $v)
+					{
+					echo $v, '|';
+					}
+				?>
+				<a href="<?=gpf::url("..form.&id={$r[$pk]}.modelid")?>">修改</a>
+				<a href="<?=gpf::url("..delete.&id={$r[$pk]}.modelid")?>">删除</a>
 			</div>
 			<?=$pages?>
 			<?php
@@ -59,14 +65,27 @@ class ctrl_a_table
 	function save()
 	{//{{{
 		$modelid = _g('modelid', 'int');
-		$data = _p('info');
+		$data = _p('data');
+		$keep = _p('keep');
 
 		//todo 应取也模型缓存,缓存内标有模型表主键键名
-		$CMMr = conm_model_get($modelid);
-		$CMFl = conm_field_get($modelid);
-		$data = conm_fill($CMFl, $data);
-		var_dump($data);exit;
-		siud::save($CMMr['tablename'])->pk('id')->data($data)->ing();
+		$CMMR = conm_CMMR($modelid);
+		$data = conm_fill($CMMR['CMFL'], $data, $keep);
+		$pk = $CMMR['setting']['pk'];
+		siud::save($CMMR['tablename'])->pk($pk)->data($data)->ing();
+		$field_use_id = conm_use_id($CMMR['CMFL']);
+		if (!$data[$pk] && $field_use_id)
+			{
+			//第二次填充,填充需要取得主键ID后才能填充的字段。
+			$data[$pk] = $insert_id;
+			conm_fill($CMMR['CMFL'], $data, $keep);
+			$data_update = array($pk => $insert_id,);
+			foreach ($field_use_id as $f)
+				{
+				$data_update[$f] = $dat[$f];
+				}
+			siud::save($CMMR['tablename'])->pk($pk)->data($data_update)->ing();
+			}
 		?>
 		成功.
 		<br />
@@ -83,16 +102,21 @@ class ctrl_a_table
 		$modelid = _g('modelid', 'int');
 		$id = _g('id', 'int');
 
+		$CMMR = conm_CMMR($modelid);
 		if (!$id)
 			{
 			$data = array();
+			}
+		else
+			{
+			$data = siud::find($CMMR['tablename'])->wis($CMMR['setting']['pk'], $id)->ing();
 			}
 		?>
 		<a href="<?=gpf::url('..manage..modelid')?>">管理</a>
 		<hr />
 		<form action="<?=gpf::url('..save..modelid')?>" method="POST" enctype="multipart/form-data">
 		<?php
-		$form = conm_content_form($modelid, $data);
+		$form = conm_form($CMMR['CMFL'], $data);
 		foreach ($form as $f => $html)
 			{
 			echo $html['name'], ':', $html['form'], "<hr/>\n";

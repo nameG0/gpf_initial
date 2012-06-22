@@ -26,7 +26,7 @@ foreach ($CMFTl as $k => $v)
 <div id="field_setting"><?php
 if ($data['formtype'])
 	{
-	cm_f_field_load($data['formtype']);
+	cm_f_load($data['formtype']);
 	list($_mod, $_name) = explode("/", $data['formtype']);
 	$func_name = "cm_ft_{$_mod}__{$_name}_setting";
 	if (function_exists($func_name))

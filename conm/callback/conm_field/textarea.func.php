@@ -74,8 +74,9 @@ function cm_ft_conm__textarea_form($field, $value, $set)
 	return hd("textarea|name=data[{$field}]|value={$value}|cols={$set['cols']}|rows={$set['rows']}");
 }//}}}
 
-function cm_ft_conm__textarea_save($field, $value)
+function cm_ft_conm__textarea_save($field, $data)
 {//{{{
+	return $data[$field];
 	//phpcms 的旧代码
 	//if(!fields[$field]['enablehtml']) $value = strip_tags($value);
 	//return $value;

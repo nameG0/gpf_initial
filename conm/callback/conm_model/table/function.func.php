@@ -57,7 +57,7 @@ function cm_mt_conm__table_sync($CMMr, $CMFl)
 		{
 		$field_list[] = $v['formtype'];
 		}
-	cm_f_field_load($field_list);
+	cm_f_load($field_list);
 	
 	$FString = cm_m_get_FString($CMMr['tablename']);
 	$table = RDB_PRE . $CMMr['tablename'];
@@ -115,4 +115,9 @@ function cm_mt_conm__table_sync($CMMr, $CMFl)
 		}
 
 	return $ret;
+}//}}}
+
+function cm_mt_conm__table_fill_info(& $info, $set)
+{//{{{
+	$info['pk'] = $set['pk'];
 }//}}}

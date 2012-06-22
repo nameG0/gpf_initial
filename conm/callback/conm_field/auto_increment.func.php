@@ -27,7 +27,8 @@ function cm_ft_conm__auto_increment_setting($set)
 }//}}}
 function cm_ft_conm__auto_increment_form($field, $value, $CMFr)
 {//{{{
-	return intval($value);
+	$value = intval($value);
+	return "<input type=\"hidden\" name=\"data[{$field}]\" value=\"{$value}\" />{$value}";
 }//}}}
 
 function cm_ft_conm__auto_increment_save($field, $data, $keep, $set)

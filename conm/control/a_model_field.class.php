@@ -202,7 +202,7 @@ class ctrl_a_model_field
 
 		$CMFTid = _g('field_id');
 
-		cm_f_field_load($CMFTid);
+		cm_f_load($CMFTid);
 		list($mod, $name) = explode("/", $CMFTid);
 		$func_name = "cm_ft_{$mod}__{$name}_setting";
 		if (!function_exists($func_name))

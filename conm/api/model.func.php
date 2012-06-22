@@ -5,32 +5,31 @@
  * @package default
  * @filesource
  */
+define('CONM_MODEL_FIELD', 0);
+define('CONM_ONLY_MODEL', 1);
+define('CONM_ONLY_FIELD', 2);
 
 /**
- * 取指定模型数据
+ * 提取模型及其字段信息 CMMR
  * @param int $modelid 模型ID
- * @return array $CMMr
+ * @param int $mode {CONM_MODEL_FIELD:取模型与字段, CONM_ONLY_MODEL:只取模型, CONM_ONLY_FIELD:只取字段}
+ * @return array $CMMR, 提取数据失败时返回空数组。
  */
-function conm_model_get($modelid)
+function conm_CMMR($modelid, $mode = CONM_MODEL_FIELD)
 {//{{{
+	//------ 取模型数据 ------
 	$CMMr = siud::find('model')->wis('modelid', $modelid)->ing();
 	if (!$CMMr)
 		{
 		return array();
 		}
 	a::i($CMMr)->unsers('setting');
-	return $CMMr;
-}//}}}
-/**
- * 取指定模型的字段数据
- * @return array $CMFl
- */
-function conm_field_get($modelid)
-{//{{{
+
+	//------ 取字段数据 ------
 	$CMFs = siud::select('model_field')->wis('modelid', $modelid)->ing();
 	if (!$CMFs)
 		{
-		return array();
+		return $CMMr;
 		}
 	$CMFl = array();
 	foreach ($CMFs as $k => $r)
@@ -38,7 +37,23 @@ function conm_field_get($modelid)
 		a::i($r)->unsers('setting');
 		$CMFl[$r['field']] = $r;
 		}
-	return $CMFl;
+
+	//------ 为 CMFl 增加模型信息 ------
+	$CMFl['_info'] = array(
+		"modelid" => $modelid,
+		"tablename" => $CMMr['tablename'],
+		);
+	$CMMTid = cm_m_CMMTid($CMMr['modeltype']);
+	cm_m_load($CMMTid);
+	list($mod, $name) = explode("/", $CMMTid);
+	$func_name = "cm_mt_{$mod}__{$name}_fill_info";
+	if (function_exists($func_name))
+		{
+		$func_name($CMFl['_info'], $CMMr['setting']);
+		}
+
+	$CMMr['CMFL'] = $CMFl;
+	return $CMMr;
 }//}}}
 
 /**
@@ -46,24 +61,22 @@ function conm_field_get($modelid)
  * @param array $data 表单项值，对模型内容修改时使用。
  * @return array [field] => {form:HTML代码, name:字段中文名, tips:字段提示信息, }
  */
-function conm_content_form($modelid, $data = array())
+function conm_form($CMFL, $data = array())
 {//{{{
-	$CMFs = siud::select('model_field')->wis('modelid', $modelid)->ing();
-	$CMFl = array();
+	unset($CMFL['_info']);
 	$CMFTid_list = array();
-	foreach ($CMFs as $k => $r)
+	foreach ($CMFL as $k => $r)
 		{
-		a::i($r)->unsers('setting');
-		$CMFl[$r['field']] = $r;
+		// a::i($r)->unsers('setting');
+		// $CMFl[$r['field']] = $r;
 		$CMFTid_list[] = $r['formtype'];
 		}
-	unset($CMFs);
 
-	cm_f_field_load($CMFTid_list);
+	cm_f_load($CMFTid_list);
 
-	$form = cm_m_content_form($CMFl, $data);
+	$form = cm_c_form($CMFL, $data);
 	$ret = array();
-	foreach ($CMFl as $f => $set)
+	foreach ($CMFL as $f => $set)
 		{
 		$ret[$f] = array(
 			"form" => $form[$f],
@@ -72,6 +85,69 @@ function conm_content_form($modelid, $data = array())
 			);
 		}
 
+	return $ret;
+}//}}}
+/**
+ * 填充字段数据。
+ * @param array $CMFL
+ * @param array $data 表单提交，待录入数据。
+ * @param array $keep 助手性质，比如保存字段的旧值。
+ */
+function conm_fill($CMFL, $data, $keep = array())
+{//{{{
+	$_info = $CMFL['_info'];
+	unset($CMFL['_info']);
+	//加载字段类型文件
+	$CMFTid_list = array();
+	foreach ($CMFL as $f => $r)
+		{
+		$CMFTid_list[] = $r['formtype'];
+		}
+	cm_f_load($CMFTid_list);
+
+	$id = $data[$_info['pk']];
+	//按字段类型进行填充，在表单输入值为空的情况下也可以填入默认值。
+	foreach ($CMFL as $f => $r)
+		{
+		list($mod, $name) = explode("/", $r['formtype']);
+		$func_name = "cm_ft_{$mod}__{$name}_save";
+		if (!function_exists($func_name))
+			{
+			continue;
+			}
+		$data[$f] = $func_name($f, $data, $keep, $r['setting'], $id);
+		}
+	return $data;
+}//}}}
+/**
+ * 返回传入字段列表中属于关联字段类型的字段名,若没有则返回空数组
+ * @param array $CMFL
+ * @return array [] => field
+ */
+function conm_use_id($CMFL)
+{//{{{
+	unset($CMFL['_info']);
+	$CMMid_list = array();
+	foreach ($CMFL as $f => $r)
+		{
+		$CMMid_list[] = $r['formtype'];
+		}
+	cm_f_load($CMMid_list);
+	$ret = array();
+	foreach ($CMFL as $f => $r)
+		{
+		list($mod, $name) = explode("/", $r['formtype']);
+		$func_name = "cm_ft_{$mod}__{$name}_use_id";
+		if (function_exists($func_name) && $func_name($r['setting']))
+			{
+			$ret[] = $f;
+			continue;
+			}
+		else if (defined(strtoupper("CM_FT_{$mod}__{$name}_USE_ID")))
+			{
+			$ret[] = $f;
+			}
+		}
 	return $ret;
 }//}}}
 

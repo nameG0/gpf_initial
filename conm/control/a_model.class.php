@@ -63,6 +63,9 @@ class ctrl_a_model
 			// showmessage('操作失败！');
 			echo '操作失败！';
 			}
+		?>
+		<a href="<?=gpf::url('..manage')?>">管理</a>
+		<?php
 	}//}}}
 	/**
 	 * 显示模型[添加/修改]表单。
@@ -75,7 +78,7 @@ class ctrl_a_model
 		$CMMr = array();
 		if ($modelid)
 			{
-			$CMMr = conm_model_get($modelid);
+			$CMMr = conm_CMMR($modelid, CONM_ONLY_MODEL);
 			if (!$CMMr)
 				{
 				showmessage('指定的模块不存在！');
@@ -185,28 +188,10 @@ class ctrl_a_model
 			{
 			exit('模型不存在');
 			}
-		if (0 == $CMMr['modeltype'])
-			{
-			$CMMTid = 'conm/table';
-			}
-		else
-			{
-			//todo
-			exit('未完成其它内容模型的同步功能');
-			}
-		//todo 在同步之前检查一下模型的 is_sync 字段是否为1,为1一般不同步。
-		
+		//todo 在同步之前检查一下模型的 is_sync 字段是否为1,为1一般不同步。然后有一个参数可以在 is_sync=1 的情况下强制同步。
 		//加载内容模型处理函数
-		list($mod, $name) = explode("/", $CMMTid);
-		$callback = mod_callback($mod, 'p');
-		foreach ($callback as $k => $v)
-			{
-			$p = "{$v}conm_model/{$name}/function.func.php";
-			if (is_file($p))
-				{
-				include_once $p;
-				}
-			}
+		$CMMTid = cm_m_CMMTid($CMMr['modeltype']);
+		cm_m_load($CMMTid);
 		$func_pre = "cm_mt_{$mod}__{$name}_";
 		$func_name = "{$func_pre}is_make";
 		if (!function_exists($func_name))
@@ -263,9 +248,7 @@ class ctrl_a_model
 
 		log::is_print(0);
 
-		if (0 == $modeltype)
-			{
-			cm_m_setting_form('conm/table');
-			}
+		$CMMTid = cm_m_CMMTid($modeltype);
+		cm_m_setting_form($CMMTid);
 	}//}}}
 }

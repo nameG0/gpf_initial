@@ -35,6 +35,13 @@
  * $CMFl(content module field list):多条内容字段数据，且数组键为字段名。
  * array[field] => $CMFr
  *
+ * $CMFL:同 $CMFl ，只是多了保存所属模型信息的 _info 键。
+ * array[field] => $CMFr, [_info] => 所属模型信息。
+ *
+ * $CMMr:一条模型数据
+ *
+ * $CMMR:同 $CMMr, 只是多了保存字段信息的 CMML 键。
+ *
  * <b>字段类型接口</b>
  * 前序:cm_ft_ (content model field type)
  * 命名规则:前序_{mod}_{name}_接口名. eg. cm_ft_conm__example_setting
@@ -182,13 +189,17 @@ function cm_f_field_list($mod = '')
  * 加载一个或一组字段类型
  * @param string|array 字段类型ID , 数组则由字段类型ID组成. eg. conm/title eg. array[] => 'conm/title'
  */
-function cm_f_field_load($CMFTid)
+function cm_f_load($CMFTid)
 {//{{{
 	static $cache = array(); //记录已加载的字段类型,避免重复加载.
 
-	if (!is_array($CMFTid))
+	if (is_string($CMFTid))
 		{
 		$CMFTid = array($CMFTid);
+		}
+	if (!is_array($CMFTid))
+		{
+		return ;
 		}
 
 	foreach ($CMFTid as $k => $v)
@@ -204,6 +215,9 @@ function cm_f_field_load($CMFTid)
 		{
 		$cache[$v] = true;
 		list($mod, $name) = explode("/", $v);
+		//自动加载字段类型所在模块。
+		mod_init($mod);
+		
 		$callback = mod_callback($mod, 'p');
 		$path_inst = $callback["inst"] . "conm_field/{$name}.func.php";
 		$path_sour = $callback["sour"] . "conm_field/{$name}.func.php";
@@ -217,13 +231,53 @@ function cm_f_field_load($CMFTid)
 			}
 		}
 }//}}}
+/**
+ * 加载模型类型处理函数
+ * @param string $CMMTid
+ * @return void
+ */
+function cm_m_load($CMMTid)
+{//{{{
+	list($mod, $name) = explode("/", $CMMTid);
+	$callback = mod_callback($mod, 'p');
+	foreach ($callback as $k => $v)
+		{
+		$p = "{$v}conm_model/{$name}/function.func.php";
+		if (is_file($p))
+			{
+			include_once $p;
+			break;
+			}
+		}
+}//}}}
+/**
+ * @param int $modeltype 模型类型注册ID
+ * @return string $CMMTid
+ */
+function cm_m_CMMTid($modeltype)
+{//{{{
+	if (0 == $modeltype)
+		{
+		return 'conm/table';
+		}
+	else if (1 == $modeltype)
+		{
+		return 'conm/content';
+		}
+	else
+		{
+		//todo
+		exit('未完成其它内容模型的同步功能(' . __FILE__ . ':' . __LINE__ . ')');
+		}
+	return $CMMTid;
+}//}}}
 
 /**
- * 返回模型编辑表单（调用者需要使用 cm_f_field_load() 加载字段类型）
+ * 返回模型编辑表单（调用者需要使用 cm_f_load() 加载字段类型）
  * @param array $data 表单项值，对模型内容修改时使用。
  * @return array [field] => HTML代码
  */
-function cm_m_content_form($CMFl, $data = array())
+function cm_c_form($CMFl, $data = array())
 {//{{{
 	$ret = array();
 	foreach ($CMFl as $f => $set)
@@ -239,40 +293,6 @@ function cm_m_content_form($CMFl, $data = array())
 	return $ret;
 }//}}}
 
-/**
- * 填充字段数据。
- * <pre>
- * 调用字段类型的接口为：save($field, $data, $keep, $ft_setting, $id)
- * $id 主键ID字段名。
- * </pre>
- * @param array $CMFl
- * @param array $data 表单提交，待录入数据。
- * @param array $keep 助手性质，比如保存字段的旧值。
- */
-function conm_fill($CMFl, $data, $keep = array())
-{//{{{
-	//加载字段类型文件
-	$CMFTid_list = array();
-	foreach ($CMFl as $f => $r)
-		{
-		$CMFTid_list[] = $r['formtype'];
-		}
-	cm_f_field_load($CMFTid_list);
-
-	//按字段类型进行填充，在表单输入值为空的情况下也可以填入默认值。
-	foreach ($CMFl as $f => $r)
-		{
-		list($mod, $name) = explode("/", $r['formtype']);
-		$func_name = "cm_ft_{$mod}__{$name}_save";
-		if (!function_exists($func_name))
-			{
-			continue;
-			}
-		//todo id 还没有
-		$data[$f] = $func_name($f, $data, $keep, $r['setting'], 'id');
-		}
-	return $data;
-}//}}}
 
 //------ 旧函数，待改进 ------
 
