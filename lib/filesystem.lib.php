@@ -8,6 +8,11 @@ last_update:
 */
 //==============================
 
+function fileext($filename)
+{
+	return strtolower(trim(substr(strrchr($filename, '.'), 1, 10)));
+}
+
 //强制解释 ini 文件，以第一个 = 号分隔键与值, 其它什么都不管,如果一组中出现多个同名键，则以数组形式返回
 function parse_ini_filei($path)
 {
