@@ -4,7 +4,7 @@
 */
 $_tmp = array(
 	'UPLOAD_FRONT' => 1, //是否允许前台上传附件
-	'UPLOAD_ROOT' => PHPCMS_DATA_ROOT.'uploadfile/', //附件保存物理路径
+	'UPLOAD_ROOT' => G_PATH_UPLOADFILE, //附件保存物理路径
 	'UPLOAD_URL' => 'uploadfile/', //附件目录访问路径
 	'UPLOAD_ALLOWEXT' => 'doc,xls,ppt,wps,zip,rar,txt,jpg,jpeg,gif,bmp,png', //允许上传的文件后缀，多个后缀用“,”分隔
 	'UPLOAD_DENYEXT' => '', //禁止上传的文件后缀，多个后缀用“,”分隔

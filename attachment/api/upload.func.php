@@ -1,8 +1,12 @@
 <?php
-/*
-2011-10-16
-附件模块公共函数（相当于 API）
-*/
+/**
+ * 附件模块公共函数（相当于 API）
+ * 2011-10-16
+ * 
+ * @package default
+ * @filesource
+ */
+
 //生成一个当前日期及随机数组合的数字形文件名
 function atta_make_name($fileext)
 {//{{{
@@ -174,7 +178,7 @@ function atta_upload_move(& $upload)
 			{
 			continue;
 			}
-		dir_create($v['_fulldir']);
+		mkdiri($v['_fulldir']);
 		$upload[$k]['_is_upload'] = move_uploaded_file($v['tmp_name'], $v['_fullpath']);
 		}
 }//}}}
@@ -183,4 +187,3 @@ function atta_upload_close(& $upload)
 {//{{{
 	$upload = NULL;
 }//}}}
-?>

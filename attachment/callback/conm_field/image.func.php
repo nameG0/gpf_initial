@@ -53,8 +53,8 @@ function cm_ft_attachment__image_form($field, $value, $fieldinfo)
 {//{{{
 	return <<<EOT
 输入 
-<input type="text" name="data[{$field}]" value="{$value}" />
-<input type="hidden" name="data[{$field}_old]" value="{$value}" />
+<input type="text" name="data[{$field}]" value="{$value}" title="{$value}" size="50" />
+<input type="hidden" name="keep[{$field}]" value="{$value}" /><br />
 或上传：<input type="file" name="{$field}" size="20" />
 EOT;
 	//下面是旧的代码
@@ -71,12 +71,10 @@ EOT;
 function cm_ft_attachment__image_save($field, $data, $keep, $setting)
 {//{{{
 	global $db;
-	mod_init('attachment');
 
 	$is_del_old_image = false;	//开关，是否删除旧图片文件
 	$new_image = $data[$field];	//手动输入的图片地址，若是修改文章，则为当前的图片地址
-	$old_image = $data["{$field}_old"];	//表中的字段值，用隐藏域保存
-	unset($data["{$field}_old"]);
+	$old_image = $keep["{$field}"];	//表中的字段值，用隐藏域保存
 	$upload = atta_upload_init($field);
 	//若上传了新文件，则更新字段值,并删除旧文件
 	if ($upload)
@@ -108,8 +106,7 @@ function cm_ft_attachment__image_save($field, $data, $keep, $setting)
 			unlink($path);
 			}
 		}
-	//更新字段值
-	$data[$field] = $new_image;
+	return $new_image;
 }//}}}
 
 function cm_ft_attachment__image_output($field, $value)
