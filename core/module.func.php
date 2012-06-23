@@ -18,13 +18,19 @@
 /**
  * 初始化指定模块
  * 加载模块 include/init.inc.php 文件。
- * 此处不检查模块是否重复初始化，需要模块 init 文件自行检查。因为本函数可以被跳过而直接 include init 文件。
  */
 function mod_init($mod)
 {//{{{
+	static $init_ed = array();
+	if (isset($init_ed[$mod]))
+		{
+		return $init_ed[$mod];
+		}
+
 	$ModInfo = mod_info($mod);
 	if (!$ModInfo)
 		{
+		$init_ed[$mod] = false;
 		return false;
 		}
 	//优先加载副本中的 init 文件。
@@ -34,6 +40,7 @@ function mod_init($mod)
 		$path = "{$ModInfo['path_sour']}include/init.inc.php";
 		if (!is_file($path))
 			{
+			$init_ed[$mod] = false;
 			log::add("无法初始化模块 {$mod}, 找不到 init 文件", log::NOTEXI, __FILE__, __LINE__, __FUNCTION__);
 			return false;
 			}
@@ -43,8 +50,10 @@ function mod_init($mod)
 	$ret = include $path;
 	if (is_bool($ret))
 		{
+		$init_ed[$mod] = $ret;
 		return $ret;
 		}
+	$init_ed[$mod] = true;
 	return true;
 }//}}}
 

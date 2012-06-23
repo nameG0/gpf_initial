@@ -4,9 +4,9 @@
  * <pre>
  * 使用连贯操作增加可用性,调用入口为:
  * a::i($array)->...
- * </pre>
+ * <b>使用的配置参数</b>
+ * gpf_is_form_adds, gpf_need_form_adds
  * <b>数据结构</b>
- * <pre>
  * $Fl(field list) array|string 字段列表,字符串时用,号分隔. eg. id,name
  * $Is int 判断条件,类中定义的 Is 选择.
  * </pre>
