@@ -86,9 +86,9 @@ function mod_info($mod, $key = NULL)
 			$mod_info = unserialize(file_get_contents($path));
 
 			//生成 path_sour, path_inst 。
-			$path_sour = G_PATH_MOD_SOUR . $mod . DS;
+			$path_sour = GPF_PATH_SOUR . $mod . DS;
 			$mod_info['path_sour'] = is_dir($path_sour) ? $path_sour : '';
-			$path_inst = G_PATH_MOD_INST . $mod . DS;
+			$path_inst = GPF_PATH_INST . $mod . DS;
 			$mod_info['path_inst'] = is_dir($path_inst) ? $path_inst : '';
 
 			$cache[$mod] = $mod_info;

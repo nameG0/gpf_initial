@@ -24,12 +24,12 @@ class gpf
 		mod_init('siud');
 		mod_init('tpl');
 		//默认加载的 gpf/lib
-		require_once G_PATH_GPF_LIB . "http__var.func.php";
-		require_once G_PATH_GPF_LIB . "gpf.func.php";
-		require_once G_PATH_GPF_LIB . "array.class.php";
-		require_once G_PATH_GPF_LIB . "filesystem.lib.php";
+		require_once GPF_PATH_LIB . "input.cls.php";
+		require_once GPF_PATH_LIB . "gpf.func.php";
+		require_once GPF_PATH_LIB . "array.cls.php";
+		require_once GPF_PATH_LIB . "filesystem.lib.php";
 
-		self::$cfg = require G_PATH_GPF . "cfg.inc.php";
+		self::$cfg = require GPF_PATH . "cfg.inc.php";
 	}//}}}
 	/**
 	 * 调度器
