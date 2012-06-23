@@ -5,7 +5,7 @@
  * @package default
  * @filesource
  */
-function cm_mt_category__tree_default_field()
+function cm_mt_tree__tree_default_field()
 {//{{{
 	return array(
 		"catid" => array("formtype" => 'conm/auto_increment', "name" => '栏目ID', "iscore" => 1, "setting" => array("key_type" => 'pri',),),
@@ -24,7 +24,7 @@ function cm_mt_category__tree_default_field()
 		);
 }//}}}
 
-function cm_mt_category__tree_is_make($CMMr)
+function cm_mt_tree__tree_is_make($CMMr)
 {//{{{
 	$o_db = rdb::obj();
 
@@ -32,7 +32,7 @@ function cm_mt_category__tree_is_make($CMMr)
 	return $o_db->table_exists($table_name);
 }//}}}
 
-function cm_mt_category__tree_make($CMMR)
+function cm_mt_tree__tree_make($CMMR)
 {//{{{
 	$table_name = RDB_PRE . $CMMR['tablename'];
 	$sql = "CREATE TABLE  `{$table_name}` (\n";
@@ -54,7 +54,7 @@ function cm_mt_category__tree_make($CMMR)
  * 同步表结构
  * @param array $CMFl 有实际表字段的实际字段列表
  */
-function cm_mt_category__tree_sync($CMMR)
+function cm_mt_tree__tree_sync($CMMR)
 {//{{{
 	$ret = array();
 	unset($CMMR['CMFL']['_info']);
@@ -125,7 +125,7 @@ function cm_mt_category__tree_sync($CMMR)
 	return $ret;
 }//}}}
 
-function cm_mt_category__tree_fill_info(& $info, $set)
+function cm_mt_tree__tree_fill_info(& $info, $set)
 {//{{{
 	$info['pk'] = $set['pk'];
 }//}}}
