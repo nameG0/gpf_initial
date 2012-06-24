@@ -28,6 +28,7 @@ class gpf
 		require_once GPF_PATH_LIB . "gpf.func.php";
 		require_once GPF_PATH_LIB . "array.cls.php";
 		require_once GPF_PATH_LIB . "filesystem.lib.php";
+		require_once GPF_PATH_LIB . "cache_file.lib.php";
 
 		self::$cfg = require GPF_PATH . "cfg.inc.php";
 	}//}}}
