@@ -15,15 +15,16 @@ function tpl($name, $mod = CTRL_MOD)
 		{
 		return $path;
 		}
-	return G_PATH_MOD_SOUR . "{$mod}/template/{$name}.tpl.php";
+	return GPF_PATH_SOUR . "{$mod}/template/{$name}.tpl.php";
 }//}}}
 
 function tpl_admin($name, $mod = CTRL_MOD)
 {//{{{
 	$path = GM_PATH_TPL_INST . "{$mod}/admin/{$name}.tpl.php";
-	if (is_file($path))
+	if (!is_file($path))
 		{
-		return $path;
+		$path = GPF_PATH_SOUR . "{$mod}/template/admin/{$name}.tpl.php";
 		}
-	return G_PATH_MOD_SOUR . "{$mod}/template/admin/{$name}.tpl.php";
+	log::add("{$mod}/{$name}::{$path}", log::INFO, __FILE__, __LINE__, __FUNCTION__);
+	return $path;
 }//}}}

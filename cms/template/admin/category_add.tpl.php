@@ -1,22 +1,17 @@
 <?php
-defined('IN_PHPCMS') or exit('Access Denied');
-include admin_tpl('header');
+// defined('IN_PHPCMS') or exit('Access Denied');
+include tpl_admin('header');
 ?>
 <body <?php if($type<2){ ?>onLoad="$('#div_category_urlruleid').load('?mod=<?=$mod?>&file=<?=$file?>&action=urlrule&ishtml=<?=$ishtml?>&type=category&category_urlruleid=<?=$category_urlruleid?>');$('#div_show_urlruleid').load('?mod=<?=$mod?>&file=<?=$file?>&action=show_urlrule&ishtml=<?=$ishtml?>&type=show&show_urlruleid=<?=$show_urlruleid?>');"<?php } ?> >
-<?=admin_menu('栏目管理', $submenu)?>
-<?php if(!isset($type)){ ?>
+<?php if('' === $type){ ?>
 
-<form name="myform" method="post" action="?">
-   <input name="mod" type="hidden" value="<?=$mod?>">
-   <input name="file" type="hidden" value="<?=$file?>">
-   <input name="action" type="hidden" value="<?=$action?>">
-   <input name="forward" type="hidden" value="<?=$forward?>">
+<form name="myform" method="post" action="<?=gpf::url("...")?>">
 <table cellpadding="2" cellspacing="1" class="table_form">
   <caption>添加栏目</caption>
   <tr>
   <th><font color="red">*</font>  <strong>上级栏目</strong></th>
   <td>
-<?=form::select_category('phpcms', 0, 'parentid', 'parentid', '无（作为一级栏目）', $catid,'',2)?>
+<?=hd("cms.select_category|module=cms|parentid=0|name=parentid|id=parentid|alt=无（作为一级栏目）|catid=0|type=2")?>
   </td>
   </tr>
      <tr>
@@ -39,7 +34,7 @@ include admin_tpl('header');
 <tbody id="model" style="display:'block'">
      <tr>
       <th><strong>绑定模型</strong></td>
-      <td><?=form::select_model('modelid', 'modelid', '', $modelid, '')?> <a href="<?=admin_url("content.model.manage")?>">管理模型</a></td>
+      <td><?=hd("conm.model_select|name=modelid|CMMTid=cms/content")?> </td>
     </tr>
 </tbody>
 	<tr>
@@ -51,7 +46,7 @@ include admin_tpl('header');
 
 <?php }elseif($type == 0){ ?>
 
-<form name="myform" method="post" action="?mod=<?=$mod?>&file=<?=$file?>&action=<?=$action?>">
+<form name="myform" method="post" action="<?=gpf::url("...")?>">
 <input type="hidden" name="category[type]" value="<?=$type?>">
 <input name="forward" type="hidden" value="<?=$forward?>">
 <div class="tag_menu" style="width:99%;margin-top:10px;">
@@ -79,18 +74,18 @@ include admin_tpl('header');
     <tr>
       <th><font color="red">*</font> <strong>栏目名称</strong></th>
       <td>
-      <input name='category[catname]' type='text' id='catname' size='40' maxlength='50' require="true" datatype="limit|ajax" min="1" max="50" url="<?=admin_url("..checkname.&parentid={$parentid}")?>" msg="字符长度范围必须为1到50位|" msgid="msgid1">
-      <?=form::style('category[style]','')?>
+      <input name='category[catname]' type='text' id='catname' size='40' maxlength='50' require="true" datatype="limit|ajax" min="1" max="50" url="<?=gpf::url("..checkname.&parentid={$parentid}")?>" msg="字符长度范围必须为1到50位|" msgid="msgid1">
+      <?=1//form::style('category[style]','')?>
       <span id="msgid1"></span>
       </td>
     </tr>
     <tr>
       <th><font color="red">*</font> <strong>栏目目录</strong></th>
-      <td><input name='category[catdir]' type='text' id='catdir' size='20' maxlength='50' require="true" datatype="limit|ajax" min="1" max="50" url="<?=admin_url("..checkdir.&parentid={$parentid}")?>" msg="字符长度范围必须为1到50位|"></td>
+      <td><input name='category[catdir]' type='text' id='catdir' size='20' maxlength='50' require="true" datatype="limit|ajax" min="1" max="50" url="<?=gpf::url("..checkdir.&parentid={$parentid}")?>" msg="字符长度范围必须为1到50位|"></td>
     </tr>
     <tr>
       <th><strong>栏目图片</strong></th>
-      <td><input name='category[image]' type='text' id='image' size='40' maxlength='50'> <?=file_select('image', $catid, 1)?></td>
+      <td><input name='category[image]' type='text' id='image' size='40' maxlength='50'> [使用服务器中的图片]</td>
     </tr>
     <tr>
       <th><strong>栏目介绍</strong><br></th>
@@ -98,7 +93,7 @@ include admin_tpl('header');
     </tr>
      <tr>
       <th><strong>工作流方案</strong></th>
-      <td><?=form::select(cache_read('workflow.php'), 'setting[workflowid]', 'workflowid', $MODEL[$modelid]['workflowid'])?>  <a href="?mod=phpcms&file=workflow&forward=<?=urlencode(URL)?>">管理工作流方案</a></td>
+      <td><?=1//form::select(cache_read('workflow.php'), 'setting[workflowid]', 'workflowid', $MODEL[$modelid]['workflowid'])?>  <a href="?mod=phpcms&file=workflow&forward=<?=urlencode(URL)?>">管理工作流方案</a></td>
     </tr>
 	<tr>
       <th width='30%'><strong>在导航栏显示</strong></th>
@@ -281,7 +276,7 @@ include admin_tpl('header');
   </tr>
     <tr>
       <th><strong>单网页名称</strong></th>
-      <td><input name='category[catname]' type='text' id='catname' size='40' maxlength='50'  require="true" datatype="require" msg="单网页名称不能为空"> <?=form::style('category[style]','')?>  <font color="red">*</font></td>
+      <td><input name='category[catname]' type='text' id='catname' size='40' maxlength='50'  require="true" datatype="require" msg="单网页名称不能为空"> <?=1//form::style('category[style]','')?>  <font color="red">*</font></td>
     </tr>
     <tr>
       <th><strong>单网页英文名</strong></th>
@@ -293,7 +288,7 @@ include admin_tpl('header');
     </tr>
     <tr>
       <th><strong>单网页模板</strong></th>
-      <td><?=form::select_template('phpcms', 'setting[template]', 'template', 'page', '','page')?></td>
+      <td><?=1//form::select_template('phpcms', 'setting[template]', 'template', 'page', '','page')?></td>
     </tr>
 	<tr>
       <th><strong>是否生成Html</strong></th>
@@ -315,11 +310,11 @@ include admin_tpl('header');
     </tr>
     <tr>
       <th><strong>修改权限</strong></th>
-      <td><?=form::checkbox($ROLE, 'priv_roleid', 'priv_roleid', '')?></td>
+      <td><?=1//form::checkbox($ROLE, 'priv_roleid', 'priv_roleid', '')?></td>
     </tr>
     <tr>
       <th><strong>查看权限</strong></th>
-      <td><?=form::checkbox($GROUP, 'priv_groupid', 'priv_groupid', '')?></td>
+      <td><?=1//form::checkbox($GROUP, 'priv_groupid', 'priv_groupid', '')?></td>
     </tr>
     <tr>
       <th><strong>META Title（单网页标题）</strong><br/>针对搜索引擎设置的标题</th>
@@ -371,7 +366,7 @@ function CheckForm(){
   </tr>
     <tr>
       <th><strong>链接名称</strong></th>
-      <td><input name='category[catname]' type='text' id='catname' size='40' maxlength='50'> <?=form::style('category[style]','')?>  <font color="red">*</font></td>
+      <td><input name='category[catname]' type='text' id='catname' size='40' maxlength='50'> <?=1//form::style('category[style]','')?>  <font color="red">*</font></td>
     </tr>
     <tr>
       <th><strong>链接图片</strong></th>

@@ -6,18 +6,8 @@
  * @package default
  * @filesource
  */
-if (defined('CATEGORY_ROOT'))
-	{
-	return ;
-	}
-define('CATEGORY_ROOT', dirname(dirname(__FILE__)) . '/');
-include CATEGORY_ROOT . 'include/config.inc.php';
-include CATEGORY_ROOT . 'lang/zh.inc.php';
-// require_once CATEGORY_ROOT . "include/cache.func.php";
-// require_once CATEGORY_ROOT . "include/global.func.php";
+define('TREE_PATH', dirname(dirname(__FILE__)) . '/');
+include TREE_PATH . 'include/config.inc.php';
+include TREE_PATH . 'lang/zh.inc.php';
 
-global $CATEGORY;
-// $CATEGORY = category_get();
-
-// require_once PHPCMS_ROOT . "content/include/init.inc.php";
-mod_init('conm');
+// mod_init('conm');

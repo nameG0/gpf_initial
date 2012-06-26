@@ -17,13 +17,21 @@ define('CONM_ONLY_FIELD', 2);
  */
 function conm_CMMR($modelid, $mode = CONM_MODEL_FIELD)
 {//{{{
+	$CMMr = array();
 	//------ 取模型数据 ------
-	$CMMr = siud::find('model')->wis('modelid', $modelid)->ing();
-	if (!$CMMr)
+	if (CONM_ONLY_FIELD !== $mode)
 		{
-		return array();
+		$CMMr = siud::find('model')->wis('modelid', $modelid)->ing();
+		if (!$CMMr)
+			{
+			return array();
+			}
+		a::i($CMMr)->unsers('setting');
 		}
-	a::i($CMMr)->unsers('setting');
+	if (CONM_ONLY_MODEL === $mode)
+		{
+		return $CMMr;
+		}
 
 	//------ 取字段数据 ------
 	$CMFs = siud::select('model_field')->wis('modelid', $modelid)->ing();
@@ -36,6 +44,11 @@ function conm_CMMR($modelid, $mode = CONM_MODEL_FIELD)
 		{
 		a::i($r)->unsers('setting');
 		$CMFl[$r['field']] = $r;
+		}
+	$CMMr['CMFL'] = $CMFl;
+	if (CONM_ONLY_FIELD === $mode)
+		{
+		return $CMMr;
 		}
 
 	//------ 为 CMFl 增加模型信息 ------
@@ -55,6 +68,62 @@ function conm_CMMR($modelid, $mode = CONM_MODEL_FIELD)
 	$CMMr['CMFL'] = $CMFl;
 	return $CMMr;
 }//}}}
+
+/**
+ * 删除模型
+ */
+function conm_m_delete($modelid, & $error)
+{//{{{
+	//------ 主要流程 ------
+	//取出模型数据。
+	//调用模型类型delete()接口删除模型表
+	//删除下属字段数据
+	//删除模型数据。
+	//------
+	$CMMR = conm_CMMR($modelid);
+	if (!$CMMR)
+		{
+		$error = '模型不存在';
+		return false;
+		}
+	$CMMTid = cm_m_CMMTid($CMMR['modeltype']);
+	cm_m_load($CMMTid);
+	list($mod, $name) = explode("/", $CMMTid);
+	$func_name = "cm_mt_{$mod}__{$name}_is_make";
+	if ($func_name($CMMR))
+		{
+		$func_name = "cm_mt_{$mod}__{$name}_delete";
+		$sql = $func_name($CMMR);
+		$o_db = rdb::obj();
+		foreach ($sql as $k => $v)
+			{
+			$o_db->query($v);
+			}
+		}
+	siud::delete('model_field')->wis('modelid', $modelid)->ing();
+	siud::delete('model')->wis('modelid', $modelid)->ing();
+
+	return true;
+}//}}}
+
+/**
+ * 保存一条字段数据
+ * @param array $CMFr{field:字段名, modelid:所属模型, formtype:字段类型, ...}
+ * @param string $error 保存错误信息的变量。
+ * @return int $field_id 字段ID
+ */
+function conm_f_save($CMFr, & $error)
+{//{{{
+	$error = '';
+	a::i($CMFr)->sers('setting');
+	siud::save('model_field')->pk('field_id')->data($CMFr)->error($siud_error)->id($field_id)->ing();
+	if ($siud_error)
+		{
+		$error = $siud_error;
+		}
+	return $field_id;
+}//}}}
+
 
 /**
  * 返回指定模型的编辑表单HTML代码

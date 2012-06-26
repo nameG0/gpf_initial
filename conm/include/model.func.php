@@ -27,7 +27,7 @@
  * array[字段类型ID] = $CMFTr
  *
  * $CMFr(content module field row) array 一条字段数据。
- * {formtype:字段类型}
+ * {field:字段名, modelid:所属模型, formtype:字段类型, ...}
  *
  * $CMFs(content module field s): 多条内容字段数据。数组键只是数字编号。
  * array[] => $CMFr
@@ -256,20 +256,38 @@ function cm_m_load($CMMTid)
  */
 function cm_m_CMMTid($modeltype)
 {//{{{
-	if (0 == $modeltype)
+	switch ($modeltype)
 		{
-		return 'conm/table';
+		case "0":
+			return 'conm/table';
+			break;
+		case "1":
+			return 'cms/content';
+			break;
+		case "2":
+			return 'tree/tree';
+			break;
+		case "10":
+			return 'member/member';
+			break;
+		default:
+			//todo
+			exit('未完成其它内容模型的同步功能(' . __FILE__ . ':' . __LINE__ . ')');
+			break;
 		}
-	else if (1 == $modeltype)
+}//}}}
+/**
+ * CMMTid 反查 modeltype 值
+ * @return int
+ */
+function cm_m_modeltype($CMMTid)
+{//{{{
+	switch ($CMMTid)
 		{
-		return 'conm/content';
+		case "cms/content":
+			return 1;
+			break;
 		}
-	else
-		{
-		//todo
-		exit('未完成其它内容模型的同步功能(' . __FILE__ . ':' . __LINE__ . ')');
-		}
-	return $CMMTid;
 }//}}}
 
 /**

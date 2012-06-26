@@ -24,6 +24,8 @@ class ctrl_a_model
 		<?php
 		foreach ($result as $k => $r)
 			{
+			$CMMTid = cm_m_CMMTid($r['modeltype']);
+			list($mod, $name) = explode("/", $CMMTid);
 			?>
 			<div >
 				<?=$r['name']?>
@@ -32,7 +34,7 @@ class ctrl_a_model
 				<a href="<?=gpf::url("..form.&modelid={$r['modelid']}")?>">修改</a>
 				<a href="<?=gpf::url("..delete.&modelid={$r['modelid']}")?>">删除</a>
 				|
-				<a href="<?=gpf::url(".a_table.manage.&modelid={$r['modelid']}")?>">管理内容</a>
+				<a href="<?=gpf::url("{$mod}.a_{$name}.manage.&modelid={$r['modelid']}")?>">管理内容</a>
 			</div>
 			<?php
 			}
@@ -50,13 +52,44 @@ class ctrl_a_model
 			}
 		a::i($CMMr)->fpost('CMMr')->apost('setting')->sers('setting');
 
+		if (!$CMMr['modelid'])
+			{
+			//添加时检查表是否已存在
+			$CMMTid = cm_m_CMMTid($CMMr['modeltype']);
+			cm_m_load($CMMTid);
+			list($mod, $name) = explode("/", $CMMTid);
+			$func_name = "cm_mt_{$mod}__{$name}_is_make";
+			if ($func_name($CMMr))
+				{
+				echo '表已存在';
+				exit;
+				}
+			}
 		siud::save('model')->pk('modelid')->data($CMMr)->error($error)->id($modelid)->ing();
 
 		if ($modelid)
 			{
+			if (!$CMMr['modelid'])
+				{
+				//添加模型类型默认字段数据。
+				$CMMTid = cm_m_CMMTid($CMMr['modeltype']);
+				cm_m_load($CMMTid);
+				list($mod, $name) = explode("/", $CMMTid);
+				$func_name = "cm_mt_{$mod}__{$name}_default_field";
+				if (function_exists($func_name))
+					{
+					$CMFl = $func_name();
+					foreach ($CMFl as $f => $r)
+						{
+						$r['field'] = $f;
+						$r['modelid'] = $modelid;
+						conm_f_save($r, $error);
+						}
+					}
+				}
 			//cache_model();
 			// showmessage('操作成功！', admin_url(".model_field.manage.&modelid={$modelid}"));
-			echo "操作成功！";
+			echo "操作成功！{$modelid}";
 			}
 		else
 			{
@@ -149,15 +182,22 @@ class ctrl_a_model
 	}//}}}
 	function delete()
 	{//{{{
-		$result = $model->delete($modelid);
+		$modelid = _g('modelid', 'int');
+
+		$result = conm_m_delete($modelid, $error);
 		if($result)
 			{
-			showmessage('操作成功！', $forward);
+			echo '操作成功！';
+			// showmessage('操作成功！', $forward);
 			}
 		else
 			{
-			showmessage('操作失败！', $forward);
+			echo '操作失败！' . $error;
+			// showmessage('操作失败！', $forward);
 			}
+		?>
+		<a href="<?=gpf::url('..manage')?>">管理</a>
+		<?php
 	}//}}}
 	function disable()
 	{//{{{
@@ -183,15 +223,16 @@ class ctrl_a_model
 		//todo 加一个参数令 is_sync=1 时可强制同步。
 		$modelid = _g('modelid', 'int');
 
-		$CMMr = siud::find('model')->wis('modelid', $modelid)->ing();
-		if (!$CMMr)
+		$CMMR = conm_CMMR($modelid);
+		if (!$CMMR)
 			{
 			exit('模型不存在');
 			}
 		//todo 在同步之前检查一下模型的 is_sync 字段是否为1,为1一般不同步。然后有一个参数可以在 is_sync=1 的情况下强制同步。
 		//加载内容模型处理函数
-		$CMMTid = cm_m_CMMTid($CMMr['modeltype']);
+		$CMMTid = cm_m_CMMTid($CMMR['modeltype']);
 		cm_m_load($CMMTid);
+		list($mod, $name) = explode("/", $CMMTid);
 		$func_pre = "cm_mt_{$mod}__{$name}_";
 		$func_name = "{$func_pre}is_make";
 		if (!function_exists($func_name))
@@ -199,18 +240,8 @@ class ctrl_a_model
 			exit("未定义内容模型处理函数 {$func_name}");
 			}
 
-		//查出模型下的字段数据。
-		$result = siud::select('model_field')->wis('modelid', $modelid)->ing();
-		$CMFl = array();
-		foreach ($result as $k => $r)
-			{
-			//todo 移除没有实际表字段的虚拟字段类型.
-			a::i($r)->unsers('setting');
-			$CMFl[$r['field']] = $r;
-			}
-		unset($result);
 		//检查是否初始化数据表
-		$is_make = $func_name($CMMr);
+		$is_make = $func_name($CMMR);
 		if (!$is_make)
 			{
 			//进行数据表初始化
@@ -220,11 +251,7 @@ class ctrl_a_model
 			{
 			$func_name = "{$func_pre}sync";
 			}
-		$sql = $func_name($CMMr, $CMFl);
-		if (is_string($sql))
-			{
-			$sql = (array)$sql;
-			}
+		$sql = $func_name($CMMR);
 		$o_db = rdb::obj();
 		foreach ($sql as $k => $v)
 			{

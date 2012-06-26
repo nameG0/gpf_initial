@@ -1,10 +1,10 @@
 <?php 
-defined('IN_PHPCMS') or exit('Access Denied');
-include admin_tpl('header', 'main');
+// defined('IN_PHPCMS') or exit('Access Denied');
+include tpl_admin('header', 'main');
 ?>
 <body>
 <?php if($catid){ ?>
-<div class="pos"><strong>当前栏目</strong>：<a href="?mod=phpcms&file=category&action=manage">栏目管理</a><?=catpos($catid, '?mod=phpcms&file=category&action=manage&catid=$catid')?></div>
+<div class="pos"><strong>当前栏目</strong>：<a href="?mod=phpcms&file=category&action=manage">栏目管理</a><?=1//catpos($catid, '?mod=phpcms&file=category&action=manage&catid=$catid')?></div>
 <?php } ?>
 <form method="post" action="?mod=<?=$mod?>&file=<?=$file?>&action=listorder">
 <table cellpadding="0" cellspacing="1" class="table_list">
@@ -18,7 +18,7 @@ include admin_tpl('header', 'main');
 		<th width="5%">访问</th>
 		<th width="320">管理操作</th>
 	</tr>
-<?php 
+<?php
 foreach($data as $k=>$r)
 {
 ?>
@@ -54,7 +54,9 @@ foreach($data as $k=>$r)
 }	
 ?>
 </table>
-<div class="button_box"><input name="dosubmit" type="submit" value=" 排序 "> <input name="addmenu" type="button" value="添加栏目" onclick="redirect('?mod=<?=$mod?>&file=<?=$file?>&action=add&catid=<?=$catid?>&forward='+escape('<?=URL?>'))" /></div>
+<div class="button_box">
+<input name="dosubmit" type="submit" value=" 排序 ">
+<a href="<?=gpf::url('..add')?>">添加栏目</a>
 </form>
 </body>
 </html>

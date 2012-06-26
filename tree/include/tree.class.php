@@ -1,5 +1,5 @@
 <?php
-defined('IN_PHPCMS') or exit('Access Denied');
+// defined('IN_PHPCMS') or exit('Access Denied');
 /**
 * 通用的树型类，可以生成任何树型结构
 */

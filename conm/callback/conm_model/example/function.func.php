@@ -24,15 +24,21 @@ function cm_mt_conm__example_default_field() {}
 function cm_mt_conm__example_is_make($CMMr) {}
 /**
  * 返回模型建表SQL语句(必须)
- * @return string 建表SQL语句
+ * @return array [] => 建表SQL语句
  */
-function cm_mt_conm__example_make($CMMr, $CMFl) {}
+function cm_mt_conm__example_make($CMMR) {}
 /**
  * 返回对初始化的模型进行同步的SQL语句.(必须)
  * @param array $CMFl 有实际表字段的实际字段列表
  * @return array [] => 一条SQL语句
  */
-function cm_mt_conm__example_sync($CMMr, $CMFl) {}
+function cm_mt_conm__example_sync($CMMR) {}
+
+/**
+ * 删除模型时执行的SQL语句（必须）
+ * @return array [] => 一条SQL语句
+ */
+function cm_mt_conm__example_delete($CMMr) {}
 
 /**
  * 填充 CMTL 的 _info 键数据。(可选)
@@ -40,3 +46,4 @@ function cm_mt_conm__example_sync($CMMr, $CMFl) {}
  * @return void
  */
 function cm_mt_conm__example_fill_info(& $info, $set) {}
+

@@ -1,12 +1,12 @@
 <?php 
 /**
- * 数字 字段类型
+ * 联动菜单 字段类型
  * 2011-10-17
  * 
  * @package default
  * @filesource
  */
-function cm_ft_conm__number_sql($set, $rdb_type = NULL)
+function cm_ft_tree__linkage_sql($set, $rdb_type = NULL)
 {//{{{
 	//todo 目前 $rdb_type 参数无效。
 	$minnumber = intval($set['minnumber']);
@@ -15,7 +15,7 @@ function cm_ft_conm__number_sql($set, $rdb_type = NULL)
 	$unsigned = $set['minnumber'] >= 0 ? 'UNSIGNED' : '';
 	return "{$field_type}(10) {$unsigned} NOT NULL DEFAULT '{$defaultvalue}'";
 }//}}}
-function cm_ft_conm__number_FString($set)
+function cm_ft_tree__linkage_FString($set)
 {//{{{
 	$minnumber = intval($set['minnumber']);
 	$defaultvalue = $set['decimaldigits'] == 0 ? intval($set['defaultvalue']) : floatval($set['defaultvalue']);
@@ -24,23 +24,19 @@ function cm_ft_conm__number_FString($set)
 	return "int(10){$unsigned}|NO|{$defaultvalue}|";
 }//}}}
 
-function cm_ft_conm__number_setting($setting)
+function cm_ft_tree__linkage_setting($set)
 {//{{{
-	?>
-<table cellpadding="2" cellspacing="1">
-	<tr> 
-      <td>文本框长度</td>
-      <td><input type="text" name="setting[size]" value="<?=$size?>" size="10"></td>
-    </tr>
-	<tr> 
-      <td>默认值</td>
-      <td><input type="text" name="setting[defaultvalue]" value="<?=$defaultvalue?>" size="40"></td>
-    </tr>
-</table>
-	<?php
+	echo 
+		'字段类型',
+		hd("radio|name=setting[field_type]|value={$set['field_type']}|_default=int", array("_data" => array("int" => 'int',),)),
+		'<br/>',
+		hd("text|label=首层PID|name=setting[default_pid]|value={$set['default_pid']}|br"),
+		hd("textarea|label=查询SQL语句|name=setting[sql]", array("value" => $set['sql'],)),
+		"(返回 id, name 两个字段，用 {DB_PRE} 表示表前序，用 {pid} 表示父ID)"
+		;
 }//}}}
 
-function cm_ft_conm__number_form($field, $value, $set)
+function cm_ft_tree__linkage_form($field, $value, $set)
 {//{{{
 	return <<<EOT
 <input type="text" name="info[{$field}]" value="{$value}" />
@@ -61,27 +57,27 @@ EOT;
 	return form::text('info['.$field.']', $field, $value, 'text', $size, $css, $formattribute, $minlength, $maxlength).$data;
 }//}}}
 
-function cm_ft_conm__number_input()
+function cm_ft_tree__linkage_input()
 {//{{{
 	
 }//}}}
 
-function cm_ft_conm__number_update()
+function cm_ft_tree__linkage_update()
 {//{{{
 	
 }//}}}
 
-function cm_ft_conm__number_search_form($field, $value, $fieldinfo)
+function cm_ft_tree__linkage_search_form($field, $value, $fieldinfo)
 {//{{{
 	return form::text($field, $field, $value, 'text', 20);
 }//}}}
 
-function cm_ft_conm__number_search($field, $value)
+function cm_ft_tree__linkage_search($field, $value)
 {//{{{
 	return $value === '' ? '' : " `$field` LIKE '%$value%' ";
 }//}}}
 
-function cm_ft_conm__number_output($field, $value)
+function cm_ft_tree__linkage_output($field, $value)
 {//{{{
 	$value = htmlspecialchars($value);
 	return output::style($value, $content['style']);
