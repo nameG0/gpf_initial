@@ -98,7 +98,7 @@ class i
 	 */
 	private function _get($key)
 	{//{{{
-		return isset($from_first[$key]) ? $from_first[$key] : $from_second[$key];
+		return isset($this->from_first[$key]) ? $this->from_first[$key] : $this->from_second[$key];
 	}//}}}
 	/**
 	 * 增加一个提取数据
@@ -123,8 +123,19 @@ class i
 		$arg = func_get_args();
 		foreach ($arg as $k)
 			{
-			$value = $this->_get($k);
-			$this->_set($k, intval($value));
+			$this->_set($k, intval($this->_get($k)));
+			}
+		return $this;
+	}//}}}
+	/**
+	 * 正常取值。以参数名分隔多个键。
+	 */
+	function val()
+	{//{{{
+		$arg = func_get_args();
+		foreach ($arg as $k)
+			{
+			$this->_set($k, $this->_get($k));
 			}
 		return $this;
 	}//}}}
