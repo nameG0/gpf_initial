@@ -28,3 +28,12 @@ function tpl_admin($name, $mod = CTRL_MOD)
 	log::add("{$mod}/{$name}::{$path}", log::INFO, __FILE__, __LINE__, __FUNCTION__);
 	return $path;
 }//}}}
+
+/**
+ * 临时定义一个提示用函数
+ */
+function showmessage($msg)
+{//{{{
+	echo "showmessage:{$msg}";
+	exit;
+}//}}}

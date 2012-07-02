@@ -6,27 +6,27 @@
  * @filesource
  */
 
-function cm_mt_conm__content_default_field()
+function cm_mt_cms__content_default_field()
 {//{{{
 	return array(
-		"contentid" => array(
-			"name" => '',
-			"formtype" => '',
-			"iscore" => true,
-			),
+		"contentid" => array("name" => '文章ID', "formtype" => 'conm/auto_increment', "iscore" => true, "setting" => array("key_type" => 'pri',),),
 		);
 }//}}}
-function cm_mt_conm__content_is_make($CMMr)
+function cm_mt_cms__content_is_make($CMMr)
 {//{{{
 	$o_db = rdb::obj();
 
-	$table_name = RDB_PRE . $CMMr['tablename'];
+	//todo 这个 c_ 表前序应可以配置。作为模块常量参数。
+	$table_name = RDB_PRE . 'c_' . $CMMr['tablename'];
 	return $o_db->table_exists($table_name);
 }//}}}
 
-function cm_mt_conm__content_make($CMMr, $CMFl)
+function cm_mt_cms__content_make($CMMR)
 {//{{{
-	$table_name = RDB_PRE . $CMMr['tablename'];
+	$CMFl = $CMMR['CMFL'];
+	unset($CMMR['CMFL'], $CMFl['_info']);
+
+	$table_name = RDB_PRE . 'c_' . $CMMR['tablename'];
 	$sql = "CREATE TABLE  `{$table_name}` (\n";
 	foreach ($CMFl as $f => $CMFr)
 		{
@@ -34,32 +34,25 @@ function cm_mt_conm__content_make($CMMr, $CMFl)
 		$func_name = "cm_ft_{$mod}__{$name}_sql";
 		if (!function_exists($func_name))
 			{
-			$callback = mod_callback($mod, 'p');
-			foreach ($callback as $k => $v)
-				{
-				$p = "{$v}conm_field/{$name}.func.php";
-				if (is_file($p))
-					{
-					include_once $p;
-					break;
-					}
-				}
+			cm_f_load($CMFr['formtype']);
 			}
-		$sql .= "`{$f}` " . $func_name($CMMr['setting']) . ",\n";
+		$sql .= "`{$f}` " . $func_name($CMFr['setting']) . ",\n";
 		}
 	//去除最后一个,号
 	$sql = substr($sql, 0, -2);
 	$sql .= "\n) ENGINE = MYISAM";
-	return $sql;
+	return array($sql);
 }//}}}
 
 /**
  * 同步表结构
  * @param array $CMFl 有实际表字段的实际字段列表
  */
-function cm_mt_conm__content_sync($CMMr, $CMFl)
+function cm_mt_cms__content_sync($CMMR)
 {//{{{
 	$ret = array();
+	$CMFl = $CMMR['CMFL'];
+	unset($CMMR['CMFL'], $CMFl['_info']);
 
 	//------ 加载字段类型文件 ------
 	$field_list = array();
@@ -69,8 +62,8 @@ function cm_mt_conm__content_sync($CMMr, $CMFl)
 		}
 	cm_f_load($field_list);
 	
-	$FString = cm_m_get_FString($CMMr['tablename']);
-	$table = RDB_PRE . $CMMr['tablename'];
+	$FString = cm_m_get_FString('c_' . $CMMR['tablename']);
+	$table = RDB_PRE . 'c_' . $CMMR['tablename'];
 
 	//------ 添加字段 ------
 	//如果表中原只有一个字段，若把这个字段删除，MySQL会报错，不让删除表中最后一个字段。
@@ -127,7 +120,7 @@ function cm_mt_conm__content_sync($CMMr, $CMFl)
 	return $ret;
 }//}}}
 
-function cm_mt_conm__content_fill_info(& $info, $set)
+function cm_mt_cms__content_fill_info(& $info, $set)
 {//{{{
-	$info['pk'] = $set['pk'];
+	// $info['pk'] = $set['pk'];
 }//}}}

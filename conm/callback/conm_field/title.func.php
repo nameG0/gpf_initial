@@ -18,7 +18,7 @@ function cm_ft_conm__title_FString($set)
 {//{{{
 	if(!$set['maxlength']) $set['maxlength'] = 255;
 	$maxlength = min($set['maxlength'], 255);
-	return "char({$maxlength})|NO||{$set['defaultvalue']}|";
+	return "char({$maxlength})|NO|{$set['defaultvalue']}|";
 }//}}}
 
 function cm_ft_conm__title_setting($setting)
@@ -40,7 +40,7 @@ function cm_ft_conm__title_setting($setting)
 function cm_ft_conm__title_form($field, $value, $fieldinfo)
 {//{{{
 	return <<<EOT
-<input type="text" name="info[{$field}]" value="{$value}" />
+<input type="text" name="data[{$field}]" value="{$value}" />
 EOT;
 
 	global $catid;

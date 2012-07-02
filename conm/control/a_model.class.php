@@ -28,6 +28,7 @@ class ctrl_a_model
 			list($mod, $name) = explode("/", $CMMTid);
 			?>
 			<div >
+				(<?=$r['modelid']?>)
 				<?=$r['name']?>
 				<a href="<?=gpf::url(".a_model_field.manage.&modelid={$r['modelid']}")?>">管理字段</a>
 				<a href="<?=gpf::url("..sync.&modelid={$r['modelid']}")?>">同步</a>
@@ -106,7 +107,7 @@ class ctrl_a_model
 	 */
 	function form()
 	{//{{{
-		$modelid = _g('modelid', 'int');
+		$modelid = i::g()->int('modelid')->end();
 
 		$CMMr = array();
 		if ($modelid)
@@ -221,7 +222,7 @@ class ctrl_a_model
 	function sync()
 	{//{{{
 		//todo 加一个参数令 is_sync=1 时可强制同步。
-		$modelid = _g('modelid', 'int');
+		$modelid = i::g()->int('modelid')->end();
 
 		$CMMR = conm_CMMR($modelid);
 		if (!$CMMR)
@@ -271,7 +272,7 @@ class ctrl_a_model
 	 */
 	function ajax_setting_form()
 	{//{{{
-		$modeltype = _g('modeltype', 'int');
+		$modeltype = i::g()->int('modeltype')->end();
 
 		log::is_print(0);
 

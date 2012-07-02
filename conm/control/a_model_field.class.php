@@ -54,7 +54,7 @@ class ctrl_a_model_field
 	 */
 	function form()
 	{//{{{
-		$field_id = _g('field_id', 'int');
+		$field_id = i::g()->int('field_id')->end();
 
 		if ($field_id)
 			{
@@ -70,8 +70,8 @@ class ctrl_a_model_field
 	}//}}}
 	function manage()
 	{//{{{
-		$modelid = _g('modelid', 'intval');
-		$modelid = intval($modelid);
+		$modelid = i::g()->int('modelid')->end();
+
 		if (!$modelid)
 			{
 			echo 'require modelid';
@@ -200,7 +200,7 @@ class ctrl_a_model_field
 	{//{{{
 		log::is_print(false);
 
-		$CMFTid = _g('field_id');
+		$CMFTid = i::g()->int('field_id')->end();
 
 		cm_f_load($CMFTid);
 		list($mod, $name) = explode("/", $CMFTid);

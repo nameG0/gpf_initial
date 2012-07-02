@@ -11,16 +11,16 @@ class ctrl_a_content
 	function __construct()
 	{//{{{
 		//require_once 'admin/process.class.php';
-		require_once CONTENT_ROOT . 'include/content.class.php';
+		require_once CMS_PATH . 'include/content.class.php';
 		//require_once 'attachment.class.php';
 		$c = new content();
 
-		if(is_numeric($contentid) && $contentid>0)
-			{
-			$data = $c->get($contentid);
-			$catid = $data['catid'];
-			$modelid = $CATEGORY[$catid]['modelid'];
-			}
+		// if(is_numeric($contentid) && $contentid>0)
+			// {
+			// $data = $c->get($contentid);
+			// $catid = $data['catid'];
+			// $modelid = $CATEGORY[$catid]['modelid'];
+			// }
 
 		$modelid = intval($modelid);
 		$catid = intval($catid);
@@ -43,7 +43,7 @@ class ctrl_a_content
 		$submenu = $allowprocessids = array();
 		if($allow_add)
 			{
-			$submenu[] = array('<font color="red">发布信息</font>', admin_url("..add.&modelid={$modelid}.catid"));
+			$submenu[] = array('<font color="red">发布信息</font>', gpf::url("..add.&modelid={$modelid}.catid"));
 			//$submenu[] = array('我发布的信息', '?mod='.$mod.'&file='.$file.'&action=my&catid='.$catid);
 			}
 		if($allow_check)
@@ -71,7 +71,7 @@ class ctrl_a_content
 			}
 		if($allow_manage)
 			{
-			$submenu[] = array('管理', admin_url("..manage.&modelid={$modelid}.catid"));
+			$submenu[] = array('管理', gpf::url("..manage.&modelid={$modelid}.catid"));
 			// $submenu[] = array('回收站', '?mod='.$mod.'&file='.$file.'&action=recycle&catid='.$catid);
 			// $submenu[] = array('碎片', '?mod='.$mod.'&file='.$file.'&action=block&catid='.$catid);
 			// $submenu[] = array('定时发布', '?mod='.$mod.'&file='.$file.'&action=publish&catid='.$catid);
@@ -81,71 +81,104 @@ class ctrl_a_content
 			$submenu[] = array('浏览', '?mod='.$mod.'&file='.$file.'&action=browse&catid='.$catid);
 			}
 		//$submenu[] = array('搜索', '?mod='.$mod.'&file='.$file.'&action=search&catid='.$catid);
-		$menu = admin_menu($CATEGORY[$catid]['catname'].' 栏目管理', $submenu);
+		// $menu = admin_menu($CATEGORY[$catid]['catname'].' 栏目管理', $submenu);
 
 		//if(!isset($processid) || !in_array($processid, $allow_processids)) $processid = $allow_processids[0];
 	}//}}}
 	function add()
 	{//{{{
+		$modelid = i::g()->int('modelid')->end();
+
 		if(!$modelid) showmessage('缺少 modelid 参数!');
 		log::add("modelid[{$modelid}]", log::INFO, __FILE__, __LINE__);
 		//if(!$priv_role->check('catid', $catid, 'add') && !$allow_manage) showmessage('无发布权限！');
 
 		if (isset($_POST["dosubmit"]))
 			{
+			a::i($info)->fpost('data');
+
 			//增加判断如果发布时间大于当前时间则设定为定时发布状态98
-			$info['status'] = ($status == 2 || $status == 3) ? $status : ($allow_manage ? ($PHPCMS['publish'] && (strtotime($info['inputtime']) > TIME) ? 98 : 99)  : 3);
+			// $info['status'] = ($status == 2 || $status == 3) ? $status : ($allow_manage ? ($PHPCMS['publish'] && (strtotime($info['inputtime']) > TIME) ? 98 : 99)  : 3);
+			//ggzhu@2012-06-28 暂时直接设置状态
+			$info['status'] = $status;
 
 			if(isset($info['inputtime'])) $info['updatetime'] = $info['inputtime'];
-			$contentid = $c->add($info, $cat_selected);
+			// $contentid = $c->add($info, $cat_selected);
+			//ggzhu@2012-06-28 为求开发速度，直接在控制器中保存数据到数据库
+			$CMMR = conm_CMMR($modelid);
+			//保存到数据表
+			$o_db = rdb::obj();
+			$o_db->insert(RDB_PRE . 'cms_content', array("modelid" => $modelid,));
+			$contentid = $o_db->insert_id();
+			$info['contentid'] = $contentid;
+			$info = conm_fill($CMMR['CMFL'], $info);
+			$o_db->insert(RDB_PRE . 'c_' . $CMMR['tablename'], $info);
 
 			//如果状态为定时发布，文章id作为key，发布时间作为value，写入缓存
-			if($info['status']==98) {
-				$tmp_publisharr = cache_read('publish.php');
-				$tmp_publisharr[$contentid] = strtotime($info['updatetime']);
-				cache_write('publish.php', $tmp_publisharr);
-				unset($tmp_publisharr);
-			}
+			//ggzhu@2012-06-28 暂不支持定时发布
+			// if($info['status']==98) {
+				// $tmp_publisharr = cache_read('publish.php');
+				// $tmp_publisharr[$contentid] = strtotime($info['updatetime']);
+				// cache_write('publish.php', $tmp_publisharr);
+				// unset($tmp_publisharr);
+			// }
 
-			if($contentid) showmessage('发布成功！', admin_url("..add..catid,modelid"));
+			if($contentid) showmessage('发布成功！', gpf::url("..add..catid,modelid"));
 			}
 		else
 			{
 			$data['catid'] = $catid;
 			$data['template'] = isset($template_show) ? $template_show :$MODEL[$modelid]['template_show'];
 
-			require CONTENT_ROOT . 'include/content_form.class.php';
-			$content_form = new content_form($modelid);
-			$forminfos = $content_form->get($data);
-			require_once CATEGORY_ROOT . 'include/tree.class.php';
-			foreach($CATEGORY as $cid=>$c)
-				{
-				if($c['module'] != $mod || $c['type'] > 0) continue;
-				$checkbox = $c['child'] ? '' : '<input type="checkbox" name="cat_selected[]" value="'.$cid.'">';
-				$cats[$cid] = array('id'=>$cid, 'parentid'=>$c['parentid'], 'name'=>$c['catname'], 'checkbox'=>$checkbox);
-				}
-			$str = "<tr><td style='height:22px;padding:0 0 0 10px;'>\$spacer\$name</td><td>\$checkbox</td></tr>";
-			$tree = new tree($cats);
-			$categorys = $tree->get_tree(0, $str);
+			$CMMR = conm_CMMR($modelid);
+			// require CONTENT_ROOT . 'include/content_form.class.php';
+			// $content_form = new content_form($modelid);
+			// $forminfos = $content_form->get($data);
+			$forminfos = conm_form($CMMR['CMFL'], $data);
+			// require_once CATEGORY_ROOT . 'include/tree.class.php';
+			// foreach($CATEGORY as $cid=>$c)
+				// {
+				// if($c['module'] != $mod || $c['type'] > 0) continue;
+				// $checkbox = $c['child'] ? '' : '<input type="checkbox" name="cat_selected[]" value="'.$cid.'">';
+				// $cats[$cid] = array('id'=>$cid, 'parentid'=>$c['parentid'], 'name'=>$c['catname'], 'checkbox'=>$checkbox);
+				// }
+			// $str = "<tr><td style='height:22px;padding:0 0 0 10px;'>\$spacer\$name</td><td>\$checkbox</td></tr>";
+			// $tree = new tree($cats);
+			// $categorys = $tree->get_tree(0, $str);
 			$pagetitle = $CATEGORY[$catid]['catname'].'-发布';
 			@header("Cache-control: private");
-			include admin_tpl('content_add');
+			include tpl_admin('content_add');
 			}
 	}//}}}
 	function edit()
 	{//{{{
-		if($dosubmit)
+		$contentid = i::g()->int('contentid')->end();
+
+		if (isset($_POST["dosubmit"]))
 			{
+			a::i($info)->fpost('data');
+			a::i($keep)->fpost('keep');
+
+			$r = siud::find('cms_content')->tfield('modelid')->wis('contentid', $contentid)->ing();
+			$modelid = $r['modelid'];
 			$info['status'] = ($status == 2 || $status == 3) ? $status : 99;
-			$c->edit($contentid, $info);
+			$CMMR = conm_CMMR($modelid);
+			$data = conm_fill($CMMR['CMFL'], $info, $keep);
+			siud::save('c_' . $CMMR['tablename'])->data($data)->pk('contentid')->ing();
+			// $c->edit($contentid, $info);
 			showmessage('修改成功！', $forward);
 			}
 		else
 			{
-			require CONTENT_ROOT . 'include/content_form.class.php';
-			$content_form = new content_form($modelid);
-			$forminfos = $content_form->get($data);
-			include admin_tpl('content_edit');
+			// require CONTENT_ROOT . 'include/content_form.class.php';
+			// $content_form = new content_form($modelid);
+			// $forminfos = $content_form->get($data);
+			$r = siud::find('cms_content')->tfield('modelid')->wis('contentid', $contentid)->ing();
+			$modelid = $r['modelid'];
+			$CMMR = conm_CMMR($modelid);
+			$data = siud::find('c_' . $CMMR['tablename'])->wis('contentid', $contentid)->ing();
+			$forminfos = conm_form($CMMR['CMFL'], $data);
+			include tpl_admin('content_edit');
 			}
 	}//}}}
 	function view()
@@ -156,7 +189,7 @@ class ctrl_a_content
 		$coutput = new content_output();
 		$info = $coutput->get($data);
 
-		include admin_tpl('content_view');
+		include tpl_admin('content_view');
 	}//}}}
 	function log_list()
 	{//{{{
@@ -165,7 +198,7 @@ class ctrl_a_content
 		extract($content);
 		$log->set('contentid', $contentid);
 		$data = $log->listinfo($where, $page, 20);
-		include admin_tpl('content_log');
+		include tpl_admin('content_log');
 	}//}}}
 	function my_contribute()
 	{//{{{
@@ -183,7 +216,7 @@ class ctrl_a_content
 		if($status != -1) $where .= " AND `status`='$status'";
 		$infos = $c->listinfo($where, 'listorder DESC,contentid DESC', $page, 20);
 		$pagetitle = '我的信息-管理';
-		include admin_tpl('content_my');
+		include tpl_admin('content_my');
 	}//}}}
 	function my_cancelcontribute()
 	{//{{{
@@ -209,7 +242,7 @@ class ctrl_a_content
 			$content_form = new content_form($modelid);
 			$forminfos = $content_form->get($data);
 
-			include admin_tpl('content_edit');
+			include tpl_admin('content_edit');
 			}
 	}//}}}
 	function my_delete()
@@ -228,7 +261,7 @@ class ctrl_a_content
 		$coutput = new content_output();
 		$info = $coutput->get($data);
 
-		include admin_tpl('content_view');
+		include tpl_admin('content_view');
 	}//}}}
 	function check()
 	{//{{{
@@ -241,7 +274,7 @@ class ctrl_a_content
 		extract($process);
 
 		$pagetitle = $CATEGORY[$catid]['catname'].'-审核';
-		include admin_tpl('content_check');
+		include tpl_admin('content_check');
 	}//}}}
 	function publish()
 	{//{{{
@@ -277,7 +310,7 @@ class ctrl_a_content
 			$process = $p->get($processid, 'passname,passstatus,rejectname,rejectstatus');
 			extract($process);
 		}
-		include admin_tpl('content_publish');
+		include tpl_admin('content_publish');
 	}//}}}
 	function check_title()
 	{//{{{
@@ -295,7 +328,7 @@ class ctrl_a_content
 	{//{{{
 		$where = "`catid`=$catid AND `status`=99";
 		$infos = $c->listinfo($where, 'listorder DESC,contentid DESC', $page, 20);
-		include admin_tpl('content_browse');
+		include tpl_admin('content_browse');
 	}//}}}
 	function search()
 	{//{{{
@@ -304,7 +337,7 @@ class ctrl_a_content
 			require CONTENT_ROOT . 'include/content_search.class.php';
 			$content_search = new content_search();
 			$infos = $content_search->data($page, 20);
-			include admin_tpl('content_search_list');
+			include tpl_admin('content_search_list');
 			}
 		else
 			{
@@ -314,7 +347,7 @@ class ctrl_a_content
 			$orderfields = $content_search_form->get_order();
 
 			$pagetitle = $CATEGORY[$catid]['catname'].'-搜索';
-			include admin_tpl('content_search');
+			include tpl_admin('content_search');
 			}
 	}//}}}
 	function recycle()
@@ -323,7 +356,7 @@ class ctrl_a_content
 		$infos = $c->listinfo("catid=$catid AND status=0", 'listorder DESC,contentid DESC', $page, 20);
 
 		$pagetitle = $CATEGORY[$catid]['catname'].'-回收站';
-		include admin_tpl('content_recycle');
+		include tpl_admin('content_recycle');
 	}//}}}
 	function pass()
 	{//{{{
@@ -405,7 +438,7 @@ class ctrl_a_content
 			}
 		else
 			{
-			include admin_tpl('content_link');
+			include tpl_admin('content_link');
 			}
 	}//}}}
 	function block()
@@ -447,7 +480,7 @@ class ctrl_a_content
 		$head['keywords'] = $meta_keywords;
 		$head['description'] = $meta_description;
 		include admin_template('phpcms', $template);
-		include admin_tpl('block_ajax', 'phpcms');
+		include tpl_admin('block_ajax', 'phpcms');
 	}//}}}
 	function category()
 	{//{{{
@@ -510,6 +543,8 @@ class ctrl_a_content
 	 */
 	function manage()
 	{//{{{
+		$modelid = i::g()->int('modelid')->end();
+
 		$where = '1 ';
 		if ($catid)
 			{
@@ -548,6 +583,8 @@ class ctrl_a_content
 				if($contentid) $where .= " AND `contentid`=$contentid";
 				}
 			}
+		$CMMR = conm_CMMR($modelid);
+		list($result, $pages, $total) = siud::select('c_' . $CMMR['tablename'])->pagesize(20)->ing();
 		// $infos = $c->listinfo($where, '`listorder` DESC,`contentid` DESC', $page, 20);
 
 		$pagetitle = $CATEGORY[$catid]['catname'].'-管理';
@@ -561,6 +598,6 @@ class ctrl_a_content
 		// $POS = $POSID;
 		// $POS[0] = '不限推荐位';
 
-		include admin_tpl('content_manage');
+		include tpl_admin('content_manage');
 	}//}}}
 }
