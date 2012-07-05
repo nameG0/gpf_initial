@@ -11,7 +11,7 @@
 <?php
 $CMFTl = cm_f_field_list();
 ?>
-<select name="data[formtype]" id="modeltype">
+<select name="data[formtype]" id="formtype">
 	<option value="">请选择</option>
 <?php
 foreach ($CMFTl as $k => $v)
@@ -49,8 +49,8 @@ hd("text|label=正则验证|name=data[pattern]|value={$data['pattern']}|br")
 </form>
 <script type="text/javascript">
 <!--
-$('#modeltype').change(function (){
-	$('#field_setting').load('<?=ctrl_url('..ajax_setting')?>&field_id=' + $('#modeltype').val());
+$('#formtype').change(function (){
+	$('#field_setting').load('<?=ctrl_url('..ajax_setting')?>&field_id=' + $('#formtype').val());
 });
 //-->
 </script>

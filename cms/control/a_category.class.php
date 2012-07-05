@@ -66,27 +66,32 @@ class ctrl_a_category
 	}//}}}
 	function edit()
 	{//{{{
-		$catid = intval($catid);
+		global $CATEGORY;
+
+		list($catid, $parentid) = i::g()->int('catid', 'parentid')->end();
+
 		if(!$catid) showmessage($LANG['illegal_parameters']);
 		if($catid == $category['parentid']) showmessage('当前栏目不能与上级栏目相同');
-		if($dosubmit)
+		if (isset($_POST["dosubmit"]))
 			{
+			list($category, $setting) = i::p()->val('category', 'setting')->end();
+
 			if(!$category['catname']) showmessage($LANG['category_name_not_null']);
 			$category['catname'] = trim($category['catname']);
 			$category['catdir'] = trim($category['catdir']);
-			$cat->edit($catid, $category, $setting);
+			$this->o_cate->edit($catid, $category, $setting);
 			if($createtype_application && $CATEGORY[$catid]['child'])
 				{
-				$cat->update_child($catid);
+				$this->o_cate->update_child($catid);
 				}
 			//$priv_group->update('catid', $catid, $priv_groupid);
 			//$priv_role->update('catid', $catid, $priv_roleid);
-			showmessage('操作成功！开始更新网站地图...', admin_url("..manage"));
+			showmessage('操作成功！开始更新网站地图...', gpf::url("..manage"));
 			}
 		else
 			{
-			$category = $cat->get($catid);
-			@extract(new_htmlspecialchars($category));
+			$category = $this->o_cate->get($catid);
+			@extract(hd("html", $category));
 			/* 如果没有设置是否生成静态选项，那么则按照模型中的初始化 */
 			if(!isset($ishtml))
 				{

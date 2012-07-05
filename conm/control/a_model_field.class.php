@@ -200,7 +200,8 @@ class ctrl_a_model_field
 	{//{{{
 		log::is_print(false);
 
-		$CMFTid = i::g()->int('field_id')->end();
+		$CMFTid = i::g()->val('field_id')->end();
+
 
 		cm_f_load($CMFTid);
 		list($mod, $name) = explode("/", $CMFTid);

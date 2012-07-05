@@ -32,8 +32,14 @@ function tpl_admin($name, $mod = CTRL_MOD)
 /**
  * 临时定义一个提示用函数
  */
-function showmessage($msg)
+function showmessage($msg, $url = NULL)
 {//{{{
 	echo "showmessage:{$msg}";
+	if ($url)
+		{
+		?>
+		<a href="<?=$url?>">GO</a>
+		<?php
+		}
 	exit;
 }//}}}

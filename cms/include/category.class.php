@@ -28,13 +28,14 @@ class category
 	{
 		$data = $this->db->get_one("SELECT * FROM `$this->table` WHERE `catid`=$catid");
 		if(!$data) return false;
-		if($data['setting'])
-			{
-			$setting = $data['setting'];
-			eval("\$setting = $setting;");
-			unset($data['setting']);
-			if(is_array($setting)) $data = array_merge($data, $setting);
-			}
+		a::i($data)->unsers('setting');
+		// if($data['setting'])
+			// {
+			// $setting = $data['setting'];
+			// eval("\$setting = $setting;");
+			// unset($data['setting']);
+			// if(is_array($setting)) $data = array_merge($data, $setting);
+			// }
 		return $data;
 	}
 
@@ -122,7 +123,7 @@ class category
 	}
 
 	function edit($catid, $category, $setting = array())
-	{
+	{//{{{
 		$parentid = $category['parentid'];
 		$oldparentid = $this->category[$catid]['parentid'];
 		if($parentid != $oldparentid)
@@ -131,11 +132,15 @@ class category
 			}
 
 		$category['module'] = $this->module;
+		if($setting)
+			{
+			a::i($category)->is_adds(true)->set('setting', $setting)->sers('setting');
+			// setting_set($this->table, "catid=$catid", $setting);
+			}
 		$this->db->update($this->table, $category, "catid=$catid");
-		if($setting) setting_set($this->table, "catid=$catid", $setting);
 		if($this->module == 'phpcms' && $category['type'] < 2)
 			{
-			$url = $this->category[$catid]['child'] ? '' : '?mod=phpcms&file=content&action=manage&catid='.$catid;
+			$url = $this->category[$catid]['child'] ? '' : gpf::url("cms.a_content.manage.&catid={$catid}");
 			//$this->menu->update('catid_'.$catid, array('parentid'=>$this->menu->menuid('catid_'.$parentid), 'name'=>$category['catname'], 'url'=>$url));
 			//if($parentid) $this->menu->update('catid_'.$parentid, array('url'=>''));
 			}
@@ -144,14 +149,14 @@ class category
 		_category_cache_catid($catid);
 		$this->cache();
 		return true;
-	}
+	}//}}}
 
 	function link($catid, $category)
-	{
+	{//{{{
 		$this->db->update($this->table, $category, "catid=$catid");
 		$this->cache();
 		return true;
-	}
+	}//}}}
 
 	function page($catid, $category)
 	{
@@ -428,12 +433,15 @@ class category
 
 	function url($catid, $is_update = 1)
 	{
+		//todo 暂时不计算栏目URL
+		return '';
+
 		global $MODEL;
 		$data = $this->get($catid);
 		if(!$data) return false;
 		$this->u->CATEGORY[$catid] = $data;
 		if($this->category[$catid]['type'] == 2) return false;
-		cache_write('category_'.$catid.'.php', $data);
+		// cache_file_write('category_'.$catid.'.php', $data);
 		if($MODEL[$this->category[$catid]['modelid']]['ishtml'])
 			{
 			if(!preg_match('/:\/\//',$data['url']))

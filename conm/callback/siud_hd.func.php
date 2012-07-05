@@ -14,8 +14,11 @@ mod_init('conm');
 function hd_conm__model_select($attr)
 {//{{{
 	$modeltype = cm_m_modeltype($attr['CMMTid']);
-	echo $modeltype;
-	?>
-	<a href="<?=gpf::url("content.model.manage")?>">管理模型</a>
-	<?php
+	$result = siud::select('model')->tfield('modelid, nickname')->wis('modeltype', $modeltype)->ing();
+	$attr['option'] = array();
+	foreach ($result as $k => $r)
+		{
+		$attr['option'][$r['modelid']] = $r['nickname'];
+		}
+	return hd('select', $attr) . "<a href=\"" . gpf::url("content.model.manage") . "\">管理模型</a>";
 }//}}}

@@ -1,12 +1,12 @@
 <?php
-defined('IN_PHPCMS') or exit('Access Denied');
-include admin_tpl('header');
+// defined('IN_PHPCMS') or exit('Access Denied');
+include tpl_admin('header');
 ?>
 <body <?php if($type<2){ ?>onLoad="$('#div_category_urlruleid').load('?mod=<?=$mod?>&file=<?=$file?>&action=urlrule&ishtml=<?=$ishtml?>&type=category&category_urlruleid=<?=$category_urlruleid?>');$('#div_show_urlruleid').load('?mod=<?=$mod?>&file=<?=$file?>&action=show_urlrule&ishtml=<?=$content_ishtml?>&type=show&show_urlruleid=<?=$show_urlruleid?>');"<?php } ?> >
-<?=admin_menu('栏目管理', $submenu)?>
+<?=NULL//admin_menu('栏目管理', $submenu)?>
 <?php if($type == 0){ ?>
 
-<form name="myform" method="post" action="?mod=<?=$mod?>&file=<?=$file?>&action=<?=$action?>&catid=<?=$catid?>">
+<form name="myform" method="post" action="<?=gpf::url("....catid")?>">
 <input type="hidden" name="category[type]" value="<?=$type?>">
 <div class="tag_menu" style="width:99%;margin-top:10px;">
 	<ul>
@@ -22,22 +22,22 @@ include admin_tpl('header');
   <tr>
   <th width='30%'><font color="red">*</font> <strong>上级栏目</strong></th>
   <td>
-<?=form::select_category('phpcms', 0, 'category[parentid]', 'parentid', '无（作为一级栏目）', $parentid,'',2)?>
+<?=hd("cms.select_category|module=cms|parentid=0|name=category[parentid]|id=parentid|alt=无（作为一级栏目）|catid={$parentid}|type=2")?>
   </td>
   </tr>
      <tr>
       <th><strong>绑定模型</strong></th>
       <td>
-	  <?php if(($items =$cat->count($catid))){ ?>
+	  <?php if(false && ($items =$this->o_cate->count($catid))){ ?>
            <input type="hidden" name="category[modelid]" value="<?=$modelid?>"> <?=$MODEL[$modelid]['name']?>（由于<?=$catname?>栏目存在<?=$items?>条信息，不能更改模型）
 	  <?php }else{ ?>
-	       <?=form::select_model('category[modelid]', 'modelid', '', $modelid)?>
+		<?=hd("conm.model_select|name=category[modelid]|CMMTid=cms/content")?>
 	  <?php } ?>
 	  </td>
     </tr>
     <tr>
       <th><font color="red">*</font> <strong>栏目名称</strong></th>
-      <td><input name='category[catname]' type='text' id='catname' value='<?=$catname?>' size='40' maxlength='50' require="true" datatype="limit" min="1" max="50" msg="字符长度范围必须为1到50位" msgid="msgid1"> <?=form::style('category[style]',  $style)?><span id="msgid1"/></td>
+      <td><input name='category[catname]' type='text' id='catname' value='<?=$catname?>' size='40' maxlength='50' require="true" datatype="limit" min="1" max="50" msg="字符长度范围必须为1到50位" msgid="msgid1"> <?=1//form::style('category[style]',  $style)?><span id="msgid1"/></td>
     </tr>
     <tr>
       <th><font color="red">*</font> <strong>栏目目录</strong></th>
@@ -45,7 +45,7 @@ include admin_tpl('header');
     </tr>
     <tr>
       <th><strong>栏目图片</strong></th>
-      <td><input name='category[image]' type='text' id='image' value='<?=$image?>' size='40' maxlength='50'> <?=file_select('image', $catid, 1)?></td>
+      <td><input name='category[image]' type='text' id='image' value='<?=$image?>' size='40' maxlength='50'> <?=1//file_select('image', $catid, 1)?></td>
     </tr>
     <tr>
       <th><strong>栏目介绍</strong><br></th>
@@ -53,7 +53,7 @@ include admin_tpl('header');
     </tr>
      <tr>
       <th><strong>工作流方案</strong></th>
-      <td><?=form::select(cache_read('workflow.php'), 'setting[workflowid]', 'workflowid', $workflowid)?>  <a href="?mod=phpcms&file=workflow&forward=<?=urlencode(URL)?>">管理工作流方案</a></td>
+      <td><?=1//form::select(cache_read('workflow.php'), 'setting[workflowid]', 'workflowid', $workflowid)?>  <a href="?mod=phpcms&file=workflow&forward=<?=urlencode(URL)?>">管理工作流方案</a></td>
     </tr>
 	<tr>
       <th width='30%'><strong>在导航栏显示</strong></th>
@@ -244,12 +244,12 @@ include admin_tpl('header');
   <caption>修改单网页</caption>
   <th width='30%'><strong>上级栏目</strong></th>
   <td>
-<?=form::select_category('phpcms', 0, 'category[parentid]', 'parentid', '无（作为一级栏目）', $parentid,'',2)?>  <font color="red">*</font>
+<?=1//form::select_category('phpcms', 0, 'category[parentid]', 'parentid', '无（作为一级栏目）', $parentid,'',2)?>  <font color="red">*</font>
   </td>
   </tr>
     <tr>
       <th><strong>单网页名称</strong></th>
-      <td><input name='category[catname]' type='text' id='catname' value='<?=$catname?>' size='40' maxlength='50' require="true" datatype="require" msg="单网页名称不能为空"> <?=form::style('category[style]', $style)?>  <font color="red">*</font></td>
+      <td><input name='category[catname]' type='text' id='catname' value='<?=$catname?>' size='40' maxlength='50' require="true" datatype="require" msg="单网页名称不能为空"> <?=1//form::style('category[style]', $style)?>  <font color="red">*</font></td>
     </tr>
     <tr>
       <th><strong>单网页英文名</strong></th>
@@ -283,11 +283,11 @@ include admin_tpl('header');
     </tr>
     <tr>
       <th width='30%'><strong>修改权限</strong></th>
-      <td><?=form::checkbox($ROLE, 'priv_roleid', 'priv_roleid', $priv_roleids)?></td>
+      <td><?=1//form::checkbox($ROLE, 'priv_roleid', 'priv_roleid', $priv_roleids)?></td>
     </tr>
     <tr>
       <th width='30%'><strong>查看权限</strong></th>
-      <td><?=form::checkbox($GROUP, 'priv_groupid', 'priv_groupid', $priv_groupids)?></td>
+      <td><?=1//form::checkbox($GROUP, 'priv_groupid', 'priv_groupid', $priv_groupids)?></td>
     </tr>
     <tr>
       <th width='30%'><strong>META Title（单网页标题）</strong><br/>针对搜索引擎设置的标题</th>
@@ -332,12 +332,12 @@ function CheckForm(){
   <tr>
   <th width='25%'><strong>上级栏目</strong></th>
   <td>
-<?=form::select_category('phpcms', 0, 'category[parentid]', 'parentid', '无（作为一级栏目）', $parentid,'',2)?>  <font color="red">*</font>
+<?=1//form::select_category('phpcms', 0, 'category[parentid]', 'parentid', '无（作为一级栏目）', $parentid,'',2)?>  <font color="red">*</font>
   </td>
   </tr>
     <tr>
       <th><strong>链接名称</strong></th>
-      <td><input name='category[catname]' type='text' id='catname' value="<?=$catname?>" size='40' maxlength='50'> <?=form::style('category[style]', $style)?>  <font color="red">*</font></td>
+      <td><input name='category[catname]' type='text' id='catname' value="<?=$catname?>" size='40' maxlength='50'> <?=1//form::style('category[style]', $style)?>  <font color="red">*</font></td>
     </tr>
     <tr>
       <th><strong>链接图片</strong></th>
