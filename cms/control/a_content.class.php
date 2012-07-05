@@ -166,6 +166,7 @@ class ctrl_a_content
 			$data = conm_fill($CMMR['CMFL'], $info, $keep);
 			siud::save('c_' . $CMMR['tablename'])->data($data)->pk('contentid')->ing();
 			// $c->edit($contentid, $info);
+			$forward = gpf::url("..edit..contentid");
 			showmessage('修改成功！', $forward);
 			}
 		else

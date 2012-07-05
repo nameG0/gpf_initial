@@ -1,27 +1,23 @@
 <?php
-/**
- * 多文件上传
- * 2011-10-15
- * 
- * @package default
- * @filesource
- */
-
-function content_field_downfiles_add($tablename, $info, $setting)
+/*
+单文件上传
+2012-07-05
+*/
+function cm_ft_attachment__downfile_add($tablename, $info, $setting)
 {//{{{
 	global $db;
 	$sql = "ALTER TABLE `{$tablename}` ADD `{$info['field']}` TEXT NOT NULL";
 	$db->query($sql);
 }//}}}
 
-function content_field_downfiles_drop($info, $setting)
+function cm_ft_attachment__downfile_drop($info, $setting)
 {//{{{
 	global $db;
 	$sql = "ALTER TABLE `{$tablename}` DROP `{$field}` ";
 	$db->query($sql);
 }//}}}
 
-function content_field_downfiles_change($tablename, $info, $setting)
+function cm_ft_attachment__downfile_change($tablename, $info, $setting)
 {//{{{
 	global $db;
 	$sql = "ALTER TABLE `{$tablename}` CHANGE `{$info['field']}` `{$info['field']}` TEXT NOT NULL";
@@ -29,42 +25,44 @@ function content_field_downfiles_change($tablename, $info, $setting)
 	//$db->query($sql);
 }//}}}
 
-function content_field_downfiles_setting($info, $setting)
+function cm_ft_attachment__downfile_setting($info, $setting)
 {//{{{
 	$setting['size'] = $setting['size'] ? $setting['size'] : 50;
 	?>
-	<table cellpadding="2" cellspacing="1">
-		<tr> 
-	      <td>字段长度</td>
-	      <td><input type="text" name="setting[size]" value="<?=$setting['size']?>" size="5"></td>
-	    </tr>
-		<tr> 
-	      <td>文件下载方式</td>
-	      <td>
-	      <label>
-	      <input type="radio" name="setting[downloadtype]" value="0" <?=($setting['downloadtype'] == 0 ? 'checked' : '')?> /> 链接文件地址
-	      </label>
-	      <label>
-	      <input type="radio" name="setting[downloadtype]" value="1" <?=($setting['downloadtype'] == 1 ? 'checked' : '')?> /> 通过PHP读取
-	      </label>
-	      </td>
-	    </tr>
-	    <tr>
-	    	<td>是否记录到附件表</td>
-		<td>
-		<label>
-		<input name="setting[is_insert_attachment]" type="radio" value="1" <?=($setting['is_insert_attachment'] ? 'checked' : '')?> />是
-		</label>
-		<label>
-		<input name="setting[is_insert_attachment]" type="radio" value="0" <?=($setting['is_insert_attachment'] ? '' : 'checked')?> />否
-		</label>
-		</td>
-	    </tr>
-	</table>
+<table cellpadding="2" cellspacing="1">
+	<tr> 
+      <td>下载模式</td>
+      <td><input type="radio" name="setting[mode]" value="1" <?=($mode ? 'checked' : '')?> onclick="showservers(1)"/> 镜像模式 <input type="radio" name="setting[mode]" value="0" <?=($mode ? '' : 'checked')?> onclick="showservers(0)"/> 普通下载模式</td>
+    </tr>
+	<tr id="servers" style="display:<?=($mode ? '' : 'none')?>"> 
+      <td>服务器地址</td>
+      <td><textarea name="setting[servers]" rows="3" cols="60"  style="height:80px;width:400px;"><?=$servers?></textarea></td>
+    </tr>
+	<tr> 
+      <td>字段长度</td>
+      <td><input type="text" name="setting[size]" value="<?=$size?>" size="5"></td>
+    </tr>
+	<tr> 
+      <td>文件下载方式</td>
+      <td><input type="radio" name="setting[downloadtype]" value="0" <?=($downloadtype == 0 ? 'checked' : '')?>/> 链接文件地址 <input type="radio" name="setting[downloadtype]" value="1" <?=($downloadtype == 1 ? 'checked' : '')?>/> 通过PHP读取</td>
+    </tr>
+</table>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+	function showservers(flag)
+	{
+		if(flag) {
+			$('#servers').css('display','');
+		} else {
+			$('#servers').css('display','none');
+		}
+	}
+//-->
+</SCRIPT>
 	<?php
 }//}}}
 
-function content_field_downfiles_form($field, $value, $setting)
+function cm_ft_attachment__downfile_form($field, $value, $setting)
 {//{{{
 	global $catid;
 	$atta = array();
@@ -122,7 +120,7 @@ function _AddInputFile(Field)
 	return $string;
 }//}}}
 
-function content_field_downfiles_save($field, & $data, $setting)
+function cm_ft_attachment__downfile_save($field, & $data, $setting)
 {//{{{
 	$del = $data["{$field}_del"];
 	$desc = $data["{$field}_description"];
@@ -199,7 +197,7 @@ function content_field_downfiles_save($field, & $data, $setting)
 	$data[$field] = join("||", $str_value);
 }//}}}
 
-function content_field_downfiles_output($field, $value, $setting)
+function cm_ft_attachment__downfile_output($field, $value, $setting)
 {//{{{
 	//$contentid = $this->contentid;
 	$downloadtype = $setting['downloadtype'];
@@ -221,8 +219,7 @@ function content_field_downfiles_output($field, $value, $setting)
 	return $result;
 }//}}}
 
-function content_field_downfiles_search()
+function cm_ft_attachment__downfile_search()
 {//{{{
 	
 }//}}}
-?>
