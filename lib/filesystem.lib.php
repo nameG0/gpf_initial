@@ -9,13 +9,13 @@ last_update:
 //==============================
 
 function fileext($filename)
-{
+{//{{{
 	return strtolower(trim(substr(strrchr($filename, '.'), 1, 10)));
-}
+}//}}}
 
 //强制解释 ini 文件，以第一个 = 号分隔键与值, 其它什么都不管,如果一组中出现多个同名键，则以数组形式返回
 function parse_ini_filei($path)
-{
+{//{{{
 	$ini = array();
 	$current_tag = '_';
 	$fp = fopen($path, 'r');
@@ -55,21 +55,21 @@ function parse_ini_filei($path)
 		}
 	fclose($fp);
 	return $ini;
-}
+}//}}}
 //解释一行 ini 字符串, 不包括 [xx] 这样的行, 只解释 xx=xxxx 这样的行
 //return array(key, value)
 function parse_ini_str($ini)
-{
+{//{{{
 	$seek = strpos($ini, '=');
 	$key = trim(substr($ini, 0, $seek));
 	$value = trim(substr($ini, $seek + 1));
 	return array($key, $value);
-}
+}//}}}
 
 //解释一行 dsv 风格字符串
 //$col	为最多解释多少列，0 为不限
 function parse_dsv_str($dsv, $col = 0, $section = ':')
-{
+{//{{{
 	$ret = array();
 	$count = strlen($dsv);
 	$tmp = '';
@@ -101,10 +101,10 @@ function parse_dsv_str($dsv, $col = 0, $section = ':')
 		$ret[] = $tmp;
 		}
 	return $ret;
-}
+}//}}}
 //解释dsv格式文件,支持续行符（/）
 function parse_dsv_file($file, $col = 0)
-{
+{//{{{
 	//echo $file, __FILE__, __LINE__;exit;
 	if (!is_file($file))
 		{
@@ -158,7 +158,7 @@ function parse_dsv_file($file, $col = 0)
 	fclose($fp);
 	//print_r($list);echo __FILE__, __LINE__;exit;
 	return $list;
-}
+}//}}}
 //解释以“%%”分隔记录，每行为dsv风格的键值文件：
 /*
 name:dennis
@@ -171,7 +171,7 @@ name:green
 age:10
 */
 function parse_record_jar_file($file)
-{
+{//{{{
 	$dsv = parse_dsv_file($file, 2);
 	if (!$dsv)
 		{
@@ -198,16 +198,17 @@ function parse_record_jar_file($file)
 		$r = array();
 		}
 	return $ret;
-}
+}//}}}
 //$ret = parse_dsv_str("%%\n");var_dump($ret);
 //$ret = parse_dsv_file('./dsv.txt'); print_r($ret);
 //$ret = parse_record_jar_file('./dsv.txt'); print_r($ret);
 
-//ggzhu 2010-6-25
-//创建一个目录(树)
-//$i	循环最大次数，以防止死循环 -- 1000(1000 层的目录)
+/**
+ * 创建一个目录(树)
+ * @param int $i 循环最大次数，以防止死循环 -- 1000(1000 层的目录)
+ */
 function mkdiri($dir, $mode = 0777, $i = 1000)
-{
+{//{{{
 	if (is_dir($dir))
 		{
 		return true;
@@ -225,7 +226,7 @@ function mkdiri($dir, $mode = 0777, $i = 1000)
 		mkdir($v, $mode);
 		}
 	return true;
-}
+}//}}}
 
 /**
  * 删除指定目录及其下的所有文件和子目录
@@ -242,7 +243,7 @@ function mkdiri($dir, $mode = 0777, $i = 1000)
  */
 //note 睇归
 function rmdiri($dir)
-{
+{//{{{
 	$me = __FUNCTION__;
 	$dir = realpath($dir);
 	// 禁止删除根目录
@@ -281,14 +282,14 @@ function rmdiri($dir)
 	{
 		return false;
 	}
-}
+}//}}}
 
 //2010-6-26 from 08cms
 //$f-是否复制文件夹下文件，$d是否复制搜索下级文件夹
 //require dir_make()
 //note 睇归
 function dir_copy($source,$destination,$f = 1,$d = 1)
-{
+{//{{{
 	if(!is_dir($source)) return false;
 	dir_make($destination,0);
 	if($f || $d){
@@ -304,7 +305,7 @@ function dir_copy($source,$destination,$f = 1,$d = 1)
 		}
 	}
 	return true;
-}
+}//}}}
 
 /*
 //ggzhu 2010-6-26
@@ -460,7 +461,7 @@ function file_all($dir, $i = 10000)
 //计算形像化的文件大小，则自动选择单位为MB或KB
 //$dec 文件大小精确到的位数
 function file_size($size = 0, $dec = 2)
-{
+{//{{{
 	$a = array("B", "KB", "MB", "GB", "TB", "PB");
 	$pos = 0;
 	while ($size >= 1024)
@@ -469,4 +470,4 @@ function file_size($size = 0, $dec = 2)
 		$pos++;
 	}
 	return round($size, $dec) . ' ' . $a[$pos];
-}
+}//}}}

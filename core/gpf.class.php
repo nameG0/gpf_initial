@@ -23,6 +23,7 @@ class gpf
 		mod_init('rdb');
 		mod_init('siud');
 		mod_init('tpl');
+		mod_init('admin');
 		//默认加载的 gpf/lib
 		require_once GPF_PATH_LIB . "input.cls.php";
 		require_once GPF_PATH_LIB . "gpf.func.php";

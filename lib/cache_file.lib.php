@@ -45,6 +45,10 @@ function cache_file_write($path, $data, $mode = GPF_SER)
 		{
 		$content = "<?php\nreturn " . var_export($data, true) . ";\n?>";
 		}
+	if (function_exists('mkdiri'))
+		{
+		mkdiri(dirname($path));
+		}
 	$strlen = file_put_contents($file, $content);
 	@chmod($file, 0777);
 	return $strlen;

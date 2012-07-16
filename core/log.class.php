@@ -231,4 +231,3 @@ class log
 		echo "<br/><br/><br/></div>\n";
 	}//}}}
 }
-?>
