@@ -19,7 +19,7 @@
  * @param int $optgroup
  */
 function hd_cms__select_category($attr)
-{
+{//{{{
 	a::i($attr)->d('module', 'cms')->d('parentid', 0)->d('name', 'catid')->d('id', '')->d('alt', '')->d('catid', 0)->d('property', '')->d('type', 0)->d('optgroup', 0);
 	extract($attr);
 
@@ -43,14 +43,13 @@ function hd_cms__select_category($attr)
 		}
 	$data .= '</select>';
 	return $data;
-}
+}//}}}
 
 //级联式栏目下拉框
 //$name	$id 表单项属性
 //$catid	默认选择的栏目
 function hd_cms__select_categoryi($catid = 0, $name = 'catid', $id = '')
-{
+{//{{{
 	$id = $id ? $id : str_replace(array('[', ']'), array('', ''), $name);
 	return "<input type=\"hidden\" name=\"{$name}\" id=\"{$id}\" value=\"{$catid}\"><span id=\"load_{$id}\"></span><script type=\"text/javascript\">category_load_simple('{$catid}','{$id}');</script>";
-}
-
+}//}}}

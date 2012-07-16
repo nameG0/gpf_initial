@@ -2,7 +2,7 @@
 /**
  * 内容模型相关API
  * 
- * @package default
+ * @package api
  * @filesource
  */
 define('CONM_MODEL_FIELD', 0);

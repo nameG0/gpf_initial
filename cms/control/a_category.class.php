@@ -1,10 +1,18 @@
 <?php
+/**
+ * 管理文章栏目
+ * 
+ * @package default
+ * @filesource
+ */
 class ctrl_a_category
 {
 	private $o_cate = NULL;
 
 	function __construct()
 	{//{{{
+		admin_check();
+
 		// defined('IN_PHPCMS') or exit('Access Denied');
 
 		// require_once CATEGORY_ROOT . 'include/cache.func.php';
@@ -114,9 +122,14 @@ class ctrl_a_category
 	}//}}}
 	function delete()
 	{//{{{
-		if(!array_key_exists($catid, $CATEGORY)) showmessage($LANG['illegal_parameters'], '?mod=phpcms&file=category&action=manage');
-		$cat->delete($catid);
-		showmessage($LANG['operation_success'], '?mod='.$mod.'&file='.$file.'&action=updatecache&forward='.urlencode('?mod=phpcms&file=category&action=manage'));
+		$catid = i::g()->int('catid')->end();
+		$LANG['illegal_parameters'] = '不行';
+		$LANG['operation_success'] = '操作成功';
+		global $CATEGORY;
+
+		if(!array_key_exists($catid, $CATEGORY)) showmessage($LANG['illegal_parameters'], gpf::url("..manage"));
+		$this->o_cate->delete($catid);
+		showmessage($LANG['operation_success'], gpf::url("..updatecache") . '&forward='.urlencode(gpf::url('..manage')));
 	}//}}}
 	function join()
 	{//{{{
@@ -183,7 +196,8 @@ class ctrl_a_category
 	{//{{{
 		//cache_common();
 		cache_category();
-		showmessage($LANG['category_cache_update_success'], admin_url("..manage"));
+		$LANG['category_cache_update_success'] = '缓存更新成功';
+		showmessage($LANG['category_cache_update_success'], gpf::url("..manage"));
 	}//}}}
 	/**
 	 * 管理栏目数据

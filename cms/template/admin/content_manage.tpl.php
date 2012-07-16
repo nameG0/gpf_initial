@@ -4,67 +4,15 @@ include tpl_admin('header');
 ?>
 <body>
 <?=$menu?>
-<form name="search" method="get" action="">
-<input type="hidden" name="mod" value="<?=$mod?>"> 
-<input type="hidden" name="file" value="<?=$file?>"> 
-<input type="hidden" name="action" value="<?=$action?>"> 
-<input type="hidden" name="catid" value="<?=$catid?>">
-<table cellpadding="0" cellspacing="1" class="table_form">
-  <caption>信息查询</caption>
-<tr>
-<td class="align_c">
-<?php 
-//if($model_field->exists('typeid')) echo form::select_type('phpcms', 'typeid','typeid','类别', $typeid, '', $modelid);
-?>
-
-<?php //if($model_field->exists('areaid')){ ?>
-<?php if(false){ ?>
-<input type="hidden" name="areaid" id="areaid" value="">
-<span id="load_areaid"></span>
-<a href="javascript:areaid_reload();">重选</a>
-<script type="text/javascript">
-function areaid_load(id)
-{
-	$.get('load.php', { field: 'areaid', id: id },
-		  function(data){
-			$('#areaid').val(id);
-			$('#load_areaid').append(data);
-		  });
-}
-function areaid_reload()
-{
-	$('#load_areaid').html('');
-	areaid_load(0);
-}
-areaid_load(0);
-</script>
-<?php } ?>
-<select name='field'>
-<option value='title' <?=$field == 'title' ? 'selected' : ''?> >标题</option>
-<option value='username' <?=$field == 'username' ? 'selected' : ''?> >用户名</option>
-<option value='userid' <?=$field == 'userid' ? 'selected' : ''?> >用户ID</option>
-<option value='contentid' <?=$field == 'contentid' ? 'selected' : ''?> >ID</option>
-</select>
-<input type="text" name="q" value="<?=$q?>" size="20" />&nbsp;
-发布时间：<?=1//form::date('inputdate_start')?> - <?=1//form::date('inputdate_end')?>&nbsp;
-<input type="submit" name="dosubmit" value=" 查询 " />
-</td>
-</tr>
-</table>
-</form>
-<form name="myform" method="post" action="">
+<a href="<?=gpf::url("..add..catid")?>" target="main">发布内容</a>
+<form name="myform" method="post" action="<?=gpf::url("..delete")?>">
 <table cellpadding="0" cellspacing="1" class="table_list">
   <caption>信息管理</caption>
 <tr>
-<th width="30">选中</th>
-<!--
-<th width="50">排序</th>
--->
+<th width="50">选中</th>
 <th width="40">ID</th>
 <th>标题</th>
-<th width="50">点击量</th>
-<th width="70">发布人</th>
-<th width="105">更新时间</th>
+<th width="165">更新时间</th>
 <th width="165">管理操作</th>
 </tr>
 <?php 
@@ -82,18 +30,14 @@ if(is_array($result)){
 <!--
 <a href="<?=$info['url']?>" target="_blank">
 -->
-<?=1//output::style($info['title'], $info['style'])?><!--</a>--> <?=$info['thumb'] ? '<font color="red">图</font>' : ''?>&nbsp;<?=$info['posids']?'<font color="green">荐</font>': ''?>&nbsp;<?=$info['typeid']?'<font color="blue">类</font>': ''?></td>
-<td class="align_c" title="总点击量：<?=$r['hits']?>&#10;今日点击：<?=$r['hits_day']?>&#10;本周点击：<?=$r['hits_week']?>&#10;本月点击：<?=$r['hits_month']?>"><?=$r['hits']?></td>
-<td class="align_c">
-<?=$info['username']?>
-</td>
+<?=$info['title']//output::style($info['title'], $info['style'])?><!--</a>--> <?=$info['thumb'] ? '<font color="red">图</font>' : ''?>&nbsp;<?=$info['posids']?'<font color="green">荐</font>': ''?>&nbsp;<?=$info['typeid']?'<font color="blue">类</font>': ''?></td>
 <td class="align_c"><?=date('Y-m-d H:i', $info['updatetime'])?></td>
 <td class="align_c">
 <!--
 <a href="?mod=<?=$mod?>&file=<?=$file?>&action=view&catid=<?=$catid?>&contentid=<?=$info['contentid']?>">查看</a> | 
 -->
 <a href="<?=gpf::url("..edit.&contentid={$info['contentid']}&catid={$info['catid']}")?>">修改</a> |
-<a href="<?=gpf::url("..delete.&contentid={$info['contentid']}&catid={$info['catid']}")?>">删除</a>
+<a href="<?=gpf::url("..delete.&contentid={$info['contentid']}&catid={$info['catid']}")?>" onclick="if(!confirm('真的要删除《<?=$info['title']?>》吗？')){return false;}">删除</a>
 <!--
 <a href="?mod=<?=$mod?>&file=<?=$file?>&action=log_list&catid=<?=$catid?>&contentid=<?=$info['contentid']?>">日志</a>
 <?php if(isset($MODULE['comment'])){ ?> | <a href="?mod=comment&file=comment&keyid=phpcms-content-title-<?=$info['contentid']?>">评论</a> <?php } ?>

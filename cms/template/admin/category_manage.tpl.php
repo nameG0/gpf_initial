@@ -6,6 +6,7 @@ include tpl_admin('header', 'main');
 <?php if($catid){ ?>
 <div class="pos"><strong>当前栏目</strong>：<a href="<?=gpf::url("...")?>>栏目管理</a><?=1//catpos($catid, '?mod=phpcms&file=category&action=manage&catid=$catid')?></div>
 <?php } ?>
+<a href="<?=gpf::url('..add')?>">添加栏目</a>
 <form method="post" action="<?=gpf::url("..listorder")?>">
 <table cellpadding="0" cellspacing="1" class="table_list">
     <caption><?=$catid ? $CATEGORY[$catid]['catname'].'子' : ''?>栏目管理</caption>
@@ -49,7 +50,7 @@ foreach($data as $k=>$r)
 	<a href="javascript:confirmurl('?mod=<?=$mod?>&file=<?=$file?>&action=recycle&catid=<?=$r['catid']?>', '确认清空“<?=$r['catname']?>”栏目吗？')" >清空</a> | 
 	-->
 	<?php } ?>
-	<a href="javascript:confirmurl('<?=gpf::url("..delete.&catid={$r['catid']}")?>', '确认删除“<?=$r['catname']?>”栏目吗？')">删除</a>
+	<a href="<?=gpf::url("..delete.&catid={$r['catid']}")?>)" onclick="if(!confirm('确认删除“<?=$r['catname']?>”栏目吗？')){return false;}">删除</a>
 	<?php } ?>
 	</td>
 </tr>
@@ -59,7 +60,6 @@ foreach($data as $k=>$r)
 </table>
 <div class="button_box">
 <input name="dosubmit" type="submit" value=" 排序 ">
-<a href="<?=gpf::url('..add')?>">添加栏目</a>
 </form>
 </body>
 </html>

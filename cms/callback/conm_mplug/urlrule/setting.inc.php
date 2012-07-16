@@ -1,0 +1,1 @@
+<?=hd("conm.mplug_checkbox|form_name={$form_name}|Qid={$MPlugr['qid']}|key_name=urlrule", array("change_quote" => $change_quote,))?> url规则：<input type="text" name="<?=$form_name?>[setting][urlrule]" value="<?=$setting['urlrule']?>" />

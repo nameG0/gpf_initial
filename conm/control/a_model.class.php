@@ -7,6 +7,10 @@
  */
 class ctrl_a_model
 {
+	function __construct()
+	{//{{{
+		admin_check();
+	}//}}}
 	function index()
 	{//{{{
 		echo 'this is a_model';
@@ -88,6 +92,7 @@ class ctrl_a_model
 						}
 					}
 				}
+			conm_mplug_save_form('model_plug', $modelid);
 			//cache_model();
 			// showmessage('操作成功！', admin_url(".model_field.manage.&modelid={$modelid}"));
 			echo "操作成功！{$modelid}";
@@ -103,7 +108,7 @@ class ctrl_a_model
 	}//}}}
 	/**
 	 * 显示模型[添加/修改]表单。
-	 * @param int modelid 修改时传入
+	 * @param int modelid 修改时传入,不传入表示添加。
 	 */
 	function form()
 	{//{{{
@@ -118,6 +123,14 @@ class ctrl_a_model
 				showmessage('指定的模块不存在！');
 				}
 			}
+		$Nt = array("namespace" => 'model', "tag_id" => intval($modelid),);
+		$Nt_extend = array();
+		$Nt_extend_from = array();
+		// $Nt_extend = array("namespace" => 'model', "tag_id" => '1',);
+		// $Nt_extend_from = array(
+			// array("namespace" => 'model', "tag_id" => 1, "name" => '模型',),
+			// array("namespace" => 'catid', "tag_id" => 1, "name" => '上级栏目',),
+			// );
 		include tpl_admin('model_form');
 	}//}}}
 	function export()

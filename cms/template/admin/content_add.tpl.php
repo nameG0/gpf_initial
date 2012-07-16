@@ -24,6 +24,7 @@ include tpl_admin('header');
 <?php
 }
 ?>
+<!--
 <tr>
       <th width="20%"><strong>状态</strong><br />
 	  </th>
@@ -35,6 +36,7 @@ include tpl_admin('header');
 	  <label><input type="radio" name="status" value="2"> 草稿</label>
 	  </td>
     </tr>
+-->
     <tr>
       <td></td>
       <td>

@@ -2,7 +2,7 @@
 /**
  * 前台内容列表查询助手
  * 
- * @package default
+ * @package api
  * @filesource
  */
 

@@ -7,6 +7,10 @@
  */
 class ctrl_a_table
 {
+	function __construct()
+	{//{{{
+		admin_check();
+	}//}}}
 	function index()
 	{//{{{
 		echo 'this is a_table';

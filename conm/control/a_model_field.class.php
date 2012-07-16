@@ -13,6 +13,7 @@ class ctrl_a_model_field
 {
 	function __construct()
 	{//{{{
+		admin_check();
 		// $fields = include CONTENT_ROOT . 'fields/fields.inc.php';
 		// require_once CONTENT_ROOT . 'include/model_field.class.php';
 		// require_once CONTENT_ROOT . 'include/model.class.php';
@@ -138,8 +139,7 @@ class ctrl_a_model_field
 	 */
 	function delete()
 	{//{{{
-		$field_id = _g('field_id', 'int');
-		$modelid = _g('modelid', 'int');
+		list($field_id, $modelid) = i::g()->int('field_id', 'modelid')->end();
 
 		siud::delete('model_field')->wis('field_id', $field_id)->ing();
 		?>

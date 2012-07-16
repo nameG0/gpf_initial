@@ -10,6 +10,7 @@ class ctrl_a_content
 {
 	function __construct()
 	{//{{{
+		admin_check();
 		//require_once 'admin/process.class.php';
 		require_once CMS_PATH . 'include/content.class.php';
 		//require_once 'attachment.class.php';
@@ -87,7 +88,8 @@ class ctrl_a_content
 	}//}}}
 	function add()
 	{//{{{
-		$modelid = i::g()->int('modelid')->end();
+		list($modelid, $catid) = i::g()->int('modelid', 'catid')->end();
+		$modelid = CMS_MODEL_ID;
 
 		if(!$modelid) showmessage('缺少 modelid 参数!');
 		log::add("modelid[{$modelid}]", log::INFO, __FILE__, __LINE__);
@@ -102,7 +104,8 @@ class ctrl_a_content
 			//ggzhu@2012-06-28 暂时直接设置状态
 			$info['status'] = $status;
 
-			if(isset($info['inputtime'])) $info['updatetime'] = $info['inputtime'];
+			// if(isset($info['inputtime'])) $info['updatetime'] = $info['inputtime'];
+			$info['updatetime'] = $info['inputtime'] = time();
 			// $contentid = $c->add($info, $cat_selected);
 			//ggzhu@2012-06-28 为求开发速度，直接在控制器中保存数据到数据库
 			$CMMR = conm_CMMR($modelid);
@@ -135,6 +138,7 @@ class ctrl_a_content
 			// $content_form = new content_form($modelid);
 			// $forminfos = $content_form->get($data);
 			$forminfos = conm_form($CMMR['CMFL'], $data);
+			unset($forminfos['inputtime'], $forminfos['updatetime']);
 			// require_once CATEGORY_ROOT . 'include/tree.class.php';
 			// foreach($CATEGORY as $cid=>$c)
 				// {
@@ -158,13 +162,15 @@ class ctrl_a_content
 			{
 			a::i($info)->fpost('data');
 			a::i($keep)->fpost('keep');
+			$info['updatetime'] = time();
 
 			$r = siud::find('cms_content')->tfield('modelid')->wis('contentid', $contentid)->ing();
 			$modelid = $r['modelid'];
 			$info['status'] = ($status == 2 || $status == 3) ? $status : 99;
 			$CMMR = conm_CMMR($modelid);
 			$data = conm_fill($CMMR['CMFL'], $info, $keep);
-			siud::save('c_' . $CMMR['tablename'])->data($data)->pk('contentid')->ing();
+			// siud::save('c_' . $CMMR['tablename'])->data($data)->pk('contentid')->ing();
+			siud::save('c_cms_content')->data($data)->pk('contentid')->ing();
 			// $c->edit($contentid, $info);
 			$forward = gpf::url("..edit..contentid");
 			showmessage('修改成功！', $forward);
@@ -179,6 +185,7 @@ class ctrl_a_content
 			$CMMR = conm_CMMR($modelid);
 			$data = siud::find('c_' . $CMMR['tablename'])->wis('contentid', $contentid)->ing();
 			$forminfos = conm_form($CMMR['CMFL'], $data);
+			unset($forminfos['inputtime'], $forminfos['updatetime']);
 			include tpl_admin('content_edit');
 			}
 	}//}}}
@@ -393,8 +400,11 @@ class ctrl_a_content
 	 */
 	function delete()
 	{//{{{
+		$contentid = i::g()->int('contentid')->end();
 		//if(!$allow_manage) showmessage('无管理权限！');
-		$c->delete($contentid);
+		// $c->delete($contentid);
+		siud::delete('cms_content')->wis('contentid', $contentid)->ing();
+		siud::delete('c_cms_content')->wis('contentid', $contentid)->ing();
 		showmessage('操作成功！', $forward);
 	}//}}}
 	function clean()
@@ -544,7 +554,7 @@ class ctrl_a_content
 	 */
 	function manage()
 	{//{{{
-		$modelid = i::g()->int('modelid')->end();
+		list($modelid, $catid) = i::g()->int('modelid', 'catid')->end();
 
 		$where = '1 ';
 		if ($catid)
@@ -584,8 +594,9 @@ class ctrl_a_content
 				if($contentid) $where .= " AND `contentid`=$contentid";
 				}
 			}
-		$CMMR = conm_CMMR($modelid);
-		list($result, $pages, $total) = siud::select('c_' . $CMMR['tablename'])->pagesize(20)->ing();
+		// $CMMR = conm_CMMR($modelid);
+		// list($result, $pages, $total) = siud::select('c_' . $CMMR['tablename'])->pagesize(20)->ing();
+		list($result, $pages, $total) = siud::select('c_cms_content')->where($where)->pagesize(20)->ing();
 		// $infos = $c->listinfo($where, '`listorder` DESC,`contentid` DESC', $page, 20);
 
 		$pagetitle = $CATEGORY[$catid]['catname'].'-管理';
