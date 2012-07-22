@@ -49,7 +49,7 @@ function cache_file_write($path, $data, $mode = GPF_SER)
 		{
 		mkdiri(dirname($path));
 		}
-	$strlen = file_put_contents($file, $content);
-	@chmod($file, 0777);
+	$strlen = file_put_contents($path, $content);
+	@chmod($path, 0777);
 	return $strlen;
 }//}}}
