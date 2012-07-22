@@ -12,26 +12,26 @@ class ctrl_index
 		admin_check();
 		log::is_print(false);
 	}//}}}
-	function index()
+	function action_index()
 	{//{{{
 		include tpl_admin('index');
 	}//}}}
-	function top()
+	function action_top()
 	{//{{{
 		include tpl_admin('top');
 	}//}}}
-	function left()
+	function action_left()
 	{//{{{
 		echo 'this is left';
 	}//}}}
-	function main()
+	function action_main()
 	{//{{{
 		echo 'this is main';
 	}//}}}
 	/**
 	 * 修改密码
 	 */
-	function repassword()
+	function action_repassword()
 	{//{{{
 		if (isset($_POST["dosubmit"]))
 			{

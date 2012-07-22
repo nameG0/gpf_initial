@@ -7,7 +7,7 @@
  */
 class ctrl_a_index
 {
-	function index()
+	function action_index()
 	{//{{{
 		echo 'this is index';
 	}//}}}

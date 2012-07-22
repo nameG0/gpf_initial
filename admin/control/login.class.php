@@ -9,7 +9,7 @@ log::is_print(false);
 
 class ctrl_login
 {
-	function index()
+	function action_index()
 	{//{{{
 		if (is_file(GM_ADMIN_PATH_PASSWORD))
 			{
@@ -24,7 +24,7 @@ class ctrl_login
 	/**
 	 * 首次登录时设置登录密码
 	 */
-	function init()
+	function action_init()
 	{//{{{
 		list($sQ_password, $sQ_password_again) = i::p()->val('password', 'password_again')->end();
 
@@ -48,7 +48,7 @@ class ctrl_login
 			}
 		showmessage("密码初始化失败", gpf::url("..index"));
 	}//}}}
-	function login()
+	function action_login()
 	{//{{{
 		$password = i::p()->val('password')->end();
 
@@ -68,7 +68,7 @@ class ctrl_login
 		$_SESSION[GM_ADMIN_SESSION_KEY] = true;
 		showmessage('登录成功', gpf::url(".index.index"));
 	}//}}}
-	function logout()
+	function action_logout()
 	{//{{{
 		unset($_SESSION[GM_ADMIN_SESSION_KEY]);
 		showmessage("登出成功", gpf::url("main.index.index"));

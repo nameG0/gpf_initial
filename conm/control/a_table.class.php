@@ -11,7 +11,7 @@ class ctrl_a_table
 	{//{{{
 		admin_check();
 	}//}}}
-	function index()
+	function action_index()
 	{//{{{
 		echo 'this is a_table';
 	}//}}}
@@ -19,7 +19,7 @@ class ctrl_a_table
 	 * 管理内容模型
 	 * @param int $modelid
 	 */
-	function manage()
+	function action_manage()
 	{//{{{
 		$modelid = _g('modelid', 'int');
 
@@ -66,7 +66,7 @@ class ctrl_a_table
 	 * @param int $modelid 模型ID
 	 * @param array $info 内容数据数组
 	 */
-	function save()
+	function action_save()
 	{//{{{
 		$modelid = _g('modelid', 'int');
 		$data = _p('data');
@@ -101,7 +101,7 @@ class ctrl_a_table
 	 * @param int $modelid 模型ID
 	 * @param int $id 修改内容时传入内容ID
 	 */
-	function form()
+	function action_form()
 	{//{{{
 		$modelid = _g('modelid', 'int');
 		$id = _g('id', 'int');
@@ -135,7 +135,7 @@ class ctrl_a_table
 	 * @param int $modelid 模型ID
 	 * @param int $id 内容ID
 	 */
-	function delete()
+	function action_delete()
 	{//{{{
 		$modelid = _g('modelid', 'int');
 		$id = _g('id', 'int');
@@ -148,7 +148,7 @@ class ctrl_a_table
 		<a href="<?=gpf::url('..manage..modelid')?>">管理</a>
 		<?php
 	}//}}}
-	function disable()
+	function action_disable()
 	{//{{{
 		$result = $model->disable($modelid, $disabled);
 		if($result)
@@ -160,7 +160,7 @@ class ctrl_a_table
 			showmessage('操作失败！');
 			}
 	}//}}}
-	function urlrule()
+	function action_urlrule()
 	{//{{{
 		echo $type == 'category' ? form::select_urlrule('phpcms', 'category', $ishtml, 'info[category_urlruleid]', 'category_urlruleid', $category_urlruleid) : form::select_urlrule('phpcms', 'show', $ishtml, 'info[show_urlruleid]', 'show_urlruleid', $show_urlruleid);
 	}//}}}

@@ -2,29 +2,32 @@
 /**
  * 前台内容列表查询助手
  * 
- * @package api
+ * @package callback
  * @filesource
  */
 
-class content_list
+class siudFind_cms__list
 {
-	public $catid = 0;
-	public $offset = 0;
-	public $limit = 0;
-	public $field = 'contentid, title, url';
-	public $is_thumb = false;
-	public $thumb_default = '';
-	public $order = '';	//排序语句
+	private $catid = 0;
+	private $offset = 0;
+	private $limit = 0;
+	private $field = 'contentid, title';
+	private $is_thumb = false;
+	private $thumb_default = '';
+	private $order = '';	//排序语句
+
+	private $format = array();
 
 	function init()
 	{//{{{
 		$this->catid = 0;
 		$this->offset = 0;
 		$this->limit = 0;
-		$this->field = 'contentid, title, url';
+		$this->field = 'contentid, title';
 		$this->is_thumb = false;
 		$this->thumb_default = '';
 		$this->order = '';
+		$this->format = array();
 	}//}}}
 	
 	function thumb_default($thumb)
@@ -37,7 +40,7 @@ class content_list
 
 	function order($str)
 	{//{{{
-		$this->order = "ORDER BY {$str}";
+		$this->order = $str;
 		return $this;
 	}//}}}
 
@@ -53,40 +56,55 @@ class content_list
 		return $this;
 	}//}}}
 
-	function select()
+	function ing()
 	{//{{{
-		global $db;
+		// global $db;
+		$is_use_get = 1 == $this->limit;
+		$obj_siud = siud::select();
+		$obj_siud->t('c_cms_content');
+		$obj_siud->tfield($this->field);
 
-		$field = $this->field;
+		// $field = $this->field;
 
-		$where = '';
+		// $where = '';
 		if ($this->catid)
 			{
-			$where .= "catid = '{$this->catid}' ";
+			$obj_siud->wis('catid', $this->catid);
+			// $where .= "catid = '{$this->catid}' ";
 			}
-		if ($where)
-			{
-			$where = "WHERE {$where}";
-			}
+		// if ($where)
+			// {
+			// $where = "WHERE {$where}";
+			// }
 
-		$limit = '';
+		// $limit = '';
 		if ($this->offset)
 			{
-			$limit .= $this->offset . ', ';
+			$obj_siud->limit("{$this->offset}, {$this->limit}");
+			// $limit .= $this->offset . ', ';
 			}
-		if ($this->limit)
+		else
 			{
-			$limit .= $this->limit;
+			$obj_siud->limit($this->limit);
 			}
-		if ($limit)
-			{
-			$limit = "LIMIT {$limit}";
-			}
-		$is_use_get = 1 == $this->limit;
+		// if ($this->limit)
+			// {
+			// $limit .= $this->limit;
+			// }
+		// if ($limit)
+			// {
+			// $limit = "LIMIT {$limit}";
+			// }
+		// $is_use_get = 1 == $this->limit;
 		$is_thumb = $this->is_thumb;
 
-		$sql = "SELECT {$field} FROM " . DB_PRE . "content {$where} {$this->order} {$limit}";
-		$result = $db->select($sql);
+		if ($this->order)
+			{
+			$obj_siud->order($this->order);
+			}
+		// $sql = "SELECT {$field} FROM " . DB_PRE . "cms_content {$where} {$this->order} {$limit}";
+		// $result = $db->select($sql);
+		$result = $obj_siud->ing();
 		if (is_thumb)
 			{
 			foreach ($result as $k => $r)
@@ -97,8 +115,10 @@ class content_list
 					}
 				}
 			}
-		//在返回结果前重新初始化一次参数，为下一次调用做准备。
-		$this->init();
+		if ($this->format['title'])
+			{
+			$this->_f_title($result);
+			}
 
 		if ($is_use_get)
 			{
@@ -113,5 +133,34 @@ class content_list
 		$this->offset = $offset;
 		return $this;
 	}//}}}
+
+	/**
+	 * 方便地在列表页输出文章 title 字段，带 a 标签，自动截取标题长度
+	 *
+	 * 输出的 html 代码看上去像：
+	 * <code>
+	 * <a href="content/show.php?contentid=1" title="full title">short title ...<a/>
+	 * </code>
+	 * 保存在 _title 键中。
+	 */
+	function f_title($length = 18, $target = '', $title_before = '')
+	{//{{{
+		$this->format['title'] = array(
+			"length" => $length,
+			"target" => $target,
+			"title_before" => $title_before,
+			);
+		return $this;
+	}//}}}
+	function _f_title(& $result)
+	{//{{{
+		foreach ($result as $k => $r)
+			{
+			$url = $r['url'] ? $r['url'] : "?a=cms,content,show&contentid={$r['contentid']}";
+			// $title = $this->format['title']['length'] ? str_cut($r['title'], $this->format['title']['length']) : $r['title'];
+			$title = $r['title'];
+			$target = $target ? "target=\"{$target}\"" : '';
+			$result[$k]['_title'] = "<a href=\"{$url}\" title=\"{$r['title']}\" {$target} >{$title_before}{$title}</a>";
+			}
+	}//}}}
 }
-?>

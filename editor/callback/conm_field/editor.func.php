@@ -44,13 +44,14 @@ function cm_ft_editor__editor_form($field, $value, $set)
 
 function cm_ft_editor__editor_output($field, $value, $setting)
 {//{{{
-	$data = $setting['storage'] == 'database' ? $value : content_get($contentid, $field);
-	if($setting['enablekeylink'])
-	{
-		$replacenum = $setting['replacenum'];
-		$data = keylinks($data, $replacenum);
-	}
-	return $data;
+	return $value;
+	// $data = $setting['storage'] == 'database' ? $value : content_get($contentid, $field);
+	// if($setting['enablekeylink'])
+	// {
+		// $replacenum = $setting['replacenum'];
+		// $data = keylinks($data, $replacenum);
+	// }
+	// return $data;
 }//}}}
 
 function cm_ft_editor__editor_search($field, $value)

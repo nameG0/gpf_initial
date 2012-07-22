@@ -11,14 +11,14 @@ class ctrl_a_model
 	{//{{{
 		admin_check();
 	}//}}}
-	function index()
+	function action_index()
 	{//{{{
 		echo 'this is a_model';
 	}//}}}
 	/**
 	 * 管理内容模型.
 	 */
-	function manage()
+	function action_manage()
 	{//{{{
 		$sql = "SELECT * FROM " . RDB_PRE . "model";
 		$result = rdb::obj()->select($sql);
@@ -49,7 +49,7 @@ class ctrl_a_model
 	/**
 	 * 保存[添加/修改]一条模型数据
 	 */
-	function save()
+	function action_save()
 	{//{{{
 		if (!isset($_POST["dosubmit"]))
 			{
@@ -110,7 +110,7 @@ class ctrl_a_model
 	 * 显示模型[添加/修改]表单。
 	 * @param int modelid 修改时传入,不传入表示添加。
 	 */
-	function form()
+	function action_form()
 	{//{{{
 		$modelid = i::g()->int('modelid')->end();
 
@@ -133,14 +133,14 @@ class ctrl_a_model
 			// );
 		include tpl_admin('model_form');
 	}//}}}
-	function export()
+	function action_export()
 	{//{{{
 		$result = $model->export($modelid);
 		$filename = $result['arr_model']['tablename'].'.model';
 		cache_write($filename, $result, CACHE_MODEL_PATH);
 		file_down(CACHE_MODEL_PATH.$filename, $filename);
 	}//}}}
-	function import()
+	function action_import()
 	{//{{{
 		if($dosubmit)
 			{
@@ -194,7 +194,7 @@ class ctrl_a_model
 			include tpl_admin('model_import');
 			}
 	}//}}}
-	function delete()
+	function action_delete()
 	{//{{{
 		$modelid = _g('modelid', 'int');
 
@@ -213,7 +213,7 @@ class ctrl_a_model
 		<a href="<?=gpf::url('..manage')?>">管理</a>
 		<?php
 	}//}}}
-	function disable()
+	function action_disable()
 	{//{{{
 		$result = $model->disable($modelid, $disabled);
 		if($result)
@@ -225,14 +225,14 @@ class ctrl_a_model
 			showmessage('操作失败！');
 			}
 	}//}}}
-	function urlrule()
+	function action_urlrule()
 	{//{{{
 		echo $type == 'category' ? form::select_urlrule('phpcms', 'category', $ishtml, 'info[category_urlruleid]', 'category_urlruleid', $category_urlruleid) : form::select_urlrule('phpcms', 'show', $ishtml, 'info[show_urlruleid]', 'show_urlruleid', $show_urlruleid);
 	}//}}}
 	/**
 	 * 内容模型数据同步到数据库表。
 	 */
-	function sync()
+	function action_sync()
 	{//{{{
 		//todo 加一个参数令 is_sync=1 时可强制同步。
 		$modelid = i::g()->int('modelid')->end();
@@ -283,7 +283,7 @@ class ctrl_a_model
 	 * 加载模型设置表单
 	 * @param int $modeltype
 	 */
-	function ajax_setting_form()
+	function action_ajax_setting_form()
 	{//{{{
 		$modeltype = i::g()->int('modeltype')->end();
 

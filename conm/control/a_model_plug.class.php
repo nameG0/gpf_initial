@@ -16,7 +16,7 @@ class ctrl_a_model_plug
 	 * @param string mplugid
 	 * @param int $qid
 	 */
-	function ajax_new_form()
+	function action_ajax_new_form()
 	{//{{{
 		list($dom_id, $MPlugID, $qid) = i::g()->val('dom_id', 'mplugid')->int('qid')->end();
 
@@ -33,7 +33,7 @@ class ctrl_a_model_plug
 	/**
 	 * 初始化插件引用基本的编辑界面
 	 */
-	function ajax_form_init()
+	function action_ajax_form_init()
 	{//{{{
 		log::is_print(0);
 		//dom_id divID
@@ -58,7 +58,7 @@ class ctrl_a_model_plug
 	/**
 	 * 输出插件引用编辑界面
 	 */
-	function ajax_form_plug()
+	function action_ajax_form_plug()
 	{//{{{
 		log::is_print(false);
 		//dom_id divID

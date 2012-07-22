@@ -8,6 +8,7 @@ include tpl_admin('header');
 
 <form name="myform" method="post" action="<?=gpf::url("....catid")?>">
 <input type="hidden" name="category[type]" value="<?=$type?>">
+<!--
 <div class="tag_menu" style="width:99%;margin-top:10px;">
 	<ul>
 		<li><a onClick="ShowTabs(0)" id="TabTitle0" href="###" class="selected">基本信息</a></li>
@@ -17,6 +18,7 @@ include tpl_admin('header');
 		<li><a onClick="ShowTabs(5)" id="TabTitle5" href="###">生成HTML</a></li>
 	</ul>
 </div>
+-->
 <table cellpadding="2" cellspacing="1" class="table_form">
   <tbody id='Tabs0' style='display:'>
   <tr>
@@ -25,6 +27,22 @@ include tpl_admin('header');
 <?=hd("cms.select_category|module=cms|parentid=0|name=category[parentid]|id=parentid|alt=无（作为一级栏目）|catid={$parentid}|type=2")?>
   </td>
   </tr>
+<tr>
+	<th><strong>栏目类型</strong></th>
+	<td>
+	<label>
+	<input type="radio" name="category[type]" value="0" <?=0 == $type ? 'checked' : ''?> >内部栏目（可绑定内容模型，并支持在栏目下建立子栏目或发布信息）
+	</label>
+	<br/>
+	<label>
+	<input type="radio" name="category[type]" value="1" <?=1 == $type ? 'checked' : ''?> >单网页（可更新单网页内容，但是不能在栏目下建立子栏目或发布信息）
+	</label>
+	<br/>
+	<label>
+	<input type="radio" name="category[type]" value="2" <?=2 == $type ? 'checked' : ''?> >外部链接（可建立一个链接并指向任意网址）
+	</label>
+	</td>
+</tr>
      <tr>
       <th><strong>绑定模型</strong></th>
       <td>
@@ -244,7 +262,8 @@ include tpl_admin('header');
   <caption>修改单网页</caption>
   <th width='30%'><strong>上级栏目</strong></th>
   <td>
-<?=1//form::select_category('phpcms', 0, 'category[parentid]', 'parentid', '无（作为一级栏目）', $parentid,'',2)?>  <font color="red">*</font>
+<?=hd("cms.select_category|module=cms|parentid=0|name=category[parentid]|id=parentid|alt=无（作为一级栏目）|catid={$parentid}|type=2")?>
+  <font color="red">*</font>
   </td>
   </tr>
     <tr>
@@ -325,14 +344,15 @@ function CheckForm(){
 }
 </script>
 
-<form name="myform" method="post" action="?mod=<?=$mod?>&file=<?=$file?>&action=<?=$action?>&catid=<?=$catid?>" onSubmit='return CheckForm();'>
+<form name="myform" method="post" action="<?=gpf::url("....catid")?>" onSubmit='return CheckForm();'>
 <input type="hidden" name="category[type]" value="<?=$type?>">
 <table cellpadding="0" cellspacing="1" class="table_form">
   <caption>修改外部链接</caption>
   <tr>
   <th width='25%'><strong>上级栏目</strong></th>
   <td>
-<?=1//form::select_category('phpcms', 0, 'category[parentid]', 'parentid', '无（作为一级栏目）', $parentid,'',2)?>  <font color="red">*</font>
+<?=hd("cms.select_category|module=cms|parentid=0|name=category[parentid]|id=parentid|alt=无（作为一级栏目）|catid={$parentid}|type=2")?>
+<font color="red">*</font>
   </td>
   </tr>
     <tr>
@@ -340,8 +360,12 @@ function CheckForm(){
       <td><input name='category[catname]' type='text' id='catname' value="<?=$catname?>" size='40' maxlength='50'> <?=1//form::style('category[style]', $style)?>  <font color="red">*</font></td>
     </tr>
     <tr>
+      <th><font color="red">*</font> <strong>栏目目录</strong></th>
+      <td><input name='category[catdir]' type='text' id='catdir' value='<?=$catdir?>' size='20' maxlength='50' require="true" datatype="limit" min="1" max="50" msg="字符长度范围必须为1到50位"></td>
+    </tr>
+    <tr>
       <th><strong>链接图片</strong></th>
-      <td><input name='category[image]' type='text' id='image' value="<?=$image?>" size='40' maxlength='50'> <?=file_select('image', $catid, 1)?></td>
+      <td><input name='category[image]' type='text' id='image' value="<?=$image?>" size='40' maxlength='50'> <?=1//file_select('image', $catid, 1)?></td>
     </tr>
 	<tr>
       <th width='30%'><strong>在导航栏显示</strong></th>

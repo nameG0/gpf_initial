@@ -44,6 +44,7 @@ function cm_ft_cms__catid_search($field, $value)
 
 function cm_ft_cms__catid_output($field, $value)
 {//{{{
-	$value = htmlspecialchars($value);
-	return output::style($value, $content['style']);
+	return $value;
+	// $value = htmlspecialchars($value);
+	// return output::style($value, $content['style']);
 }//}}}

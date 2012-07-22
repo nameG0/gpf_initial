@@ -83,6 +83,7 @@ function cm_ft_conm__number_search($field, $value)
 
 function cm_ft_conm__number_output($field, $value)
 {//{{{
-	$value = htmlspecialchars($value);
-	return output::style($value, $content['style']);
+	return $value;
+	// $value = htmlspecialchars($value);
+	// return output::style($value, $content['style']);
 }//}}}

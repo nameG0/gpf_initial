@@ -9,7 +9,7 @@ class category
 	var $u;
 
 	function __construct($module = 'cms')
-	{
+	{//{{{
 		global $CATEGORY;
 		$this->db = rdb::obj();
 		$this->table = RDB_PRE . 'category';
@@ -17,15 +17,15 @@ class category
 		$this->module = $module;
 		//$this->menu = load('menu.class.php');
 		// $this->u = load('url.class.php');
-	}
+	}//}}}
 
 	function category($module = 'cms')
-	{
+	{//{{{
 		$this->__construct($module);
-	}
+	}//}}}
 
 	function get($catid)
-	{
+	{//{{{
 		$data = $this->db->get_one("SELECT * FROM `$this->table` WHERE `catid`=$catid");
 		if(!$data) return false;
 		a::i($data)->unsers('setting');
@@ -37,7 +37,7 @@ class category
 			// if(is_array($setting)) $data = array_merge($data, $setting);
 			// }
 		return $data;
-	}
+	}//}}}
 
 	//$category
 	//	type		栏目类型,0=内部栏目,1=单网页,2=外部链接*
@@ -57,7 +57,7 @@ class category
 	//	...(其它参数模板)
 	//$is_repair	是否调用 $this->repair 方法，若需要多次 add() ，则可设为 false，添加完后再手动调用，可节省些运行时间。
 	function add($category, $setting = array(), $is_repair = true)
-	{
+	{//{{{
 		if(!is_array($category)) return FALSE;
 		$category['module'] = $this->module;
 		$this->db->insert($this->table, $category);
@@ -77,7 +77,8 @@ class category
 				if($parentid)
 					{
 					$arrchildid = $this->category[$parentid]['arrchildid'].','.$catid;
-					$this->db->query("UPDATE `$this->table` SET child=1,arrchildid='$arrchildid' WHERE catid='$parentid'");
+					$url = gpf::url("cms.content.category.&catid={$parentid}");
+					$this->db->query("UPDATE `{$this->table}` SET child=1,arrchildid='{$arrchildid}', url='{$url}' WHERE catid='$parentid'");
 					}
 				}
 			}
@@ -94,6 +95,7 @@ class category
 			"arrparentid" => $arrchildid,
 			"parentdir" => $parentdir,
 			"setting" => $setting,
+			"url" => gpf::url("cms.content.list.&catid={$catid}"),
 			);
 		a::i($r_update)->sers('setting')->adds();
 		$this->db->update($this->table, $r_update, "catid = {$catid}");
@@ -114,13 +116,13 @@ class category
 			// $this->repair();
 			}
 		return $catid;
-	}
+	}//}}}
 
 	//纯更新数据
 	function _edit($where, $data)
-	{
+	{//{{{
 		return sql_edit($this->table, 'catid', $where, $data);
-	}
+	}//}}}
 
 	function edit($catid, $category, $setting = array())
 	{//{{{
@@ -137,8 +139,21 @@ class category
 			a::i($category)->is_adds(true)->set('setting', $setting)->sers('setting');
 			// setting_set($this->table, "catid=$catid", $setting);
 			}
+		//todo ggzhu@2012-07-18 硬生成栏目前台URL
+		if ($category['type'] < 2)
+			{
+			if ($this->category[$catid]['child'])
+				{
+				$category['url'] = gpf::url("cms.content.category.&catid={$catid}");
+				}
+			else
+				{
+				$category['url'] = gpf::url("cms.content.list.&catid={$catid}");
+				}
+			}
+
 		$this->db->update($this->table, $category, "catid=$catid");
-		if($this->module == 'phpcms' && $category['type'] < 2)
+		if($this->module == 'cms' && $category['type'] < 2)
 			{
 			$url = $this->category[$catid]['child'] ? '' : gpf::url("cms.a_content.manage.&catid={$catid}");
 			//$this->menu->update('catid_'.$catid, array('parentid'=>$this->menu->menuid('catid_'.$parentid), 'name'=>$category['catname'], 'url'=>$url));
@@ -159,14 +174,14 @@ class category
 	}//}}}
 
 	function page($catid, $category)
-	{
+	{//{{{
 		$this->db->update($this->table, $category, "catid=$catid");
 		$this->cache();
 		return true;
-	}
+	}//}}}
 
 	function delete($catid)
-	{
+	{//{{{
 		global $MODEL,$MODULE;
 		if(!array_key_exists($catid, $this->category)) return false;
 		@set_time_limit(600);
@@ -238,10 +253,10 @@ class category
 			}
 		$this->cache();
 		return true;
-	}
+	}//}}}
 
 	function listorder($listorder)
-	{
+	{//{{{
 		if(!is_array($listorder)) return FALSE;
 		foreach($listorder as $catid=>$value)
 			{
@@ -250,18 +265,18 @@ class category
 			}
 		$this->cache();
 		return TRUE;
-	}
+	}//}}}
 
 	function recycle($catid)
-	{
+	{//{{{
 		$modelid = $this->category[$catid]['modelid'];
 		$m = cache_read('model_'.$modelid.'.php');
 		$this->db->query("DELETE FROM `".DB_PRE."content` ,`".DB_PRE."c_".$m['tablename']."` USING `".DB_PRE."content`,`".DB_PRE."c_".$m['tablename']."` WHERE `".DB_PRE."content`.catid='$catid' AND `".DB_PRE."content`.contentid=`".DB_PRE."c_".$m['tablename']."`.contentid");
 		return TRUE;
-	}
+	}//}}}
 
 	function listinfo($parentid = -1)
-	{
+	{//{{{
 		$categorys = array();
 		$where = $parentid > -1 ? " AND parentid='{$parentid}'" : '';
 		$result = $this->db->select("SELECT * FROM `{$this->table}` WHERE `module`='{$this->module}' {$where} ORDER BY `listorder`,`catid`");
@@ -271,10 +286,10 @@ class category
 			$categorys[$r['catid']] = $r;
 			}
 		return $categorys;
-	}
+	}//}}}
 
 	function repair()
-	{
+	{//{{{
 		@set_time_limit(600);
 		if(is_array($this->category))
 			{
@@ -291,10 +306,10 @@ class category
 			}
 		$this->cache();
 		return TRUE;
-	}
+	}//}}}
 
 	function join($sourcecatid, $targetcatid)
-	{
+	{//{{{
 		$arrchildid = $this->category[$sourcecatid]['arrchildid'];
 		$arrparentid = $this->category[$sourcecatid]['arrparentid'];
 
@@ -323,10 +338,10 @@ class category
 
 		$this->cache();
 		return true;
-	}
+	}//}}}
 
 	function get_arrparentid($catid, $arrparentid = '', $n = 1)
-	{
+	{//{{{
 		if($n > 5 || !is_array($this->category) || !isset($this->category[$catid])) return false;
 		$parentid = $this->category[$catid]['parentid'];
 		$arrparentid = $arrparentid ? $parentid.','.$arrparentid : $parentid;
@@ -339,10 +354,10 @@ class category
 			$this->category[$catid]['arrparentid'] = $arrparentid;
 			}
 		return $arrparentid;
-	}
+	}//}}}
 
 	function get_arrchildid($catid)
-	{
+	{//{{{
 		$arrchildid = $catid;
 		if(is_array($this->category))
 			{
@@ -356,10 +371,10 @@ class category
 				}
 			}
 		return $arrchildid;
-	}
+	}//}}}
 
 	function get_parentdir($catid)
-	{
+	{//{{{
 		if($this->category[$catid]['parentid']==0) return '';
 		$arrparentid = $this->category[$catid]['arrparentid'];
 		$arrparentid = explode(',', $arrparentid);
@@ -370,10 +385,10 @@ class category
 			$arrcatdir[] = $this->category[$id]['catdir'];
 			}
 		return implode('/', $arrcatdir).'/';
-	}
+	}//}}}
 
 	function move($catid, $parentid, $oldparentid)
-	{
+	{//{{{
 		$arrchildid = $this->category[$catid]['arrchildid'];
 		$oldarrparentid = $this->category[$catid]['arrparentid'];
 		$oldparentdir = $this->category[$catid]['parentdir'];
@@ -424,15 +439,15 @@ class category
 				}
 			}
 		return TRUE;
-	}
+	}//}}}
 
 	function depth($catid)
-	{
+	{//{{{
 		return (substr_count($this->category[$catid]['arrparentid'], ',') + 1);
-	}
+	}//}}}
 
 	function url($catid, $is_update = 1)
-	{
+	{//{{{
 		//todo 暂时不计算栏目URL
 		return '';
 
@@ -507,24 +522,23 @@ class category
 			}
 
 		return $url;
-	}
+	}//}}}
 
 	function count($catid, $status = null)
-	{
+	{//{{{
 		if(!isset($this->category[$catid])) return false;
 		$where = '';
 		$where .= $this->category[$catid]['child'] ? "AND `catid` IN(".$this->category[$catid]['arrchildid'].") " : "AND `catid`=$catid ";
 		$where .= $status == null ? '' : "AND status='$status' ";
 		if($where) $where = ' WHERE '.substr($where, 3);
 		return cache_count("SELECT COUNT(*) AS `count` FROM `".DB_PRE."content` $where");
-	}
+	}//}}}
 
 	function cache()
-	{
+	{//{{{
 		@set_time_limit(600);
 		//cache_category();
 		//cache_common();
 		_category_cache_all();
-	}
+	}//}}}
 }
-?>

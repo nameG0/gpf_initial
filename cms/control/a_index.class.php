@@ -12,7 +12,7 @@ class ctrl_a_index
 	{//{{{
 		admin_check();
 	}//}}}
-	function left()
+	function action_left()
 	{//{{{
 		global $CATEGORY;
 		log::is_print(false);

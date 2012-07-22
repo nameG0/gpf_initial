@@ -86,7 +86,7 @@ class ctrl_a_content
 
 		//if(!isset($processid) || !in_array($processid, $allow_processids)) $processid = $allow_processids[0];
 	}//}}}
-	function add()
+	function action_add()
 	{//{{{
 		list($modelid, $catid) = i::g()->int('modelid', 'catid')->end();
 		$modelid = CMS_MODEL_ID;
@@ -154,7 +154,7 @@ class ctrl_a_content
 			include tpl_admin('content_add');
 			}
 	}//}}}
-	function edit()
+	function action_edit()
 	{//{{{
 		$contentid = i::g()->int('contentid')->end();
 
@@ -189,7 +189,7 @@ class ctrl_a_content
 			include tpl_admin('content_edit');
 			}
 	}//}}}
-	function view()
+	function action_view()
 	{//{{{
 		if(!$priv_role->check('catid', $catid, 'view') && !$allow_manage) showmessage('无查看权限！');
 
@@ -199,7 +199,7 @@ class ctrl_a_content
 
 		include tpl_admin('content_view');
 	}//}}}
-	function log_list()
+	function action_log_list()
 	{//{{{
 		$ACTION = array('add'=>'发布', 'edit'=>'修改', 'delete'=>'删除');
 		$content = $c->get($contentid);
@@ -208,14 +208,14 @@ class ctrl_a_content
 		$data = $log->listinfo($where, $page, 20);
 		include tpl_admin('content_log');
 	}//}}}
-	function my_contribute()
+	function action_my_contribute()
 	{//{{{
 		$c->set_userid($_userid);
 		$contentid = $c->contentid($contentid, array(0, 1, 2));
 		$c->status($contentid, 3);
 		showmessage('操作成功！', $forward);
 	}//}}}
-	function my()
+	function action_my()
 	{//{{{
 		if(!$allow_add) showmessage('无发布权限！');
 		$c->set_userid($_userid);
@@ -226,14 +226,14 @@ class ctrl_a_content
 		$pagetitle = '我的信息-管理';
 		include tpl_admin('content_my');
 	}//}}}
-	function my_cancelcontribute()
+	function action_my_cancelcontribute()
 	{//{{{
 		$c->set_userid($_userid);
 		$contentid = $c->contentid($contentid, array(3));
 		$c->status($contentid, 2);
 		showmessage('操作成功！', $forward);
 	}//}}}
-	function my_edit()
+	function action_my_edit()
 	{//{{{
 		$c->set_userid($_userid);
 		$contentid = $c->contentid($contentid, array(0, 1, 2, 3));
@@ -253,14 +253,14 @@ class ctrl_a_content
 			include tpl_admin('content_edit');
 			}
 	}//}}}
-	function my_delete()
+	function action_my_delete()
 	{//{{{
 		$c->set_userid($_userid);
 		$contentid = $c->contentid($contentid, array(0, 1, 2, 3));
 		$c->delete($contentid);
 		showmessage('操作成功！', $forward);
 	}//}}}
-	function my_view()
+	function action_my_view()
 	{//{{{
 		$c->set_userid($_userid);
 		$contentid = $c->contentid($contentid, array(0, 1, 2, 3));
@@ -271,7 +271,7 @@ class ctrl_a_content
 
 		include tpl_admin('content_view');
 	}//}}}
-	function check()
+	function action_check()
 	{//{{{
 		$allow_status = $p->get_process_status($processid);
 		if(!isset($status) || !in_array($status, $allow_status)) $status = -1;
@@ -284,7 +284,7 @@ class ctrl_a_content
 		$pagetitle = $CATEGORY[$catid]['catname'].'-审核';
 		include tpl_admin('content_check');
 	}//}}}
-	function publish()
+	function action_publish()
 	{//{{{
 		if($do) {
 			//如果操作定时发布文章，从缓存中移除该文章id。
@@ -320,7 +320,7 @@ class ctrl_a_content
 		}
 		include tpl_admin('content_publish');
 	}//}}}
-	function check_title()
+	function action_check_title()
 	{//{{{
 		if(CHARSET=='gbk') $c_title = iconv('utf-8', 'gbk', $c_title);
 		if($c->get_contentid($c_title))
@@ -332,13 +332,13 @@ class ctrl_a_content
 			echo '标题不存在！';
 			}
 	}//}}}
-	function browse()
+	function action_browse()
 	{//{{{
 		$where = "`catid`=$catid AND `status`=99";
 		$infos = $c->listinfo($where, 'listorder DESC,contentid DESC', $page, 20);
 		include tpl_admin('content_browse');
 	}//}}}
-	function search()
+	function action_search()
 	{//{{{
 		if($dosubmit)
 			{
@@ -358,7 +358,7 @@ class ctrl_a_content
 			include tpl_admin('content_search');
 			}
 	}//}}}
-	function recycle()
+	function action_recycle()
 	{//{{{
 		if(!$allow_manage) showmessage('无管理权限！');
 		$infos = $c->listinfo("catid=$catid AND status=0", 'listorder DESC,contentid DESC', $page, 20);
@@ -366,7 +366,7 @@ class ctrl_a_content
 		$pagetitle = $CATEGORY[$catid]['catname'].'-回收站';
 		include tpl_admin('content_recycle');
 	}//}}}
-	function pass()
+	function action_pass()
 	{//{{{
 		if(!$priv_role->check('catid', $catid, 'check') && !$allow_manage) showmessage('无审核权限！');
 		$allow_status = $p->get_process_status($processid);
@@ -376,7 +376,7 @@ class ctrl_a_content
 		$c->status($contentid, $process['passstatus']);
 		showmessage('操作成功！', $forward);
 	}//}}}
-	function reject()
+	function action_reject()
 	{//{{{
 		if(!$priv_role->check('catid', $catid, 'check') && !$allow_manage) showmessage('无审核权限！');
 		$allow_status = $p->get_process_status($processid);
@@ -389,7 +389,7 @@ class ctrl_a_content
 	/**
 	 * 把 status 设为 0
 	 */
-	function cancel()
+	function action_cancel()
 	{//{{{
 		if(!$allow_manage) showmessage('无管理权限！');
 		$c->status($contentid, 0);
@@ -398,7 +398,7 @@ class ctrl_a_content
 	/**
 	 * 删除文章
 	 */
-	function delete()
+	function action_delete()
 	{//{{{
 		$contentid = i::g()->int('contentid')->end();
 		//if(!$allow_manage) showmessage('无管理权限！');
@@ -407,25 +407,25 @@ class ctrl_a_content
 		siud::delete('c_cms_content')->wis('contentid', $contentid)->ing();
 		showmessage('操作成功！', $forward);
 	}//}}}
-	function clean()
+	function action_clean()
 	{//{{{
 		if(!$allow_manage) showmessage('无管理权限！');
 		$c->clear();
 		showmessage('操作成功！', $forward);
 	}//}}}
-	function restore()
+	function action_restore()
 	{//{{{
 		if(!$allow_manage) showmessage('无管理权限！');
 		$c->restore($contentid);
 		showmessage('操作成功！', $forward);
 	}//}}}
-	function restoreall()
+	function action_restoreall()
 	{//{{{
 		if(!$allow_manage) showmessage('无管理权限！');
 		$c->restoreall();
 		showmessage('操作成功！', $forward);
 	}//}}}
-	function listorder()
+	function action_listorder()
 	{//{{{
 		$result = $c->listorder($listorders);
 		if($result)
@@ -437,7 +437,7 @@ class ctrl_a_content
 			showmessage('操作失败！');
 			}
 	}//}}}
-	function link()
+	function action_link()
 	{//{{{
 		if($dosubmit)
 			{
@@ -452,7 +452,7 @@ class ctrl_a_content
 			include tpl_admin('content_link');
 			}
 	}//}}}
-	function block()
+	function action_block()
 	{//{{{
 		if($type == 0)
 			{
@@ -493,7 +493,7 @@ class ctrl_a_content
 		include admin_template('phpcms', $template);
 		include tpl_admin('block_ajax', 'phpcms');
 	}//}}}
-	function category()
+	function action_category()
 	{//{{{
 		$catid = intval($catid);
 		if(!isset($CATEGORY[$catid])) showmessage('访问的栏目不存在！');
@@ -527,7 +527,7 @@ class ctrl_a_content
 		define('BLOCK_EDIT', 1);
 		include template('phpcms', $template);
 	}//}}}
-	function posid()
+	function action_posid()
 	{//{{{
 		if(!$posid) showmessage('不存在此推荐位！');
 		if(!$contentid) showmessage('没有被推荐的信息！');
@@ -539,7 +539,7 @@ class ctrl_a_content
 			}
 		showmessage('批量推荐成功！', '?mod='.$mod.'&file='.$file.'&action=manage&catid='.$catid);
 	}//}}}
-	function typeid()
+	function action_typeid()
 	{//{{{
 		if(!$typeid) showmessage('不存在此类别！');
 		if(!$contentid) showmessage('没有信息被选中！');
@@ -552,7 +552,7 @@ class ctrl_a_content
 	/**
 	 * 内容列表
 	 */
-	function manage()
+	function action_manage()
 	{//{{{
 		list($modelid, $catid) = i::g()->int('modelid', 'catid')->end();
 

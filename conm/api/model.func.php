@@ -157,6 +157,37 @@ function conm_form($CMFL, $data = array())
 	return $ret;
 }//}}}
 /**
+ * 格式化一条内容的输出
+ */
+function conm_output($CMFL, $data)
+{//{{{
+	unset($CMFL['_info']);
+	$ret = array();
+	$CMFTid_list = array();
+	foreach ($CMFL as $k => $r)
+		{
+		// a::i($r)->unsers('setting');
+		// $CMFl[$r['field']] = $r;
+		$CMFTid_list[] = $r['formtype'];
+		}
+
+	cm_f_load($CMFTid_list);
+
+	foreach ($CMFL as $f => $set)
+		{
+		list($_mod, $_name) = explode("/", $set['formtype']);
+		$func_name = "cm_ft_{$_mod}__{$_name}_output";
+		if (!function_exists($func_name))
+			{
+			$ret[$f] = $data[$f];
+			continue;
+			}
+		$ret[$f] = $func_name($f, $data[$f], $set['setting']);
+		}
+
+	return $ret;
+}//}}}
+/**
  * 填充字段数据。
  * @param array $CMFL
  * @param array $data 表单提交，待录入数据。
@@ -274,38 +305,4 @@ function _content_model_cache_modelid($modelid)
 		}
 	cache_write("modelid_{$modelid}.php", $r, CONTENT_DATA_DIR, true);
 	return $r;
-}//}}}
-function content_field_output($data)
-{//{{{
-
-	$this->data = $data;
-	$this->contentid = $data['contentid'];
-	$this->set_catid($data['catid']);
-	
-	//格式化输出
-	$info = array();
-	foreach($this->fields as $field => $v)
-	{
-		if(!isset($data[$field]))
-			{
-			continue;
-			}
-		$func = $formtype = $v['formtype'];
-		$value = $data[$field];
-		//调用函数式字段类型
-		$func_name = "content_field_{$formtype}_output";
-		if (function_exists($func_name))
-		{
-			$result = call_user_func($func_name, $field, $value, $v);
-		}
-		else
-		{
-			$result = method_exists($this, $func) ? $this->$func($field, $data[$field]) : $data[$field];
-		}
-		if($result !== false)
-			{
-			$info[$field] = $result;
-			}
-	}
-	return $info;
 }//}}}

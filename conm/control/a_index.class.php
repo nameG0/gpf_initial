@@ -11,7 +11,7 @@ class ctrl_a_index
 	{//{{{
 		admin_check();
 	}//}}}
-	function left()
+	function action_left()
 	{//{{{
 		log::is_print(false);
 		include tpl_admin('a_left');

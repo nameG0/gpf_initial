@@ -1,7 +1,5 @@
-<!--
 <a href="<?=gpf::url(".a_category.manage")?>" target="main">管理栏目</a>
-<br />
--->
+<hr />
 <div id="content_manage">
 	<?php
 	mod_init('tree');

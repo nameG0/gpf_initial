@@ -11,6 +11,7 @@
 function tpl($name, $mod = CTRL_MOD)
 {//{{{
 	$path = GM_PATH_TPL_INST . "{$mod}/{$name}.tpl.php";
+	// return $path;
 	if (is_file($path))
 		{
 		return $path;

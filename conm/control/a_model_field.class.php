@@ -34,7 +34,7 @@ class ctrl_a_model_field
 		// );
 		// $menu = admin_menu($modelname.'模型字段管理', $submenu);
 	}//}}}
-	function save()
+	function action_save()
 	{//{{{
 		a::i($data)->fpost('data')->apost('setting')->aget('modelid')->sers('setting');
 
@@ -53,7 +53,7 @@ class ctrl_a_model_field
 	 * @param int $modelid 字段所属模型ID
 	 * @param int $field_id 修改字段时传入
 	 */
-	function form()
+	function action_form()
 	{//{{{
 		$field_id = i::g()->int('field_id')->end();
 
@@ -69,7 +69,7 @@ class ctrl_a_model_field
 		<?php
 		include tpl_admin('field_form');
 	}//}}}
-	function manage()
+	function action_manage()
 	{//{{{
 		$modelid = i::g()->int('modelid')->end();
 
@@ -100,7 +100,7 @@ class ctrl_a_model_field
 			}
 		// include tpl_admin('model_field_manage', 'conm');
 	}//}}}
-	function copy()
+	function action_copy()
 	{//{{{
 		if($dosubmit)
 			{
@@ -137,7 +137,7 @@ class ctrl_a_model_field
 	 * @param int $field_id 所删除的字段ID
 	 * @param int $modelid 字段所属模型ID
 	 */
-	function delete()
+	function action_delete()
 	{//{{{
 		list($field_id, $modelid) = i::g()->int('field_id', 'modelid')->end();
 
@@ -146,7 +146,7 @@ class ctrl_a_model_field
 		<a href="<?=gpf::url("..manage..modelid")?>">管理字段</a>
 		<?php
 	}//}}}
-	function listorder()
+	function action_listorder()
 	{//{{{
 		$result = $field->listorder($info);
 		if($result)
@@ -158,7 +158,7 @@ class ctrl_a_model_field
 			showmessage('操作失败！');
 			}
 	}//}}}
-	function disable()
+	function action_disable()
 	{//{{{
 		$result = $field->disable($fieldid, $disabled);
 		if($result)
@@ -170,14 +170,14 @@ class ctrl_a_model_field
 			showmessage('操作失败！');
 			}
 	}//}}}
-	function preview()
+	function action_preview()
 	{//{{{
 		require CONTENT_ROOT . 'include/content_form.class.php';
 		$content_form = new content_form($modelid);
 		$forminfos = $content_form->get();
 		include tpl_admin('content_add');
 	}//}}}
-	function checkfield()
+	function action_checkfield()
 	{//{{{
 		if(!$field->check($value))
 			{
@@ -196,7 +196,7 @@ class ctrl_a_model_field
 	 * AJAX 使用,显示指定字段类型的设置表单.
 	 * @param string $field_id CMFTid
 	 */
-	function ajax_setting()
+	function action_ajax_setting()
 	{//{{{
 		log::is_print(false);
 

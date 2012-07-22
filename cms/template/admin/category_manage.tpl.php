@@ -7,6 +7,8 @@ include tpl_admin('header', 'main');
 <div class="pos"><strong>当前栏目</strong>：<a href="<?=gpf::url("...")?>>栏目管理</a><?=1//catpos($catid, '?mod=phpcms&file=category&action=manage&catid=$catid')?></div>
 <?php } ?>
 <a href="<?=gpf::url('..add')?>">添加栏目</a>
+<a href="<?=gpf::url('..updatecache')?>">更新缓存</a>
+<a href="<?=gpf::url('..update_url')?>">更新URL</a>
 <form method="post" action="<?=gpf::url("..listorder")?>">
 <table cellpadding="0" cellspacing="1" class="table_list">
     <caption><?=$catid ? $CATEGORY[$catid]['catname'].'子' : ''?>栏目管理</caption>

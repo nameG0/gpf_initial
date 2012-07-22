@@ -34,7 +34,7 @@ class ctrl_a_category
 		// $action = $action ? $action : 'manage';
 		// if(!$forward) $forward = '?mod='.$mod.'&file='.$file.'&action=manage';
 	}//}}}
-	function add()
+	function action_add()
 	{//{{{
 		if (isset($_POST["dosubmit"]))
 			{
@@ -72,7 +72,7 @@ class ctrl_a_category
 			include tpl_admin('category_add');
 			}
 	}//}}}
-	function edit()
+	function action_edit()
 	{//{{{
 		global $CATEGORY;
 
@@ -115,12 +115,12 @@ class ctrl_a_category
 			include tpl_admin('category_edit');
 			}
 	}//}}}
-	function repair()
+	function action_repair()
 	{//{{{
 		$cat->repair();
 		showmessage('更新成功', '?mod='.$mod.'&file='.$file.'&action=manage');
 	}//}}}
-	function delete()
+	function action_delete()
 	{//{{{
 		$catid = i::g()->int('catid')->end();
 		$LANG['illegal_parameters'] = '不行';
@@ -131,7 +131,7 @@ class ctrl_a_category
 		$this->o_cate->delete($catid);
 		showmessage($LANG['operation_success'], gpf::url("..updatecache") . '&forward='.urlencode(gpf::url('..manage')));
 	}//}}}
-	function join()
+	function action_join()
 	{//{{{
 		if($dosubmit)
 			{
@@ -163,17 +163,17 @@ class ctrl_a_category
 			include tpl_admin('category_join');
 			}
 	}//}}}
-	function listorder()
+	function action_listorder()
 	{//{{{
 		$cat->listorder($listorder);
 		showmessage($LANG['operation_success'], $forward);
 	}//}}}
-	function recycle()
+	function action_recycle()
 	{//{{{
 		$cat->recycle($catid);
 		showmessage($LANG['operation_success'], '?mod='.$mod.'&file='.$file.'&action=manage');
 	}//}}}
-	function checkcategory()
+	function action_checkcategory()
 	{//{{{
 		if($CATEGORY[$targetcatid]['modelid'] != $CATEGORY[$sourcecatid]['modelid'])
 			{
@@ -192,36 +192,29 @@ class ctrl_a_category
 			echo -4;
 			}
 	}//}}}
-	function updatecache()
-	{//{{{
-		//cache_common();
-		cache_category();
-		$LANG['category_cache_update_success'] = '缓存更新成功';
-		showmessage($LANG['category_cache_update_success'], gpf::url("..manage"));
-	}//}}}
 	/**
 	 * 管理栏目数据
 	 */
-	function manage()
+	function action_manage()
 	{//{{{
 		$parentid = i::g()->int('catid')->end();
 
 		$data = $this->o_cate->listinfo($parentid);
 		include tpl_admin('category_manage');
 	}//}}}
-	function urlrule()
+	function action_urlrule()
 	{//{{{
 		$ishtml = intval($ishtml);
 		$category_urlruleid = intval($category_urlruleid);
 		echo form::select_urlrule('phpcms', 'category', $ishtml, 'setting[category_urlruleid]', 'category_urlruleid', $category_urlruleid);
 	}//}}}
-	function show_urlrule()
+	function action_show_urlrule()
 	{//{{{
 		$ishtml = intval($ishtml);
 		$show_urlruleid = intval($show_urlruleid);
 		echo form::select_urlrule('phpcms', 'show', $ishtml, 'setting[show_urlruleid]', 'show_urlruleid', $show_urlruleid);
 	}//}}}
-	function checkdir()
+	function action_checkdir()
 	{//{{{
 		if(!preg_match("/[a-zA-Z0-9_-]+$/i",$value)) exit('栏目目录名称只能为字母、数字、下划线，中划线');
 		if($catdir == trim($value)) exit('success');
@@ -232,7 +225,7 @@ class ctrl_a_category
 		if($parentid == 0 && isset($MODULE[$value])) exit('栏目目录名称不能重复');
 		exit('success');
 	}//}}}
-	function checkname()
+	function action_checkname()
 	{//{{{
 		if($catname == trim($value)) exit('success');
 		foreach($CATEGORY AS $k=>$v)
@@ -241,7 +234,7 @@ class ctrl_a_category
 			}
 		exit('success');
 	}//}}}
-	function more()
+	function action_more()
 	{//{{{
 		if($dosubmit)
 			{
@@ -299,7 +292,7 @@ class ctrl_a_category
 			include tpl_admin('category_more');
 			}
 	}//}}}
-	function update_search()
+	function action_update_search()
 	{//{{{
 		if($dosubmit)
 			{
@@ -382,5 +375,38 @@ class ctrl_a_category
 			{
 			include tpl_admin('category_search');
 			}
+	}//}}}
+	function action_updatecache()
+	{//{{{
+		//cache_common();
+		cache_category();
+		$LANG['category_cache_update_success'] = '缓存更新成功';
+		showmessage($LANG['category_cache_update_success'], gpf::url("..manage"));
+	}//}}}
+	/**
+	 * 更新所有栏目的前台访问URL
+	 */
+	function action_update_url()
+	{//{{{
+		global $CATEGORY;
+		$o_rdb = rdb::obj();
+		foreach ($CATEGORY as $k => $v)
+			{
+			if (!('cms' == $v['module'] && $v['type'] < 2))
+				{
+				continue;
+				}
+			if ($v['child'])
+				{
+				$url = gpf::url("cms.content.category.&catid={$k}");
+				}
+			else
+				{
+				$url = gpf::url("cms.content.list.&catid={$k}");
+				}
+			$o_rdb->update(RDB_PRE . 'category', array("url" => $url,), "catid = {$k}");
+			// siud::save('category')->pk('catid')->data(array("catid" => , ))->ing();
+			}
+		showmessage('URL更新完成');
 	}//}}}
 }

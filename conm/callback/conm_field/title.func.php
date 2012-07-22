@@ -80,6 +80,7 @@ function cm_ft_conm__title_search($field, $value)
 
 function cm_ft_conm__title_output($field, $value)
 {//{{{
-	$value = htmlspecialchars($value);
-	return output::style($value, $content['style']);
+	return $value;
+	// $value = htmlspecialchars($value);
+	// return output::style($value, $content['style']);
 }//}}}
