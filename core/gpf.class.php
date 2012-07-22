@@ -114,6 +114,8 @@ class gpf
 			exit;
 			}
 
+		//ggzhu@2012-07-18 控制器方法使用 action_ 作为命名前序，这样就可以使用像 list 这样的关键字作为动作名。
+		$action = 'action_' . $action;
 		//调用控制器方法。
 		if (!method_exists($o_ctrl, $action))
 			{
