@@ -14,7 +14,7 @@ function cm_ft_conm__datetime_sql($set, $rdb_type = NULL)
 
 function cm_ft_conm__datetime_FString($set)
 {//{{{
-	return "int(11)|NO||0|";
+	return "int(11)|NO|0|";
 }//}}}
 
 function cm_ft_conm__datetime_setting($setting)

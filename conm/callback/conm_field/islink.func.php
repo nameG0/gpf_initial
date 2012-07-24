@@ -14,7 +14,7 @@ function cm_ft_conm__islink_sql($set, $rdb_type = NULL)
 
 function cm_ft_conm__islink_FString($set)
 {//{{{
-	return "tinyint(1) unsigned|NO||0|";
+	return "tinyint(1) unsigned|NO|0|";
 }//}}}
 
 function cm_ft_conm__islink_setting($setting)

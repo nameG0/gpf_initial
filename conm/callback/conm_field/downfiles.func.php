@@ -17,7 +17,7 @@ function cm_ft_conm__downfiles_FString($set)
 {//{{{
 	if(!$set['maxlength']) $set['maxlength'] = 255;
 	$maxlength = min($set['maxlength'], 255);
-	return "char({$maxlength})|NO||{$set['defaultvalue']}|";
+	return "char({$maxlength})|NO|{$set['defaultvalue']}|";
 }//}}}
 
 function cm_ft_conm__downfiles_setting($setting)

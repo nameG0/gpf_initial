@@ -18,7 +18,7 @@ function cm_ft_conm__copyfrom_FString($set)
 {//{{{
 	if(!$set['maxlength']) $set['maxlength'] = 255;
 	$maxlength = min($set['maxlength'], 255);
-	return "varchar({$maxlength})|NO||{$set['defaultvalue']}|";
+	return "varchar({$maxlength})|NO|{$set['defaultvalue']}|";
 }//}}}
 
 function cm_ft_conm__copyfrom_setting($setting)

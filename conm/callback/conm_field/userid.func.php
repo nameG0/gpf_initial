@@ -13,7 +13,7 @@ function cm_ft_conm__userid_sql($set, $rdb_type = NULL)
 }//}}}
 function cm_ft_conm__userid_FString($set)
 {//{{{
-	return "int(11)|NO||0|";
+	return "int(11)|NO|0|";
 }//}}}
 
 function cm_ft_conm__userid_setting($setting)

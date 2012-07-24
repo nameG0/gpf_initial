@@ -14,7 +14,7 @@ function cm_ft_conm__style_sql($set, $rdb_type = NULL)
 
 function cm_ft_conm__style_FString($set)
 {//{{{
-	return "char(5)|NO|||";
+	return "char(5)|NO||";
 }//}}}
 
 function cm_ft_conm__style_setting($setting)

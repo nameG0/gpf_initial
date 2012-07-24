@@ -14,7 +14,7 @@ function _cm_ft_conm__text_mysql($set)
 	if(!$set['maxlength']) $set['maxlength'] = 255;
 	$maxlength = min($set['maxlength'], 255);
 	$ret = array(
-		"type" => $set['field_type'],
+		"type" => in_array($set['field_type'], array('char', 'varchar')) ? $set['field_type'] : 'char',
 		"maxlength" => $maxlength,
 		);
 	return $ret;

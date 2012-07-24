@@ -8,6 +8,7 @@
 function cm_ft_editor__editor_sql($set)
 {//{{{
 	$type = strtoupper($set['field_type']);
+	$type = in_array($type, array('text', 'mediumtext')) ? $type : 'text';
 	return "{$type} NOT NULL";
 }//}}}
 function cm_ft_editor__editor_FString($set)

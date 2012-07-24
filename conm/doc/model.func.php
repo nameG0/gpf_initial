@@ -13,6 +13,7 @@
  * <b>数据类型</b>
  * FString(field string) string 一个字段的指纹值,用于比较内容模型字段设置是否与实际表字段一致.
  * MySQL的指纹值为SHOW COLUMNS语句返回的字段值组合,但不包含Field字段的值.
+ * Type|Null|Default|Extra
  *
  * CMMTid(content module model type ID):模型类型ID
  * 命名规则：{module_name}/{model_name} eg. conm/table

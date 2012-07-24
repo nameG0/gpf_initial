@@ -22,7 +22,7 @@ function cm_ft_conm__typeid_FString($set)
 	$defaultvalue = $set['decimaldigits'] == 0 ? intval($set['defaultvalue']) : floatval($set['defaultvalue']);
 	$field_type = $set['decimaldigits'] == 0 ? 'INT' : 'FLOAT';
 	$unsigned = $set['minnumber'] >= 0 ? ' unsigned' : '';
-	return "int(10){$unsigned}|NO||{$defaultvalue}|";
+	return "int(10){$unsigned}|NO|{$defaultvalue}|";
 }//}}}
 
 function cm_ft_conm__typeid_setting($setting)

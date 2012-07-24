@@ -83,7 +83,6 @@ class ctrl_a_model_field
 		$result = rdb::obj()->select($sql);
 
 		?>
-		<a href="<?=gpf::url('.a_model.manage')?>">管理模型</a>
 		<a href="<?=gpf::url(".a_model.sync..modelid")?>">同步</a>
 		<a href="<?=gpf::url('..form..modelid')?>">添加</a>
 		<hr />

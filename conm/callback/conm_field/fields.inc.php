@@ -9,7 +9,7 @@ return array(
 	// 'datetime'=>array('日期和时间', 'datetime'),
 	'style'=>'颜色和字型',
 	// 'image'=>array('图片', 'attachment'),
-	'images'=>'多图片',
+	// 'images'=>'多图片',
 	'file'=>'文件',
 	'downfile'=>'镜像下载',
 	// 'downfiles' => array('多文件上传', 'attachment'),

@@ -14,8 +14,12 @@ function cm_mt_conm__table_is_make($CMMr)
 	return $o_db->table_exists($table_name);
 }//}}}
 
-function cm_mt_conm__table_make($CMMr, $CMFl)
+function cm_mt_conm__table_make($CMMR)
 {//{{{
+	$CMFl = $CMMR['CMFL'];
+	unset($CMFl['_info'], $CMMR['CMFL']);
+	$CMMr = $CMMR;
+
 	$table_name = RDB_PRE . $CMMr['tablename'];
 	$sql = "CREATE TABLE  `{$table_name}` (\n";
 	foreach ($CMFl as $f => $CMFr)
@@ -40,16 +44,19 @@ function cm_mt_conm__table_make($CMMr, $CMFl)
 	//去除最后一个,号
 	$sql = substr($sql, 0, -2);
 	$sql .= "\n) ENGINE = MYISAM";
-	return $sql;
+	return array($sql);
 }//}}}
 
 /**
  * 同步表结构
  * @param array $CMFl 有实际表字段的实际字段列表
  */
-function cm_mt_conm__table_sync($CMMr, $CMFl)
+function cm_mt_conm__table_sync($CMMR)
 {//{{{
 	$ret = array();
+	$CMFl = $CMMR['CMFL'];
+	unset($CMFl['_info'], $CMMR['CMFL']);
+	$CMMr = $CMMR;
 
 	//------ 加载字段类型文件 ------
 	$field_list = array();
@@ -120,4 +127,10 @@ function cm_mt_conm__table_sync($CMMr, $CMFl)
 function cm_mt_conm__table_fill_info(& $info, $set)
 {//{{{
 	$info['pk'] = $set['pk'];
+}//}}}
+
+function cm_mt_conm__table_delete($CMMR)
+{//{{{
+	$table = RDB_PRE . $CMMR['tablename'];
+	return array("DROP TABLE `{$table}`");
 }//}}}

@@ -80,7 +80,7 @@ function cm_ft_conm__box_FString($set)
 		if($maxlength > 2) $maxlength = 3;
 		}
 	$fieldtype = strtolower($fieldtype);
-	return "{$fieldtype}({$maxlength})|NO||{$defaultvalue}|";
+	return "{$fieldtype}({$maxlength})|NO|{$defaultvalue}|";
 }//}}}
 
 function cm_ft_conm__box_setting($setting)

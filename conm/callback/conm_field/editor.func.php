@@ -6,7 +6,7 @@ function cm_ft_conm__editor_sql($set, $rdb_type = NULL)
 }//}}}
 function cm_ft_conm__editor_FString($set)
 {//{{{
-	return "mediumtext|NO|||";
+	return "mediumtext|NO||";
 }//}}}
 
 function cm_ft_conm__editor_change($tablename, $info, $setting)

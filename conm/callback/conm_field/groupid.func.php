@@ -13,7 +13,7 @@ function cm_ft_conm__groupid_sql($set, $rdb_type = NULL)
 }//}}}
 function cm_ft_conm__groupid_FString($set)
 {//{{{
-	return "tinyint(1) unsigned|NO||0|";
+	return "tinyint(1) unsigned|NO|0|";
 }//}}}
 
 function cm_ft_conm__groupid_setting($setting)

@@ -196,7 +196,7 @@ class ctrl_a_model
 	}//}}}
 	function action_delete()
 	{//{{{
-		$modelid = _g('modelid', 'int');
+		$modelid = i::g()->int('modelid')->end();
 
 		$result = conm_m_delete($modelid, $error);
 		if($result)
@@ -275,7 +275,6 @@ class ctrl_a_model
 		//把 is_sync 改为 1
 		// siud::update('model')->wis()->data()->ing();
 		?>
-		<a href="<?=gpf::url("..manage")?>">管理模型</a>
 		<a href="<?=gpf::url(".a_model_field.manage..modelid")?>">管理字段</a>
 		<?php
 	}//}}}

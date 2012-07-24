@@ -10,6 +10,7 @@ function _cm_ft_conm__textarea_mysql($set)
 	if(!$set['maxlength']) $set['maxlength'] = 255;
 	$maxlength = min($set['maxlength'], 255);
 	$is_text = false;
+	$set['field_type'] = in_array($set['field_type'], array('char', 'varchar', 'text', 'mediumtext')) ? $set['field_type'] : 'text';
 	if ('text' == $set['field_type'] || 'mediumtext' == $set['field_type'])
 		{
 		$is_text = true;
