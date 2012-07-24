@@ -409,4 +409,26 @@ class ctrl_a_category
 			}
 		showmessage('URL更新完成');
 	}//}}}
+	/**
+	 * 编辑单网页类栏目的网页内容
+	 */
+	function action_edit_content()
+	{//{{{
+		global $CATEGORY;
+
+		$catid = i::g()->int('catid')->end();
+		if (!$catid || !$CATEGORY[$catid])
+			{
+			showmessage('栏目不存在');
+			}
+
+		if (isset($_POST["dosubmit"]))
+			{
+			$content = i::p()->val('content')->end();
+			siud::save('category')->pk('catid')->data(array("catid" => $catid, "content" => $content,))->ing();
+			showmessage('更新成功');
+			}
+		$data = siud::find('category')->tfield('content')->wis('catid', $catid)->ing();
+		include tpl_admin('category_edit_content');
+	}//}}}
 }

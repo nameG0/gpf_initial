@@ -13,9 +13,16 @@
  */
 function hd_editor__fck($set)
 {//{{{
+	$str = '';
 	a::i($set)->d('textareaid', 'content')->d('toolbar', 'standard')->d('width', '100%')->d('height', 400)->d('isshowext', false);
+	//ggzhu@2012-07-24 如果设置了 $set['value'] 则自动输出文本框
+	if (isset($set['value']))
+		{
+		$set['value'] = htmlspecialchars($set['value']);
+		$str .= "<textarea name=\"{$set['name']}\" id=\"{$set['textareaid']}\" style=\"display:none;\">{$set['value']}</textarea>\n";
+		}
 	$SITE_URL = '/gz/';
-	$str = "<script type=\"text/javascript\" src=\"{$SITE_URL}static/editor/fckeditor/fckeditor.js\"></script>\n<script language=\"JavaScript\" type=\"text/JavaScript\">var SiteUrl = \"{$SITE_URL}\"; var Module = \"{$mod}\"; var sBasePath = \"{$SITE_URL}\" + 'static/editor/fckeditor/'; var oFCKeditor = new FCKeditor( '".$set['textareaid']."' ) ; oFCKeditor.BasePath = sBasePath ; oFCKeditor.Height = '".$set['height']."'; oFCKeditor.Width	= '".$set['width']."' ; oFCKeditor.ToolbarSet	= '".$set['toolbar']."' ;oFCKeditor.ReplaceTextarea();";
+	$str .= "<script type=\"text/javascript\" src=\"{$SITE_URL}static/editor/fckeditor/fckeditor.js\"></script>\n<script language=\"JavaScript\" type=\"text/JavaScript\">var SiteUrl = \"{$SITE_URL}\"; var Module = \"{$mod}\"; var sBasePath = \"{$SITE_URL}\" + 'static/editor/fckeditor/'; var oFCKeditor = new FCKeditor( '".$set['textareaid']."' ) ; oFCKeditor.BasePath = sBasePath ; oFCKeditor.Height = '".$set['height']."'; oFCKeditor.Width	= '".$set['width']."' ; oFCKeditor.ToolbarSet	= '".$set['toolbar']."' ;oFCKeditor.ReplaceTextarea();";
 	if($_userid && $isshowext)
 	{
 		$str .= "editor_data_id += '".$textareaid."|';if(typeof(MM_time)=='undefined'){MM_time = setInterval(update_editor_data,".($PHPCMS['editor_interval_data']*1000).");}";

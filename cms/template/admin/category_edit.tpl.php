@@ -2,9 +2,9 @@
 // defined('IN_PHPCMS') or exit('Access Denied');
 include tpl_admin('header');
 ?>
-<body <?php if($type<2){ ?>onLoad="$('#div_category_urlruleid').load('?mod=<?=$mod?>&file=<?=$file?>&action=urlrule&ishtml=<?=$ishtml?>&type=category&category_urlruleid=<?=$category_urlruleid?>');$('#div_show_urlruleid').load('?mod=<?=$mod?>&file=<?=$file?>&action=show_urlrule&ishtml=<?=$content_ishtml?>&type=show&show_urlruleid=<?=$show_urlruleid?>');"<?php } ?> >
+<body >
 <?=NULL//admin_menu('栏目管理', $submenu)?>
-<?php if($type == 0){ ?>
+<?php if($type == 0){//{{{ ?>
 
 <form name="myform" method="post" action="<?=gpf::url("....catid")?>">
 <input type="hidden" name="category[type]" value="<?=$type?>">
@@ -255,7 +255,8 @@ include tpl_admin('header');
 </table>
 </form>
 
-<?php }elseif($type == 1){ ?>
+<?php }//}}}
+elseif($type == 1){//{{{ ?>
 <form name="myform" method="post" action="?mod=<?=$mod?>&file=<?=$file?>&action=<?=$action?>&catid=<?=$catid?>">
 <input type="hidden" name="category[type]" value="<?=$type?>">
 <table cellpadding="0" cellspacing="1" class="table_form">
@@ -267,58 +268,16 @@ include tpl_admin('header');
   </td>
   </tr>
     <tr>
-      <th><strong>单网页名称</strong></th>
-      <td><input name='category[catname]' type='text' id='catname' value='<?=$catname?>' size='40' maxlength='50' require="true" datatype="require" msg="单网页名称不能为空"> <?=1//form::style('category[style]', $style)?>  <font color="red">*</font></td>
+      <th><strong>栏目名称</strong></th>
+      <td><input name='category[catname]' type='text' id='catname' value='<?=$catname?>' size='40' maxlength='50' require="true" datatype="require" msg="单网页名称不能为空">  <font color="red">*</font></td>
     </tr>
     <tr>
-      <th><strong>单网页英文名</strong></th>
+      <th><strong>栏目目录</strong></th>
       <td><input name='category[catdir]' type='text' id='catdir' value='<?=$catdir?>' size='20' maxlength='50' require="true" datatype="require" msg="单网页英文名不能为空">  <font color="red">*</font></td>
     </tr>
     <tr>
-      <th><strong>单网页图片</strong></th>
-      <td><input name='category[image]' type='text' id='image' value='<?=$image?>' size='40' maxlength='50'> <?=file_select('image', $catid, 1)?></td>
-    </tr>
-    <tr>
-      <th width='30%'><strong>单网页模板</strong></th>
-      <td><input type="text" name="setting[template]" value="<?=$template?>" /></td>
-    </tr>
-	<tr>
-      <th width='30%'><strong>是否生成Html</strong></th>
-      <td>
-	  <input type='radio' name='setting[ishtml]' value='1' <?php if($ishtml){ ?>checked <?php } ?> onClick="$('#div_category_urlruleid').load('?mod=<?=$mod?>&file=<?=$file?>&action=urlrule&ishtml=1&category_urlruleid=<?=$category_urlruleid?>');"> 是&nbsp;&nbsp;&nbsp;&nbsp;
-	  <input type='radio' name='setting[ishtml]' value='0' <?php if(!$ishtml){ ?>checked <?php } ?> onClick="$('#div_category_urlruleid').load('?mod=<?=$mod?>&file=<?=$file?>&action=urlrule&ishtml=0&category_urlruleid=<?=$category_urlruleid?>');"> 否
-	  </td>
-    </tr>
-	<tr>
-      <th width='30%'><strong>是否在导航栏显示</strong></th>
-      <td>
-	  <input type='radio' name='category[ismenu]' value='1' <?php if($ismenu){ ?>checked <?php } ?> > 是&nbsp;&nbsp;&nbsp;&nbsp;
-	  <input type='radio' name='category[ismenu]' value='0' <?php if(!$ismenu){ ?>checked <?php } ?> > 否
-	  </td>
-    </tr>
-	<tr>
-      <th><strong>栏目页URL规则</strong></th>
-      <td><div id="div_category_urlruleid"></div></td>
-    </tr>
-    <tr>
-      <th width='30%'><strong>修改权限</strong></th>
-      <td><?=1//form::checkbox($ROLE, 'priv_roleid', 'priv_roleid', $priv_roleids)?></td>
-    </tr>
-    <tr>
-      <th width='30%'><strong>查看权限</strong></th>
-      <td><?=1//form::checkbox($GROUP, 'priv_groupid', 'priv_groupid', $priv_groupids)?></td>
-    </tr>
-    <tr>
-      <th width='30%'><strong>META Title（单网页标题）</strong><br/>针对搜索引擎设置的标题</th>
-      <td><input name='setting[meta_title]' type='text' id='meta_title' value='<?=$meta_title?>' size='60' maxlength='60'></th>
-    </tr>
-    <tr>
-      <th width='30%'><strong>META Keywords（单网页关键词）</strong><br/>针对搜索引擎设置的关键词</th>
-      <td><textarea name='setting[meta_keywords]' cols='100' rows='7' id='meta_keywords'><?=$meta_keywords?></textarea></td>
-    </tr>
-    <tr>
-      <th width='30%'><strong>META Description（单网页描述）</strong><br/>针对搜索引擎设置的网页描述</th>
-      <td><textarea name='setting[meta_description]' cols='100' rows='7' id='meta_description'><?=$meta_description?></textarea></td>
+      <th width='30%'><strong>栏目模板</strong></th>
+      <td><input type="text" name="setting[template]" value="<?=$setting['template']?>" /></td>
     </tr>
   <tr>
      <td width='30%'></td>
@@ -327,7 +286,8 @@ include tpl_admin('header');
 </table>
 </form>
 
-<?php }elseif($type == 2){ ?>
+<?php }//}}}
+elseif($type == 2){//{{{ ?>
 
 <script language='JavaScript' type='text/JavaScript'>
 function CheckForm(){
@@ -385,7 +345,7 @@ function CheckForm(){
 </table>
 </form>
 
-<?php }?>
+<?php }//}}} ?>
 </body>
 </html>
 <script LANGUAGE="javascript">

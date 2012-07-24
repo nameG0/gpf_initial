@@ -10,11 +10,21 @@
 		$categorys = array();
 		foreach($CATEGORY as $id=>$cat)
 			{
-			if(($type == 2 && $cat['type'] ==2) || ($type == 1 && $cat['type'])) continue;
-			if($cat['module'] == 'cms') $categorys[$id] = array('id'=>$id, 'parentid'=>$cat['parentid'], 'name'=>$cat['catname']);
+			if($cat['module'] == 'cms' && $cat['type'] <= 1)
+				{
+				if (0 == $cat['type'])
+					{
+					$url = gpf::url("cms.a_content.manage.&catid={$cat['catid']}");
+					}
+				else
+					{
+					$url = gpf::url("cms.a_category.edit_content.&catid={$cat['catid']}");
+					}
+				$categorys[$id] = array('id'=>$id, 'parentid'=>$cat['parentid'], 'name'=>$cat['catname'], "url" => $url,);
+				}
 			}
 		$tree->tree($categorys);
-		echo $tree->get_tree(0, "<div>\$spacer<a href=\\\"" . gpf::url("cms.a_content.manage") . "&catid=\$id\\\" target=\\\"main\\\">\$name</a></div>\n");
+		echo $tree->get_tree(0, "<div>\$spacer<a href=\\\"\$url\\\" target=\\\"main\\\">\$name</a></div>\n");
 		}
 	?>
 </div>

@@ -1,9 +1,11 @@
 <?php
 // defined('IN_PHPCMS') or exit('Access Denied');
+global $CATEGORY;
+
 include tpl_admin('header');
 ?>
-<body <?php if($type<2){ ?>onLoad="$('#div_category_urlruleid').load('?mod=<?=$mod?>&file=<?=$file?>&action=urlrule&ishtml=<?=$ishtml?>&type=category&category_urlruleid=<?=$category_urlruleid?>');$('#div_show_urlruleid').load('?mod=<?=$mod?>&file=<?=$file?>&action=show_urlrule&ishtml=<?=$ishtml?>&type=show&show_urlruleid=<?=$show_urlruleid?>');"<?php } ?> >
-<?php if('' === $type){ ?>
+<body >
+<?php if('' === $type){//{{{ ?>
 
 <form name="myform" method="post" action="<?=gpf::url("...")?>">
 <table cellpadding="2" cellspacing="1" class="table_form">
@@ -44,19 +46,13 @@ include tpl_admin('header');
 </table>
 </form>
 
-<?php }elseif($type == 0){ ?>
+<?php }//}}}
+elseif($type == 0)
+	{//{{{ ?>
 
 <form name="myform" method="post" action="<?=gpf::url("...")?>">
 <input type="hidden" name="category[type]" value="<?=$type?>">
 <input name="forward" type="hidden" value="<?=$forward?>">
-<div class="tag_menu" style="width:99%;margin-top:10px;">
-<ul>
-  <li><a href="###" id='TabTitle0' onclick='ShowTabs(0)' class="selected">基本信息</a></li>
-  <li><a href="###" id='TabTitle2' onclick='ShowTabs(2)'>权限设置</a></li>
-  <li><a href="###" id='TabTitle3' onclick='ShowTabs(3)'>收费设置</a></li>
-  <li><a href="###" id='TabTitle4' onclick='ShowTabs(4)'>扩展设置</a></li>
-  <li><a onClick="ShowTabs(5)" id="TabTitle5" href="###">生成HTML</a></li>
-</ul></div>
 <table cellpadding="2" cellspacing="1" class="table_form">
   <tbody id='Tabs0' style='display:'>
   <tr>
@@ -65,12 +61,6 @@ include tpl_admin('header');
   <input type="hidden" name="category[parentid]" value="<?=$parentid?>"> <?=$parentid ? $CATEGORY[$parentid]['catname'] : '无'?>
   </td>
   </tr>
-     <tr>
-      <th><strong>绑定模型</strong></th>
-      <td>
-  <input type="hidden" name="category[modelid]" value="<?=$modelid?>"> <?=$MODEL[$modelid]['name']?>
-	  </td>
-    </tr>
     <tr>
       <th><font color="red">*</font> <strong>栏目名称</strong></th>
       <td>
@@ -261,9 +251,9 @@ include tpl_admin('header');
 </table>
 </form>
 
-<?php }elseif($type == 1){ ?>
-
-<form name="myform" method="post" action="?mod=<?=$mod?>&file=<?=$file?>&action=<?=$action?>" onSubmit='return CheckForm();'>
+<?php }//}}}
+elseif($type == 1){//{{{ ?>
+<form name="myform" method="post" action="<?=gpf::url("...")?>" onSubmit='return CheckForm();'>
 <input name="forward" type="hidden" value="<?=$forward?>">
 <input type="hidden" name="category[type]" value="<?=$type?>">
 <table cellpadding="2" cellspacing="1" class="table_form">
@@ -275,58 +265,18 @@ include tpl_admin('header');
   </td>
   </tr>
     <tr>
-      <th><strong>单网页名称</strong></th>
-      <td><input name='category[catname]' type='text' id='catname' size='40' maxlength='50'  require="true" datatype="require" msg="单网页名称不能为空"> <?=1//form::style('category[style]','')?>  <font color="red">*</font></td>
+      <th><strong>栏目名称</strong></th>
+      <td><input name='category[catname]' type='text' id='catname' size='40' maxlength='50'  require="true" datatype="require" msg="单网页名称不能为空"> <font color="red">*</font></td>
     </tr>
     <tr>
-      <th><strong>单网页英文名</strong></th>
+      <th><strong>栏目目录</strong></th>
       <td><input name='category[catdir]' type='text' id='catdir' size='20' maxlength='50'  require="true" datatype="require" msg="单网页英文名不能为空">  <font color="red">*</font></td>
     </tr>
     <tr>
-      <th><strong>单网页图片</strong></th>
-      <td><input name='category[image]' type='text' id='image' size='40' maxlength='50'> <?=file_select('image', $catid, 1)?></td>
-    </tr>
-    <tr>
-      <th><strong>单网页模板</strong></th>
-      <td><?=1//form::select_template('phpcms', 'setting[template]', 'template', 'page', '','page')?></td>
-    </tr>
-	<tr>
-      <th><strong>是否生成Html</strong></th>
-      <td>
-	  <input type='radio' name='setting[ishtml]' value='1' <?php if($PHPCMS['ishtml']){ ?>checked <?php } ?> onClick="$('#div_category_urlruleid').load('?mod=<?=$mod?>&file=<?=$file?>&action=urlrule&ishtml=1&category_urlruleid=0');"> 是&nbsp;&nbsp;&nbsp;&nbsp;
-	  <input type='radio' name='setting[ishtml]' value='0' <?php if(!$PHPCMS['ishtml']){ ?>checked <?php } ?> onClick="$('#div_category_urlruleid').load('?mod=<?=$mod?>&file=<?=$file?>&action=urlrule&ishtml=0&category_urlruleid=0');"> 否
-	  </td>
-    </tr>
-	<tr>
-      <th width='30%'><strong>是否在导航栏显示</strong></th>
-      <td>
-	  <input type='radio' name='category[ismenu]' value='1'> 是&nbsp;&nbsp;&nbsp;&nbsp;
-	  <input type='radio' name='category[ismenu]' value='0' checked> 否
-	  </td>
-    </tr>
-	<tr>
-      <th><strong>栏目页URL规则</strong></th>
-      <td><div id="div_category_urlruleid"></div></td>
-    </tr>
-    <tr>
-      <th><strong>修改权限</strong></th>
-      <td><?=1//form::checkbox($ROLE, 'priv_roleid', 'priv_roleid', '')?></td>
-    </tr>
-    <tr>
-      <th><strong>查看权限</strong></th>
-      <td><?=1//form::checkbox($GROUP, 'priv_groupid', 'priv_groupid', '')?></td>
-    </tr>
-    <tr>
-      <th><strong>META Title（单网页标题）</strong><br/>针对搜索引擎设置的标题</th>
-      <td><input name='setting[meta_title]' type='text' id='meta_title' size='60' maxlength='60'></td>
-    </tr>
-    <tr>
-      <th><strong>META Keywords（单网页关键词）</strong><br/>针对搜索引擎设置的关键词</th>
-      <td><textarea name='setting[meta_keywords]' cols='100' rows='7' id='meta_keywords'></textarea></td>
-    </tr>
-    <tr>
-      <th><strong>META Description（单网页描述）</strong><br/>针对搜索引擎设置的网页描述</th>
-      <td><textarea name='setting[meta_description]' cols='100' rows='7' id='meta_description'></textarea></td>
+      <th><strong>栏目模板</strong></th>
+	<td>
+	<input type="text" name="setting[template]" value="" />(mod/name), eg. main/index
+	</td>
     </tr>
   <tr>
      <th></th>
@@ -335,8 +285,8 @@ include tpl_admin('header');
 </table>
 </form>
 
-
-<?php }elseif($type == 2){ ?>
+<?php }//}}}
+elseif($type == 2){//{{{ ?>
 
 <script language='JavaScript' type='text/JavaScript'>
 function CheckForm(){
@@ -389,7 +339,7 @@ function CheckForm(){
   </tr>
 </table>
 </form>
-<?php } ?>
+<?php }//}}} ?>
 </body>
 </html>
 <script LANGUAGE="javascript">
