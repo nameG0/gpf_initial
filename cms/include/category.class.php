@@ -61,7 +61,7 @@ class category
 		if(!is_array($category)) return FALSE;
 		$category['module'] = $this->module;
 		$this->db->insert($this->table, $category);
-		//ggzhu 2010-08-06 add 对于catid的处理，使其可用于指定catid的新增
+		//ggzhu@2010-08-06 add 对于catid的处理，使其可用于指定catid的新增
 		if (!$category['catid'])
 			{
 			$category['catid'] = $this->db->insert_id();
@@ -95,8 +95,11 @@ class category
 			"arrparentid" => $arrchildid,
 			"parentdir" => $parentdir,
 			"setting" => $setting,
-			"url" => gpf::url("cms.content.list.&catid={$catid}"),
 			);
+		if ($category['type'] <= 1)
+			{
+			$r_update['url'] = gpf::url("cms.content.list.&catid={$catid}");
+			}
 		a::i($r_update)->sers('setting')->adds();
 		$this->db->update($this->table, $r_update, "catid = {$catid}");
 		// $this->db->query("UPDATE `$this->table` SET `arrchildid`='$catid',`listorder`=$catid,`arrparentid`='$arrparentid',`parentdir`='$parentdir' WHERE catid=$catid");

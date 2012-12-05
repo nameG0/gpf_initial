@@ -50,10 +50,17 @@ class ctrl_a_category
 			//cache_common();
 			cache_category();
 			// showmessage('栏目添加成功！待栏目全部添加完成，请修复栏目', $forward);
-			echo '栏目添加成功！待栏目全部添加完成，请修复栏目';
 			?>
-			<a href="<?=gpf::url('..manage')?>">管理栏目</a>
+<script type="text/javascript">
+<!--
+if ('function' === typeof(top.__done))
+	{
+	top.__done(<?=intval($category['parentid'])?>);
+	}
+//-->
+</script>
 			<?php
+			// echo '栏目添加成功！待栏目全部添加完成，请修复栏目';
 			}
 		else
 			{
@@ -94,7 +101,17 @@ class ctrl_a_category
 				}
 			//$priv_group->update('catid', $catid, $priv_groupid);
 			//$priv_role->update('catid', $catid, $priv_roleid);
-			showmessage('操作成功！开始更新网站地图...', gpf::url("..manage"));
+			// showmessage('操作成功！开始更新网站地图...', gpf::url("..manage"));
+			?>
+<script type="text/javascript">
+<!--
+if ('function' === typeof(top.__done))
+	{
+	top.__done();
+	}
+//-->
+</script>
+			<?php
 			}
 		else
 			{
@@ -122,14 +139,23 @@ class ctrl_a_category
 	}//}}}
 	function action_delete()
 	{//{{{
+		log::is_print(false);
+
 		$catid = i::g()->int('catid')->end();
 		$LANG['illegal_parameters'] = '不行';
 		$LANG['operation_success'] = '操作成功';
 		global $CATEGORY;
 
-		if(!array_key_exists($catid, $CATEGORY)) showmessage($LANG['illegal_parameters'], gpf::url("..manage"));
+		if(!array_key_exists($catid, $CATEGORY))
+			{
+			//输出 2 表示失败
+			echo 2;
+			// showmessage($LANG['illegal_parameters'], gpf::url("..manage"));
+			}
 		$this->o_cate->delete($catid);
-		showmessage($LANG['operation_success'], gpf::url("..updatecache") . '&forward='.urlencode(gpf::url('..manage')));
+		//输出 1 表示成功
+		echo 1;
+		// showmessage($LANG['operation_success'], gpf::url("..updatecache") . '&forward='.urlencode(gpf::url('..manage')));
 	}//}}}
 	function action_join()
 	{//{{{
@@ -165,8 +191,17 @@ class ctrl_a_category
 	}//}}}
 	function action_listorder()
 	{//{{{
-		$cat->listorder($listorder);
-		showmessage($LANG['operation_success'], $forward);
+		$listorder = i::p()->val('listorder')->end();
+
+		$this->o_cate->listorder($listorder);
+		?>
+		<script type="text/javascript">
+		<!--
+		parent.cateTree_listorder();
+		//-->
+		</script>
+		<?php
+		// showmessage($LANG['operation_success'], $forward);
 	}//}}}
 	function action_recycle()
 	{//{{{
@@ -197,10 +232,11 @@ class ctrl_a_category
 	 */
 	function action_manage()
 	{//{{{
-		$parentid = i::g()->int('catid')->end();
+		// $parentid = i::g()->int('catid')->end();
 
-		$data = $this->o_cate->listinfo($parentid);
-		include tpl_admin('category_manage');
+		// $data = $this->o_cate->listinfo($parentid);
+		// include tpl_admin('category_manage');
+		include tpl_admin('category_tree');
 	}//}}}
 	function action_urlrule()
 	{//{{{
@@ -378,16 +414,21 @@ class ctrl_a_category
 	}//}}}
 	function action_updatecache()
 	{//{{{
+		log::is_print(false);
 		//cache_common();
 		cache_category();
-		$LANG['category_cache_update_success'] = '缓存更新成功';
-		showmessage($LANG['category_cache_update_success'], gpf::url("..manage"));
+		//输出 1 表示处理成功。
+		echo 1;
+		// $LANG['category_cache_update_success'] = '缓存更新成功';
+		// showmessage($LANG['category_cache_update_success'], gpf::url("..manage"));
 	}//}}}
 	/**
 	 * 更新所有栏目的前台访问URL
 	 */
 	function action_update_url()
 	{//{{{
+		log::is_print(false);
+
 		global $CATEGORY;
 		$o_rdb = rdb::obj();
 		foreach ($CATEGORY as $k => $v)
@@ -407,7 +448,9 @@ class ctrl_a_category
 			$o_rdb->update(RDB_PRE . 'category', array("url" => $url,), "catid = {$k}");
 			// siud::save('category')->pk('catid')->data(array("catid" => , ))->ing();
 			}
-		showmessage('URL更新完成');
+		//输出 1 表示更新成功
+		echo 1;
+		// showmessage('URL更新完成');
 	}//}}}
 	/**
 	 * 编辑单网页类栏目的网页内容
@@ -430,5 +473,61 @@ class ctrl_a_category
 			}
 		$data = siud::find('category')->tfield('content')->wis('catid', $catid)->ing();
 		include tpl_admin('category_edit_content');
+	}//}}}
+	/**
+	 * 返回树状管理栏目页子栏目数据。
+	 */
+	function action_get_child()
+	{//{{{
+		log::is_print(false);
+		global $CATEGORY;
+
+		$pid = i::g()->int('pid')->end();
+		$cate_list = array();
+		foreach ($CATEGORY as $k => $v)
+			{
+			if ($pid == $v['parentid'])
+				{
+				$cate_list[$k] = $v;
+				}
+			}
+		if (!$cate_list)
+			{
+			?>
+		<ul><li>无</li></ul>
+			<?php
+			exit;
+			}
+		?>
+		<ul >
+			<?php
+			foreach ($cate_list as $k => $v)
+				{
+			?>
+			<li onclick="cateTree_click(this, event);" onmouseover="cateTree_tool(this, event);" catid="<?=$v['catid']?>">
+			<input type="text" name="listorder[<?=$v['catid']?>]" value="<?=$v['listorder']?>" style="width:30px;" />
+			<span><?=$v['catname']?></span>
+			<span type="tool" style="display:none;">|
+				<span onclick="cateTreeTool_refresh_child(this, event);">刷新</span>|
+				<a href="<?=gpf::url("..go.&catid={$v['catid']}")?>" target="_blank">访问</a> |
+				<span onclick="openwinx('<?=gpf::url("..edit.&catid={$v['catid']}&parentid={$v['parentid']}")?>', 'edit', 600, 600);stopBubble(event);">修改</span>|
+				<span onclick="openwinx('<?=gpf::url("..add.&parentid={$v['catid']}")?>', 'add', 600, 600);stopBubble(event);">添加子栏目</span>|
+				<span onclick="cateTree_del('<?=$v['catid']?>', event);">删除</span>
+			</span>
+			<span type="child" is_init="false" is_display="true"></span></li>
+			<?php
+				}
+			?>
+		</ul>
+		<?php
+	}//}}}
+	/**
+	 * 跳转到栏目对应的前台 URL
+	 */
+	function action_go()
+	{//{{{
+		global $CATEGORY;
+		$catid = i::g()->int('catid')->end();
+		header("location:{$CATEGORY[$catid]['url']}");
 	}//}}}
 }

@@ -35,7 +35,7 @@ function cmsCateCache_dir2id()
 function _category_cache_all()
 {//{{{
 	$data = array();
-	$result = siud::select('category')->tfield('`catid`,`module`,`type`,`modelid`,`catname`,`style`,`image`,`catdir`,`url`,`parentid`,`arrparentid`,`parentdir`,`child`,`arrchildid`,`items`,`citems`,`pitems`,`ismenu`,`letter`')->order("`listorder`,`catid`")->ing();
+	$result = siud::select('category')->tfield('`catid`,`module`,`type`,`modelid`,`catname`,`style`,`image`,`catdir`,`url`,`parentid`,`arrparentid`,`parentdir`,`child`,`arrchildid`,`items`,`citems`,`pitems`,`ismenu`,`letter`,`listorder`')->order("`listorder`,`catid`")->ing();
 	foreach ($result as $k => $r)
 		{
 		//$r['url'] = url($r['url']);
@@ -202,4 +202,68 @@ function get_sql_catid($catid, $ao = 'AND')
 	$catid = intval($catid);
 	if(!isset($CATEGORY[$catid])) return false;
 	return $CATEGORY[$catid]['child'] ? " {$ao} `catid` IN(".$CATEGORY[$catid]['arrchildid'].") " : " {$ao} `catid`={$catid} ";
+}//}}}
+
+/**
+ * 生成缩图
+ */
+function thumb($imgurl, $width = 100, $height = 100)
+{//{{{
+	global $o_image;
+
+	if(!extension_loaded('gd'))
+		{
+		log::add("未加载 GD 库", log::WARN, __FILE__, __LINE__, __FUNCTION__);
+		return $imgurl;
+		}
+	if (strpos($imgurl, '://'))
+		{
+		if (0 !== stripos($imgurl, HOST))
+			{
+			log::add("站外图片，不创建缩图", log::INFO, __FILE__, __LINE__, __FUNCTION__);
+			return $imgurl;
+			}
+		else
+			{
+			$imgurl = substr($imgurl, strlen(HOST));
+			}
+		}
+	
+	//计算原图与缩图的路径
+	$file_thumb = "/thumb_{$width}_{$height}_" . basename($imgurl);
+	if ('/' == $imgurl[0])
+		{
+		$imgurl = substr($imgurl, 1);
+		}
+	$url_thumb = dirname($imgurl) . $file_thumb;
+	//uploadfile 附件图片可能不在 PHPCMS_ROOT 目录内
+	if (false !== strpos($imgurl, UPLOAD_URL))
+		{
+		$path_img = UPLOAD_ROOT . str_replace(UPLOAD_URL, '', $imgurl);
+		}
+	else
+		{
+		$path_img = PHPCMS_ROOT . $imgurl;
+		}
+	$path_thumb = dirname($path_img) . $file_thumb;
+
+	//$newimgurl = dirname($imgurl).'/thumb_'.$width.'_'.$height.'_'.basename($imgurl);
+	if(file_exists($path_thumb))
+		{
+		//return $newimgurl;
+		return $url_thumb;
+		}
+	if (!file_exists($path_img))
+		{
+		log::add("原图不存在 {$imgurl}", log::NOTEXI, __FILE__, __LINE__, __FUNCTION__);
+		return $imgurl;
+		}
+	//$img_path = ;
+	if(!is_object($o_image))
+		{
+		require_once CMS_PATH . 'include/image.class.php';
+		$o_image = new image();
+		}
+	//return $image->thumb(PHPCMS_ROOT.$imgurl, PHPCMS_ROOT.$newimgurl, $width, $height) ? $newimgurl : $imgurl;
+	return $o_image->thumb($path_img, $path_thumb, $width, $height) ? $url_thumb : $imgurl;
 }//}}}

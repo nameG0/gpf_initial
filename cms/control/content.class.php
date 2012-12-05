@@ -14,9 +14,11 @@ class ctrl_content
 	function action_show()
 	{//{{{
 		$contentid = i::g()->int('contentid')->end();
-		$data = siud::find('c_cms_content')->wis('contentid', $contentid)->ing();
-		$model_info = siud::find('cms_content')->wis('contentid', $contentid)->ing();
-		$CMMR = conm_CMMR($model_info['modelid'], CONM_ONLY_FIELD);
+
+		$data = siud::find('content')->wis('contentid', $contentid)->ing();
+		// $model_info = siud::find('content')->wis('contentid', $contentid)->ing();
+		// $CMMR = conm_CMMR($model_info['modelid'], CONM_ONLY_FIELD);
+		$CMMR = conm_CMMR(CMS_MODEL_ID, CONM_ONLY_FIELD);
 		$output = conm_output($CMMR['CMFL'], $data);
 		include tpl('show', 'main');
 		// var_dump($data, $output);
@@ -33,7 +35,7 @@ class ctrl_content
 			{
 			showmessage('缺少 catid 参数');
 			}
-		list($RESULT, $pages, $total) = siud::select('c_cms_content')->tfield('title, contentid, inputtime')->where(get_sql_catid($catid, ''))->pagesize(20)->ing();
+		list($RESULT, $pages, $total) = siud::select('content')->tfield('title, contentid, inputtime')->where(get_sql_catid($catid, ''))->pagesize(20)->ing();
 		include tpl('list', 'main');
 	}//}}}
 	function action_list()

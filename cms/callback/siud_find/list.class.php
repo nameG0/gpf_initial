@@ -61,7 +61,7 @@ class siudFind_cms__list
 		// global $db;
 		$is_use_get = 1 == $this->limit;
 		$obj_siud = siud::select();
-		$obj_siud->t('c_cms_content');
+		$obj_siud->t('content');
 		$obj_siud->tfield($this->field);
 
 		// $field = $this->field;
@@ -162,5 +162,59 @@ class siudFind_cms__list
 			$target = $target ? "target=\"{$target}\"" : '';
 			$result[$k]['_title'] = "<a href=\"{$url}\" title=\"{$r['title']}\" {$target} >{$title_before}{$title}</a>";
 			}
+	}//}}}
+
+	/**
+	 * 查找上一篇文章
+	 * @param int $catid 如果提供文章栏目参数，可减少一次查询。
+	 * @return array {int contentid:文章ID, string title:文章标题, string url:文章链接}
+	 */
+	function prev_content($contentid, $catid = 0)
+	{//{{{
+		$data = siud::find('content')->tfield("contentid, title")->where("catid={$catid} AND contentid < {$contentid}")->order('contentid DESC')->ing();
+		if (!empty($data))
+			{
+			$data['url'] = gpf::url("cms.content.show.&contentid={$data['contentid']}");
+			}
+		return $data;
+	}//}}}
+	/**
+	 * 查找下一篇文章
+	 * @param int $catid 如果提供文章栏目参数，可减少一次查询。
+	 * @return array {int contentid:文章ID, string title:文章标题, string url:文章链接}
+	 */
+	function next_content($contentid, $catid = 0)
+	{//{{{
+		$data = siud::find('content')->tfield("contentid, title")->where("catid={$catid} AND contentid > {$contentid}")->order('contentid ASC')->ing();
+		if (!empty($data))
+			{
+			$data['url'] = gpf::url("cms.content.show.&contentid={$data['contentid']}");
+			}
+		return $data;
+	}//}}}
+	/**
+	 * 相关文章：同栏目其它文章
+	 * @param int $contentid 用于排除当前文章
+	 * @param int $catid 如果提供文章栏目参数，可减少一次查询。
+	 * @return array {int contentid:文章ID, string title:文章标题, string url:文章链接, int inputtime:发布时间}
+	 */
+	function xiangguan($contentid, $catid = 0, $limit = 6)
+	{//{{{
+		//显示数为 $limit 条，取出 $limit + 1 条，若发现与当前文章重复则直接 unset 掉
+		$result = siud::select('content')->tfield("contentid, title, inputtime")->wis('catid', $catid)->limit($limit + 1)->order("contentid DESC")->ing();
+		foreach ($result as $k => $r)
+			{
+			if ($r['contentid'] == $contentid)
+				{
+				unset($result[$k]);
+				continue;
+				}
+			$result[$k]['url'] = gpf::url("cms.content.show.&contentid={$r['contentid']}");
+			}
+		if (count($result) > $limit)
+			{
+			array_pop($result);
+			}
+		return $result;
 	}//}}}
 }
