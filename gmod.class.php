@@ -1,61 +1,118 @@
 <?php
 /**
- * 模块间通讯函数
- *
- * <pre>
- * <b>info:模块信息</b>
- * path_sour 源绝对路径，不存在则为空字符串。
- * path_inst 副本绝对路径，不存在则为空字符串。
- * <b>数据结构</b>
- * $ModInfo array mod_info() 的返回值，包含模块信息的数组。
- * </pre>
+ * 模块间通讯类
  * 
- * @version 2012-04-04
+ * @version 2012-12-12
  * @package default
  * @filesource
  */
-
-/**
- * 初始化指定模块
- * 加载模块 include/init.inc.php 文件。
- */
-function mod_init($mod)
-{//{{{
-	static $init_ed = array();
-	if (isset($init_ed[$mod]))
-		{
-		return $init_ed[$mod];
-		}
-
-	$ModInfo = mod_info($mod);
-	if (!$ModInfo)
-		{
-		$init_ed[$mod] = false;
-		return false;
-		}
-	//优先加载副本中的 init 文件。
-	$path = "{$ModInfo['path_inst']}include/init.inc.php";
-	if (!is_file($path))
-		{
-		$path = "{$ModInfo['path_sour']}include/init.inc.php";
+class gmod
+{
+	/**
+	 * 构造方法声明为private，防止直接创建对象
+	 */
+	private function __construct() {
+	}
+	/**
+	 * 初始化模块
+	 * 即加载模块的 include/init.inc.php
+	 */
+	static public function init($mod_name)
+	{//{{{
+		$path = GPF_PATH_MODULE . "{$mod_name}/include/init.inc.php";
+		if (gpf::is_inc($path))
+			{
+			return true;
+			}
 		if (!is_file($path))
 			{
-			$init_ed[$mod] = false;
-			log::add("无法初始化模块 {$mod}, 找不到 init 文件", log::NOTEXI, __FILE__, __LINE__, __FUNCTION__);
 			return false;
 			}
-		}
-	log::add($mod, log::INFO, __FILE__, __LINE__, __FUNCTION__);
-	//init 文件可通过返回 true/false 标记模块初始化是否成功
-	$ret = include $path;
-	if (is_bool($ret))
-		{
-		$init_ed[$mod] = $ret;
-		return $ret;
-		}
-	$init_ed[$mod] = true;
-	return true;
-}//}}}
+		gpf::inc($path);
+		gpf::log($mod_name, gpf::INFO, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+		return true;
+	}//}}}
+	/**
+	 * 计算模块下文件的绝对路径
+	 * @param string $path 模块下文件路径。eg. include/common.inc.php
+	 * @return string 对应文件的绝对路径。
+	 */
+	static public function path($mod_name, $path)
+	{//{{{
+		return GPF_PATH_MODULE . "{$mod_name}/{$path}";
+	}//}}}
+	/**
+	 * 单次包含模块内文件
+	 * @param string $path 模块文件路径，不用包含最后的.php后序。eg. abc.class, -> abc.class.php
+	 */
+	static public function inc($mod_name, $path)
+	{//{{{
+		gpf::inc(GPF_PATH_MODULE . "{$mod_name}/{$path}.php");
+	}//}}}
+	/**
+	 * 加载模块 API 目录文件。
+	 * api 目录中的类使用 {mod_name}Api_{class_name} 为前序, 对应文件名为 {class_name}.class.php。
+	 * @param string $mod_name 模块名。
+	 * @param string $file_name 文件名，不含 .php 后序。eg. api.func, api.class
+	 */
+	static public function api($mod_name, $file_name)
+	{//{{{
+		$path = GPF_PATH_MODULE . "{$mod_name}/api/{$file_name}.php";
+		gpf::inc($path);
+		return self::_api_class($mod_name, $file_name);
+	}//}}}
+	/**
+	 * 若加载的 API 目录文件为类定义文件，则实例化。
+	 */
+	static private function _api_class($mod_name, $file_name)
+	{//{{{
+		if ('.class' !== substr($file_name, -6, 6))
+			{
+			return ;
+			}
+		$class_name = substr($file_name, 0, -6);
+		$class_full = "{$mod_name}Api_{$class_name}";
+		if (!gpf::is_obj($class_full))
+			{
+			gpf::obj_set($class_full, new $class_full());
+			}
+		return gpf::obj_get($class_full);
+	}//}}}
+	/**
+	 * 加载读类(r_)Model
+	 * @param string $mod_name 模块名。eg. cms
+	 * @param string $class_name 类名，eg. content > r_content.class.php > r_cms_content
+	 */
+	static public function rm($mod_name, $class_name)
+	{//{{{
+		$class_full = "r_{$mod_name}_{$class_name}";
+		if (gpf::is_obj($class_full))
+			{
+			return gpf::obj_get($class_full);
+			}
+		$path = GPF_PATH_MODULE . "{$mod_name}/model/r_{$class_name}.class.php";
+		gpf::inc($path);
+		gpf::obj_set($class_full, new $class_full());
+		return gpf::obj_get($class_full);
+	}//}}}
+	/**
+	 * 加载写类(r_)Model
+	 * @param string $mod_name 模块名。eg. cms
+	 * @param string $class_name 类名，eg. content > w_content.class.php > w_cms_content
+	 */
+	static public function wm($mod_name, $class_name)
+	{//{{{
+		$class_full = "w_{$mod_name}_{$class_name}";
+		if (gpf::is_obj($class_full))
+			{
+			return gpf::obj_get($class_full);
+			}
+		$path = GPF_PATH_MODULE . "{$mod_name}/model/w_{$class_name}.class.php";
+		gpf::inc($path);
+		gpf::obj_set($class_full, new $class_full());
+		return gpf::obj_get($class_full);
+	}//}}}
+}
 
 /**
  * 读取指定模块信息。

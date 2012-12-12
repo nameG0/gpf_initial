@@ -9,8 +9,12 @@
 
 // 入口文件必须定义常量：
 // GPF_PATH_MODULE 模块目录，以 / 结尾。
+
 define('GPF_PATH', dirname(__FILE__) . DIRECTORY_SEPARATOR); //gpf 目录
 require GPF_PATH . "gpf.class.php";
+require GPF_PATH . "gmod.class.php";
+
+register_shutdown_function(array('gpf', '_shutdown_function'));
 
 // define('DS', DIRECTORY_SEPARATOR);
 // //路径常量用 G_PATH_ 前序。
