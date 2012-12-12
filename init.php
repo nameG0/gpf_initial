@@ -6,36 +6,28 @@
  * @package default
  * @filesource
  */
-error_reporting(E_ALL ^ E_NOTICE);
 
 // 入口文件必须定义常量：
-// $ds = DIRECTORY_SEPARATOR;$dir = dirname(__FILE__);
-// define('GPF_PATH_SOUR', "{$dir}{$ds}sour{$ds}"); //源目录(系统模块)
-// define('GPF_PATH_INST', "{$dir}{$ds}inst{$ds}"); //副本目录(项目模块)。
-// define('G_PATH_DATA', "{$dir}{$ds}data{$ds}"); //数据目录。
-// define('G_PATH_UPLOADFILE', "{$dir}{$ds}uploadfile{$ds}"); //上传文件保存目录。
-// define('G_PATH_CACHE', "{$dir}{$ds}cache{$ds}"); //缓存文件目录。
-// define('G_PATH_LOG', "{$dir}{$ds}log{$ds}"); //日志记录文件目录。
-// include "{$dir}{$ds}gpf{$ds}gpf.inc.php";
-// unset($ds, $dir);
+// GPF_PATH_MODULE 模块目录，以 / 结尾。
+define('GPF_PATH', dirname(__FILE__) . DIRECTORY_SEPARATOR); //gpf 目录
+require GPF_PATH . "gpf.class.php";
 
-define('DS', DIRECTORY_SEPARATOR);
-//路径常量用 G_PATH_ 前序。
-define('GPF_PATH', dirname(__FILE__) . DS); //gpf 目录
-define('GPF_PATH_CORE', GPF_PATH . 'core' . DS); //gpf core 目录
-define('GPF_PATH_LIB', GPF_PATH . 'lib' . DS); //gpf lib 目录
+// define('DS', DIRECTORY_SEPARATOR);
+// //路径常量用 G_PATH_ 前序。
+// define('GPF_PATH_CORE', GPF_PATH . 'core' . DS); //gpf core 目录
+// define('GPF_PATH_LIB', GPF_PATH . 'lib' . DS); //gpf lib 目录
 
-//加载配置文件
-require GPF_PATH . "config.inc.php";
+// //加载配置文件
+// require GPF_PATH . "config.inc.php";
 
-//load core
-require GPF_PATH_CORE . "module.func.php";
-require GPF_PATH_CORE . "log.class.php";
-require GPF_PATH_CORE . "gpf.class.php";
+// //load core
+// require GPF_PATH_CORE . "module.func.php";
+// require GPF_PATH_CORE . "log.class.php";
+// require GPF_PATH_CORE . "gpf.class.php";
 
-//load lib
-include GPF_PATH_LIB . "common.func.php";
+// //load lib
+// include GPF_PATH_LIB . "common.func.php";
 
-define('SCRIPT_NAME', isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : preg_replace("/(.*)\.php(.*)/i", "\\1.php", $_SERVER['PHP_SELF']));
-define('QUERY_STRING', $_SERVER['QUERY_STRING']);
-log::add("TIME[" . time() . "] FILE[".SCRIPT_NAME."?".QUERY_STRING."]", log::INFO);
+// define('SCRIPT_NAME', isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : preg_replace("/(.*)\.php(.*)/i", "\\1.php", $_SERVER['PHP_SELF']));
+// define('QUERY_STRING', $_SERVER['QUERY_STRING']);
+// log::add("TIME[" . time() . "] FILE[".SCRIPT_NAME."?".QUERY_STRING."]", log::INFO);
