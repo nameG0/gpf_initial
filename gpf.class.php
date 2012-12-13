@@ -2,6 +2,10 @@
 /**
  * GPF 主类。
  * 
+ * 在类方法中使用中断式错误提示(showmessage)方案。
+ * 在类中直接进行错误提示主要是为方便使用，无需调用者每次都要手动处理错误信息。
+ * 需要做错误提示的类直接调用 gpf::err()。
+ *
  * @version 2012-05-05
  * @package default
  * @filesource
@@ -98,7 +102,19 @@ class gpf
 
 	static private $log_data = array(); //保存信息数据
 	static private $log_is_print = true; //设置是否在页面尾部输出 debug 信息
-	//log属性}}}
+	//}}}
+	
+	//gerr 功能的属性{{{
+	static private $error_func = 'exit'; //callback|NULL 操作出错时自动进行提示的提示函数。
+	static private $error = ''; //错误提示信息。
+	static private $is_pass = false; //标记流程是否正常。
+	static private $pass_num = 0; //流程计数器，每调用一次 start() 加1.
+	//}}}
+
+	//ghook 功能的属性{{{
+	static private $obj_hook = array();
+	static private $obj_callback = array();
+	//}}}
 
 	static private $shutdown_hook = array(); //挂载在 shutdown_function 调用的函数
 
@@ -254,6 +270,192 @@ class gpf
 			echo "<span style=\"", self::$style[$v['level']], "\">{$v['func']} {$v['msg']} [", self::$log_txt[$v['level']], "] {$v['file']}:{$v['line']}</span>{$br}\n";
 			}
 		echo "<br/><br/><br/></div>\n";
+	}//}}}
+
+	/**
+	 * 一个流程开始时调用
+	 */
+	static public function pnew()
+	{//{{{
+		self::$pass_num++;
+		if (1 === self::$pass_num)
+			{
+			self::$is_pass = true;
+			self::$error = '';
+			}
+	}//}}}
+	/**
+	 * 一个流程结束后调用
+	 */
+	static public function pend()
+	{//{{{
+		self::$pass_num--;
+		if (self::$pass_num < 1)
+			{
+			self::$pass_num = 0;
+			self::$is_pass = false;
+			}
+	}//}}}
+	/**
+	 * 检查流程是否正常，不正常直接提示并中断程序运行。
+	 */
+	static public function pcheck()
+	{//{{{
+		if (!self::$is_pass)
+			{
+			self::err("流程出错");
+			}
+	}//}}}
+	/**
+	 * 进行错误提示
+	 * @param string $error 错误提示信息。
+	 * @param string 所有文件(__FILE__)
+	 * @param int 所有行号(__LINE__)
+	 * @param string 所在函数(__FUNCTION__)
+	 */
+	static public function err($error, $file = '', $line = 0, $func = '')
+	{//{{{
+		self::$error = $error;
+		self::$is_pass = false;
+		self::log("(GERR){$error}", self::FLOW, $file, $line, $func);
+		if (self::$error_func)
+			{
+			if (!is_callable(self::$error_func))
+				{
+				exit($error);
+				}
+			call_user_func(self::$error_func, $error);
+			}
+	}//}}}
+	/**
+	 * 取错误提示内容。
+	 */
+	static public function err_get()
+	{//{{{
+		return self::$error;
+	}//}}}
+	/**
+	 * 设置自动提示函数
+	 * @param NULL|callback $func_name 错误处理函数，NULL 表示自动提示函数。
+	 */
+	static public function err_func($func_name)
+	{//{{{
+		if (is_null($func_name))
+			{
+			$func_name = 'exit';
+			}
+		self::$error_func = $func_name;
+	}//}}}
+
+	/**
+	 * 实例化并返回 hook 对象。
+	 * @param string $mod_name 模块名。eg. member
+	 * @param string $class_name hook类名。eg. base -> h_base.class.php -> h_member_base
+	 */
+	static public function hook($mod_name, $class_name)
+	{//{{{
+		$class_name_full = "h_{$mod_name}_{$class_name}";
+		if (isset(self::$obj_hook[$class_name_full]))
+			{
+			return self::$obj_hook[$class_name_full];
+			}
+		if (!class_exists($class_name_full))
+			{
+			$_path = PHPCMS_ROOT . "{$mod_name}/hook/h_{$class_name}.class.php";
+			if (!is_file($_path))
+				{
+				log::add("hook 类不存在[{$_path}]", log::ERROR, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+				self::$obj_hook[$class_name_full] = false;
+				return false;
+				}
+			require $_path;
+			if (!class_exists($class_name_full))
+				{
+				log::add("hook 类未定义[{$class_name_full}]", log::ERROR, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+				self::$obj_hook[$class_name_full] = false;
+				return false;
+				}
+			}
+		$obj = new $class_name_full();
+		self::$obj_hook[$class_name_full] = $obj;
+		return $obj;
+	}//}}}
+	/**
+	 * 加载并返回 callback 对象数组。
+	 * <pre>
+	 * 提供给 hook 类使用，调用格式：$list = ghook::load(mod_name, __CLASS__, __FUNCTION__);
+	 * </pre>
+	 * @param string $class_name hook 类完整类名，一般使用 __CLASS__。eg. h_member_base
+	 */
+	static public function hook_load($mod_name, $class_name, $func_name)
+	{//{{{
+		if (!isset(self::$obj_callback["{$mod_name}/{$class_name}"]))
+			{
+			self::$obj_callback["{$mod_name}/{$class_name}"] = self::_load_callback($mod_name, $class_name);
+			}
+		$obj_list = array();
+		foreach (self::$obj_callback["{$mod_name}/{$class_name}"] as $_obj)
+			{
+			if (method_exists($_obj, $func_name))
+				{
+				$obj_list[] = $_obj;
+				}
+			}
+		return $obj_list;
+	}//}}}
+
+	/**
+	 * 加载挂钩模块的 callback 对象
+	 * @param string hook 模块名
+	 * @param string $class_name self::load() 同名参数
+	 * @param array 对象列表
+	 */
+	static private function _load_callback($mod_name, $class_name)
+	{//{{{
+		$mod_callback = self::_hook_mod_file($mod_name);
+		if (!$mod_callback)
+			{
+			return array();
+			}
+		$class_name_short = substr($class_name, 2);
+		$obj_callback = array();
+		foreach ($mod_callback as $_mod)
+			{
+			$class_name_full = "hc_{$_mod}_{$class_name_short}";
+			if (!class_exists($class_name_full))
+				{
+				$_path = PHPCMS_ROOT . "{$_mod}/hook/hc_{$class_name_short}.class.php";
+				if (!is_file($_path))
+					{
+					log::add("callback 文件不存在[{$_path}]", log::ERROR, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+					continue;
+					}
+				require $_path;
+				if (!class_exists($class_name_full))
+					{
+					log::add("callback 类未定义[{$class_name_full}]", log::ERROR, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+					continue;
+					}
+				}
+			$obj_callback[] = new $class_name_full();
+			}
+		return $obj_callback;
+	}//}}}
+
+	/**
+	 * 加载模块 hook 目录 mod 文件
+	 * @param array 挂钩的模块列表。
+	 */
+	static private function _hook_mod_file($mod_name)
+	{//{{{
+		$_path = PHPCMS_ROOT . "{$mod_name}/hook/mod";
+		if (!is_file($_path))
+			{
+			return array();
+			}
+		$mod_callback = file($_path);
+		$mod_callback = array_filter(array_map('trim', $mod_callback));
+		return $mod_callback;
 	}//}}}
 
 	/**
