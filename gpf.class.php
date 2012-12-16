@@ -115,6 +115,12 @@ class gpf
 	static private $obj_hook = array();
 	static private $obj_callback = array();
 	//}}}
+	
+	static private $url_count = 0; //替换词计数器
+	static private $url_name = array(); //保存URL替换词
+	static private $url_search = array(); //方便URL替换词
+	static private $url_replace = array(); //方便URL替换词
+	static private $url_func = array(); //保存URL回调函数。
 
 	static private $shutdown_hook = array(); //挂载在 shutdown_function 调用的函数
 
@@ -456,6 +462,39 @@ class gpf
 		$mod_callback = file($_path);
 		$mod_callback = array_filter(array_map('trim', $mod_callback));
 		return $mod_callback;
+	}//}}}
+
+	/**
+	 * 用于输出完整的URL
+	 * @param string $url 用 @ 表示替换词，用 {func_name:args} 表示执行函数
+	 */
+	static public function url($url)
+	{//{{{
+		return 'http://' . str_replace(self::$url_search, self::$url_replace, $url);
+	}//}}}
+	/**
+	 * 设置URL替换词
+	 */
+	static public function url_name($name, $value)
+	{//{{{
+		$name = '@' . $name;
+		if (isset(self::$url_name[$name]))
+			{
+			$k = self::$url_name[$name];
+			self::$url_search[$k] = $name;
+			self::$url_replace[$k] = $value;
+			return ;
+			}
+		$k = self::$url_count++;
+		self::$url_name[$name] = $k;
+		self::$url_search[$k] = $name;
+		self::$url_replace[$k] = $value;
+	}//}}}
+	static public function url_func($name, $value)
+	{//{{{
+		//todo 未实现
+		//开始和结束标记使用类静态变量定义（即 { 和 }）
+		//因为模板引擎常用占用 { 和 }，所以可考虑改用 [ 和 ]
 	}//}}}
 
 	/**

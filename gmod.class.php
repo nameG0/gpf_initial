@@ -26,10 +26,11 @@ class gmod
 			}
 		if (!is_file($path))
 			{
+			gpf::log("模块初始化文件不存在[{$path}]", gpf::WARN, '', 0, __CLASS__.'->'.__FUNCTION__);
 			return false;
 			}
 		gpf::inc($path);
-		gpf::log($mod_name, gpf::INFO, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+		gpf::log($mod_name, gpf::INFO, '', 0, __CLASS__.'->'.__FUNCTION__);
 		return true;
 	}//}}}
 	/**
@@ -43,11 +44,11 @@ class gmod
 	}//}}}
 	/**
 	 * 单次包含模块内文件
-	 * @param string $path 模块文件路径，不用包含最后的.php后序。eg. abc.class, -> abc.class.php
+	 * @param string $path 模块文件路径, eg. abc.class.php
 	 */
 	static public function inc($mod_name, $path)
 	{//{{{
-		gpf::inc(GPF_PATH_MODULE . "{$mod_name}/{$path}.php");
+		gpf::inc(GPF_PATH_MODULE . "{$mod_name}/{$path}");
 	}//}}}
 	/**
 	 * 加载模块 API 目录文件。
