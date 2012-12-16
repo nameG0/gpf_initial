@@ -99,18 +99,16 @@ function gpf_dir_copy($source,$destination,$f = 1,$d = 1)
  * <pre>
  * 需定义常量：
  * GPF_STATIC_DIR :/public/static/ 目录路径。
- * GPF_STATIC_PRIOR :/public/_static/ 目录路径。
  * </pre>
  * @param string $mod_name 模块名,为空表示全部复制（一般用于初始化）。
  */
 function gpf_static($mod_name = '')
 {//{{{
-	$time = run_time();
+	gpf::log($mod_name, gpf::INFO, __FILE__, __LINE__, __FUNCTION__);
 	if ($mod_name)
 		{
 		$to = GPF_STATIC_DIR . "{$mod_name}/";
 		_gpf_static_copy(GPF_PATH_MODULE . "{$mod_name}/static/", $to);
-		_gpf_static_copy(GPF_STATIC_PRIOR . "{$mod_name}/", $to);
 		}
 	else
 		{
@@ -124,14 +122,8 @@ function gpf_static($mod_name = '')
 			_gpf_static_copy(GPF_PATH_MODULE . $entry . "/static/", GPF_STATIC_DIR . $entry . '/');
 			}
 		$handle->close();
-
-		_gpf_static_copy(GPF_STATIC_PRIOR, GPF_STATIC_DIR);
 		}
-
-	echo run_time($time);
-	exit;
 }//}}}
-
 /**
  * 只复制更新过的文件，因为“复制”操作很耗时。
  */
