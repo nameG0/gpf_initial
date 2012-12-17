@@ -9,16 +9,15 @@ class ctrl_index
 {
 	function __construct()
 	{//{{{
-		admin_check();
-		log::is_print(false);
 	}//}}}
 	function action_index()
 	{//{{{
-		include tpl_admin('index');
+		include gpf_tpl('admin', "admin/index");
 	}//}}}
 	function action_top()
 	{//{{{
-		include tpl_admin('top');
+		gpf::log_is_print(false);
+		include gpf_tpl('admin', 'admin/top');
 	}//}}}
 	function action_left()
 	{//{{{
