@@ -11,6 +11,7 @@
 // GPF_PATH_MODULE 模块目录，以 / 结尾。
 
 define('GPF_PATH', dirname(__FILE__) . DIRECTORY_SEPARATOR); //gpf 目录
+require GPF_PATH . "gpf.func.php";
 require GPF_PATH . "gpf.cls.php";
 require GPF_PATH . "gmod.cls.php";
 

@@ -122,6 +122,9 @@ class gpf
 	static private $url_replace = array(); //方便URL替换词
 	static private $url_func = array(); //保存URL回调函数。
 
+	//input 类配置
+	static public $unadds = false; //不进行引号过滤
+
 	static private $shutdown_hook = array(); //挂载在 shutdown_function 调用的函数
 
 	/**
@@ -129,6 +132,28 @@ class gpf
 	 */
 	private function __construct() {
 	}
+	/**
+	 * 注册到 register_shutdown_function 的处理函数
+	 */
+	static public function _shutdown_function()
+	{//{{{
+		//ggzhu@2012-01-30 若脚本被 Fatal error 中断， php 不会调用 set_error_handler 注册的函数处理。
+		$error_last = error_get_last();
+		//若没有 Fatal 中断 $error_last = null.
+		if ($error_last)
+			{
+			self::log($error_last['message'], $error_last['type'], $error_last['file'], $error_last['line']);
+			}
+
+		//调用持载的函数
+		foreach (self::$shutdown_hook as $v)
+			{
+			call_user_func($v);
+			}
+
+		//处理错误日志
+		self::_log_flush();
+	}//}}}
 	/**
 	 * 把一个文件路径设为已加载。
 	 * @param string $path 文件绝对路径。
@@ -497,26 +522,32 @@ class gpf
 		//因为模板引擎常用占用 { 和 }，所以可考虑改用 [ 和 ]
 	}//}}}
 
-	/**
-	 * 注册到 register_shutdown_function 的处理函数
-	 */
-	static public function _shutdown_function()
+	//如果取不到数据，直接返回默认值，无需过滤。
+	//所以取值和过滤引号和过滤函数作为一个函数。返回默认值为另一个函数。
+	static private function _input_get($data, $name, $filter)
 	{//{{{
-		//ggzhu@2012-01-30 若脚本被 Fatal error 中断， php 不会调用 set_error_handler 注册的函数处理。
-		$error_last = error_get_last();
-		//若没有 Fatal 中断 $error_last = null.
-		if ($error_last)
+		if (!isset($data[$name]))
 			{
-			self::log($error_last['message'], $error_last['type'], $error_last['file'], $error_last['line']);
+			return NULL;
 			}
-
-		//调用持载的函数
-		foreach (self::$shutdown_hook as $v)
+		$value = $data[$name];
+		if (!get_magic_quotes_gpc())
 			{
-			call_user_func($v);
+			$value = gpf_adds($value);
 			}
-
-		//处理错误日志
-		self::_log_flush();
+		if ($filter)
+			{
+			
+			}
+		return $value;
+	}//}}}
+	/**
+	 * 取 $_GET 数据
+	 */
+	static public function get($name, $filter = 'gpf_html', $def_val = NULL, $def_if = '!isset')
+	{//{{{
+		//取数据（包括处理默认值）
+		//过滤引号
+		//过滤函数
 	}//}}}
 }
