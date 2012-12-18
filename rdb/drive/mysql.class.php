@@ -336,7 +336,7 @@ class rdb_mysql extends rdb_drive
 			}
 		unset($traces);
 		$this->errormsg = "<b>MySQL Query : </b>$sql <br /><b> MySQL Error : </b>".$this->error()." <br /> <b>MySQL Errno : </b>".$this->errno()." <br /><b> Message : </b> $message <br/> <b>FILE :</b> {$trace['file']} : {$trace['line']}";
-		log::add($this->errormsg, log::SQL, $trace['file'], $trace['line'], $trace['func']);
+		gpf::log($this->errormsg, gpf::SQL, $trace['file'], $trace['line'], $trace['func']);
 		if($this->debug)
 			{
 			$msg = (defined('IN_ADMIN') || DEBUG) ? $this->errormsg : "Bad Request. {$LANG['illegal_request_return']}";
