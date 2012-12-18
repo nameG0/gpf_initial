@@ -7,7 +7,7 @@
  * @package default
  * @filesource
  */
-class rdb
+class rdbApi
 {
 	/**
 	 * 保存数据库驱动对象
