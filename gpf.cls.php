@@ -123,7 +123,8 @@ class gpf
 	static private $url_func = array(); //保存URL回调函数。
 
 	//input 类配置
-	static public $unadds = false; //不进行引号过滤
+	static public $unadds = false; //不进行引号过滤 todo 未实现
+	static public $unadds_once = false; //当次不进行引号过滤 todo 未实现
 
 	static private $shutdown_hook = array(); //挂载在 shutdown_function 调用的函数
 
@@ -523,31 +524,120 @@ class gpf
 	}//}}}
 
 	//如果取不到数据，直接返回默认值，无需过滤。
+	//也有一种可能性：过滤函数是 MD5 这类，而默认值又希望使用明文。所以默认值也有需要过滤的。
 	//所以取值和过滤引号和过滤函数作为一个函数。返回默认值为另一个函数。
-	static private function _input_get($data, $name, $filter)
+	//应该先用过滤函数过滤再过滤引号，因为不排除过滤函数会加入引号。
+	/**
+	 * @param null|mixed $name 若为 NULL 则返回整个 $data
+	 * @param string $def_if {!isset, empty}
+	 */
+	static private function _input_get($data, $name, $def_val, $def_if)
 	{//{{{
+		if (is_null($name))
+			{
+			return $data;
+			}
 		if (!isset($data[$name]))
 			{
-			return NULL;
+			return $def_val;
 			}
 		$value = $data[$name];
+		if ('empty' === $def_if && empty($value))
+			{
+			$value = $def_val;
+			}
+		return $value;
+	}//}}}
+	//调用过滤函数
+	//array_filter(array_map('intval', (array)$arr)) 可以这样写：@gpf_arr,intval,@array_filter
+	static private function _input_filter($value, $filter)
+	{//{{{
+		if ($filter)
+			{
+			$list = explode(",", $filter);
+			foreach ($list as $v)
+				{
+				//函数名前加@表示函数参数要求为数组。比如 array_filter
+				if ('@' === $v[0])
+					{
+					$v = substr($v, 1);
+					$value = $v($value);
+					}
+				else
+					{
+					$value = self::_input_call($value, $v);
+					}
+				}
+			}
+		return $value;
+	}//}}}
+	static private function _input_call($value, $func_name)
+	{//{{{
+		if (!is_array($value))
+			{
+			return $func_name($value);
+			}
+		foreach ($value as $k => $v)
+			{
+			$value[$k] = self::_input_call($v, $func_name);
+			}
+		return $value;
+	}//}}}
+	//过滤引号
+	static private function _input_adds($value)
+	{//{{{
 		if (!get_magic_quotes_gpc())
 			{
 			$value = gpf_adds($value);
-			}
-		if ($filter)
-			{
-			
 			}
 		return $value;
 	}//}}}
 	/**
 	 * 取 $_GET 数据
+	 * @param null|mixed 所取索引，为 NULL 表示取整个数组。
 	 */
-	static public function get($name, $filter = 'gpf_html', $def_val = NULL, $def_if = '!isset')
+	static public function get($name = NULL, $filter = 'gpf_html', $def_val = NULL, $def_if = '!isset')
 	{//{{{
 		//取数据（包括处理默认值）
-		//过滤引号
+		$value = self::_input_get($_GET, $name, $def_val, $def_if);
+		if (is_null($value))
+			{
+			return $value;
+			}
 		//过滤函数
+		$value = self::_input_filter($value, $filter);
+		//过滤引号
+		$value = self::_input_adds($value);
+		return $value;
+	}//}}}
+	//取 $_POST 数据
+	static public function post($name = NULL, $filter = 'gpf_html', $def_val = NULL, $def_if = '!isset')
+	{//{{{
+		//取数据（包括处理默认值）
+		$value = self::_input_get($_POST, $name, $def_val, $def_if);
+		if (is_null($value))
+			{
+			return $value;
+			}
+		//过滤函数
+		$value = self::_input_filter($value, $filter);
+		//过滤引号
+		$value = self::_input_adds($value);
+		return $value;
+	}//}}}
+	//取 COOKIE 数据
+	static public function cookie($name = NULL, $filter = 'gpf_html', $def_val = NULL, $def_if = '!isset')
+	{//{{{
+		//取数据（包括处理默认值）
+		$value = self::_input_get($_COOKIE, $name, $def_val, $def_if);
+		if (is_null($value))
+			{
+			return $value;
+			}
+		//过滤函数
+		$value = self::_input_filter($value, $filter);
+		//过滤引号
+		$value = self::_input_adds($value);
+		return $value;
 	}//}}}
 }

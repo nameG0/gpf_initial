@@ -28,6 +28,13 @@ function gpf_html($data)
 {//{{{
 	return is_array($data) ? array_map(__FUNCTION__, $data) : htmlspecialchars($data);
 }//}}}
+/**
+ * 把参数强制转换为数组返回
+ */
+function gpf_arr($data)
+{//{{{
+	return (array)$data;
+}//}}}
 
 /**
  * 更新 static 目录文件。
