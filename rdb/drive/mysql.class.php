@@ -211,7 +211,7 @@ class rdb_mysql extends rdb_drive
 		$query = $this->query($sql, $type, $expires, $dbname);
 		$tmp = run_time($tmp);
 		$this->sql_select_time_total += $tmp;
-		log::add("{$tmp} {$sql}", log::INFO, '', '', __CLASS__.'->'.__FUNCTION__);
+		gpf::log("{$tmp} {$sql}", gpf::INFO, '', '', __CLASS__.'->'.__FUNCTION__);
 		unset($tmp);
 		$rs = $this->fetch_array($query);
 		$this->free_result($query);

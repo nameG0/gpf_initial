@@ -29,6 +29,17 @@ $(document).ready(function(){
 	$(this).addClass("selected");});
 });
 
+/**
+ * 新的取菜单函数
+ */
+function get_menu_new(dom_id, url, depth)
+{//{{{
+	$("#" + dom_id)
+		.show()
+		.html('<img src="'+site_url+'images/loading.gif" width="16" height="16" border="0" />')
+		.load(url + "&depth=" + depth);
+}//}}}
+
 function get_menu(id,obj,islen){
 	if(islen==0)
 	{
@@ -38,7 +49,7 @@ function get_menu(id,obj,islen){
 	{
 		menuid = id;
 	}
-	$('#position').load('?mod=phpcms&file=menu&action=menu_pos&menuid='+id);
+	$('#position').load('?a=admin.menu.menu_pos&menuid='+id);
 	$("#"+obj).html('<img src="'+site_url+'images/loading.gif" width="16" height="16" border="0" />');
 	var touimg_src = '';
 	var img_src = '';
@@ -68,7 +79,7 @@ function get_menu(id,obj,islen){
 	$("#img_"+id).attr('src',site_url+'images/'+img_src);
 	
 	var cache_refresh = refresh ? 'false': 'true';
-	$.ajax({type:'get', url:'?mod=phpcms&file=menu&action=get_menu_list&menuid='+id, cache:cache_refresh,dataType:'json', success:function(json){
+	$.ajax({type:'get', url:'?a=admin.menu.get_menu_list&menuid='+id, cache:cache_refresh,dataType:'json', success:function(json){
 	var htmls="";
 	var isend ="tree_line";
 	var open = new Array();
@@ -101,7 +112,7 @@ function get_menu(id,obj,islen){
 					touimg = 'elbow.gif';
 				}
 			}
-			htmls += "<div class='tree_div' onclick=\""+click+"$('#position').load('?mod=phpcms&file=menu&action=menu_pos&menuid="+n.menuid+"');\" id='tree_div_"+n.menuid+"'>";
+			htmls += "<div class='tree_div' onclick=\""+click+"$('#position').load('?a=admin.menu.menu_pos&menuid="+n.menuid+"');\" id='tree_div_"+n.menuid+"'>";
 			var width = islen*16;
 			htmls += '<span class="tree_img"><img src="'+site_url+'images/'+touimg+'" id="touimg_'+n.menuid+'" width="16" height="18" border="0" /><img src="'+site_url+'images/'+img+'" id="img_'+n.menuid+'" width="16" height="16" border="0" /></span><span class="tree_text">'+n.name+'</span></div>';
 			if(n.isfolder==1){htmls +='<div id="tree_'+n.menuid+'" class="'+isend+'" style="display:none;"></div>';}
