@@ -136,7 +136,7 @@ function mod_info($mod, $key = NULL)
 		$path = GPF_PATH_DATA . "module/{$mod}.info";
 		if (!is_file($path))
 			{
-			log::add("模块 {$mod} 未启用", log::ERROR, __FILE__, __LINE__, __FUNCTION__);
+			gpf::log("模块 {$mod} 未启用", gpf::ERROR, __FILE__, __LINE__, __FUNCTION__);
 			$cache[$mod] = false;
 			}
 		else
