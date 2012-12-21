@@ -113,6 +113,48 @@ class gmod
 		gpf::obj_set($class_full, new $class_full());
 		return gpf::obj_get($class_full);
 	}//}}}
+
+	/**
+	 * 加载模块 view 目录下的界面组件。
+	 */
+	static public function v($mod, $name)
+	{//{{{
+		$path = GPF_PATH_MODULE . "{$mod}/view/{$name}.php";
+		if (!gpf::is_inc($path))
+			{
+			if (!is_file($path))
+				{
+				gpf::log("文件不存在 {$path}", gpf::ERROR, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+				gpf::err("相关文件不存在", __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+				return false;
+				}
+			gpf::inc($path);
+			}
+		if ('.class' === substr($name, -6, 6))
+			{
+			if ('_' === $name[0])
+				{
+				$class_name = "v__{$mod}_" . substr($name, 1, -6);
+				}
+			else
+				{
+				$class_name = "v_{$mod}_" . substr($name, 0, -6);
+				}
+			if (gpf::is_obj($class_name))
+				{
+				return gpf::obj_get($class_name);
+				}
+			if (!class_exists($class_name))
+				{
+				gpf::log("类不存在 {$class_name}", gpf::ERROR, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+				gpf::err("相关文件不存在", __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+				return false;
+				}
+			$obj = new $class_name();
+			gpf::obj_set($class_name, $obj);
+			return $obj;
+			}
+	}//}}}
 }
 
 /**
