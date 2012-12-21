@@ -1,6 +1,7 @@
 <?php 
-defined('IN_PHPCMS') or exit('Access Denied');
-include admin_tpl('header');
+// defined('IN_PHPCMS') or exit('Access Denied');
+include gpf_tpl('admin', 'admin/header');
+$parentid = 1; //暂时停止自动调用 getchild()
 ?>
 <body <?php if(!$parentid){?>onload="getchild(<?=$parentid?>)"<?php }?>>
 <script type="text/javaScript">
@@ -34,7 +35,7 @@ function getchild(parentid)
     </tr>
     <tr> 
       <th><strong>打开窗口</strong></th>
-      <td><?=form::select($TARGET, 'info[target]', 'target', $target)?></td>
+      <td><?=1//form::select($TARGET, 'info[target]', 'target', $target)?></td>
     </tr>
     <tr> 
       <th><strong>CSS样式</strong></th>
@@ -46,11 +47,11 @@ function getchild(parentid)
     </tr>
     <tr>
       <th><strong>用户组浏览权限</strong><br /> 如果都不选，则表示不限制</th>
-      <td><?=form::checkbox($GROUP, 'groupids', 'groupid', '', 5, '', '', 100);?></td>
+      <td><?=1//form::checkbox($GROUP, 'groupids', 'groupid', '', 5, '', '', 100);?></td>
     </tr>
     <tr>
       <th><strong>管理员浏览权限</strong><br /> 如果都不选，则表示不限制</th>
-      <td><?=form::checkbox($ROLE, 'roleids', 'roleid', '', 5, '', '', 100);?></td>
+      <td><?=1//form::checkbox($ROLE, 'roleids', 'roleid', '', 5, '', '', 100);?></td>
     </tr>
     <tr> 
       <th></th>
@@ -64,7 +65,7 @@ function getchild(parentid)
 </body>
 </html>
 <script language="javascript" type="text/javascript">
-$().ready(function() {
-	  $('form').checkForm(1);
-	});
+// $().ready(function() {
+	  // $('form').checkForm(1);
+	// });
 </script>

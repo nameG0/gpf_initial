@@ -40,4 +40,12 @@ class r_admin_menu
 		$sql = "SELECT {$sql['field']} FROM {$this->t_menu} WHERE 1 {$where} ORDER BY `listorder`,`menuid`";
 		return page_select($sql, $pagesize, $page, $other);
 	}//}}}
+
+	function list_by_pid($parentid, $field = '*')
+	{//{{{
+		$where = array(
+			"parentid" => $parentid,
+			);
+		return $this->select($where, array("field" => $field,), false);
+	}//}}}
 }

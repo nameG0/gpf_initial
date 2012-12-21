@@ -12,6 +12,8 @@ class ctrl_index
 	}//}}}
 	function action_index()
 	{//{{{
+		$omr_adm_men = gmod::rm('admin', 'menu');
+		$result_menu = $omr_adm_men->list_by_pid(1, 'menuid, name');
 		include gpf_tpl('admin', "admin/index");
 	}//}}}
 	function action_top()

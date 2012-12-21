@@ -1,7 +1,3 @@
-<?php
-$oapi_adm_men = gmod::api('admin', 'menu.class');
-$result_menu = $oapi_adm_men->list_by_pid(1, 'menuid, name');
-?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -43,7 +39,7 @@ body {
 	foreach ($result_menu as $k => $r)
 		{
 		?>
-		<li><a href="javascript:void();" onclick="menu_click(this);" is_folder="0" id_child="tree" depth="0" url="?a=admin.menu.child_menu&menuid=<?=$r['menuid']?>" url_pos="?a=admin.menu.menu_pos&menuid=<?=$r['menuid']?>" id="menu_<?=$r['menuid']?>" class="menu" alt="<?=$r['name']?>"><span><?=$r['name']?></span></a></li>
+		<li><a href="javascript:void();" onclick="menu_click(this);" is_folder="0" id_child="tree" depth="0" url_child="?a=admin.menu.child_menu&menuid=<?=$r['menuid']?>" url_pos="?a=admin.menu.menu_pos&menuid=<?=$r['menuid']?>" id="menu_<?=$r['menuid']?>" class="menu" alt="<?=$r['name']?>"><span><?=$r['name']?></span></a></li>
 		<?php
 		}
 	?>
@@ -156,8 +152,6 @@ var screen_h = parseInt(document.documentElement.clientHeight)-95-parseInt(cut_n
 $("#tree").css("height",screen_h);
 
 var site_url = '<?=gpf::url("@s")?>/pc8/skin_admin/';
-get_menu(2,'tree',0);
-$("#menu_2").addClass("selected");
 window.onresize=function()
 {
     var widths = document.body.scrollWidth-220;
@@ -167,7 +161,6 @@ window.onresize=function()
 	$('.window_1').css('left', (widths + 380 - $('.window_1').width())+'px');
 }
 
-window.onresize();
 
 var speed = 1;
 var px = 5;
@@ -290,11 +283,6 @@ function help_url()
 	}
 }//}}}
 
-if(document.documentElement.addEventListener) {
-	document.documentElement.addEventListener('keydown', resetf5, false);
-} else if(document.documentElement.attachEvent) {
-	document.documentElement.attachEvent("onkeydown", resetf5);
-}
 
 function add_menu()
 {//{{{
@@ -326,10 +314,11 @@ function add_mymenu()
 	return false;
 }//}}}
 
-function search_menu(){
+function search_menu()
+{//{{{
 	show_div('search_menu');
 	$('#menu_key').phpcmstip('menu_key');
-}
+}//}}}
 
 
 jQuery.fn.phpcmstip = function(option){
@@ -356,20 +345,20 @@ function search_menu_key()
 }//}}}
 
 String.prototype.trim = function()
-{
+{//{{{
     return this.replace(/(^\s*)|(\s*$)/g, "");
-}
+}//}}}
 
 function show_text()
-{
+{//{{{
 	$('#floor').width($("#menu_key").width() - 2);
-}
+}//}}}
 
 function mouseover(sDiv)
-{
+{//{{{
     $("#floor").children("div").attr("class","unselected_s");
     $(sDiv).attr("class","selected_s");
-}
+}//}}}
 var now_menu;
 function show_div(obj)
 {//{{{
@@ -436,9 +425,10 @@ function click_topmenu(id)
     get_menu(id, 'tree', 0);
 }//}}}
 
-function get_memo(){
+function get_memo()
+{//{{{
 	$.get('?mod=phpcms&file=memo&action=get', function(data){$('#memo_mtime').html(data.substring(0, 19));$('#memo_data').val(data.substring(19));});
-}
+}//}}}
 
 function set_memo(data)
 {//{{{
@@ -535,9 +525,6 @@ function go_right(url)
 {//{{{
 	$("#right").attr('src', url);
 }//}}}
-$('.window_1').jqDrag('.window_title');
-
-setInterval(get_msg,10000);
 
 /**
  * 菜单项的单击事项
@@ -557,8 +544,9 @@ function menu_click(dom_click)
 			jQ.attr('is_open', '0');
 			return ;
 			}
+		jQ.attr('is_open', '1');
 
-		var url = jQ.attr('url');
+		var url = jQ.attr('url_child');
 		if ('string' === typeof(url) && url.length > 0)
 			{
 			var depth = jQ.attr('depth');
@@ -570,21 +558,35 @@ function menu_click(dom_click)
 			$('#position').load(url_pos);
 			}
 		}
-	var href = jQ.attr('href');
-	if ('string' === typeof(href) && href.length > 0)
+	var url = jQ.attr('url');
+	if ('string' === typeof(url) && url.length > 0)
 		{
 		//todo 右窗口打开对应URL。
 		}
 }//}}}
 
+$(document).ready(function () {
+	// $('.window_1').jqDrag('.window_title');
+	setInterval(get_msg, 10000);
+
+	//F5 刷新限制在 iframe 内。
+	if(document.documentElement.addEventListener) {
+		document.documentElement.addEventListener('keydown', resetf5, false);
+	} else if(document.documentElement.attachEvent) {
+		document.documentElement.attachEvent("onkeydown", resetf5);
+	}
+
+	get_menu_new('tree', '?a=admin.menu.child_menu&menuid=2', 0);
+	// get_menu(2,'tree',0);
+	$("#menu_2").addClass("selected");
+	window.onresize();
+});
+</script>
 <?php
 if(isset($_SESSION['install_system']))
 {
-?>
-show_map();
-<?php
+?><script language="JavaScript">show_map();</script><?php
 }
 ?>
-</script>
 </body>
 </html>

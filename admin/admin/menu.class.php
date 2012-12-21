@@ -13,6 +13,20 @@ class ctrl_menu
 		// if (!$action) $action = 'manage';
 		// if (!$forward) $forward = '?mod='.$mod.'&file='.$file.'&action=manage';
 	}//}}}
+	function action_index()
+	{//{{{
+		$parentid = gpf::get('parentid', 'intval', 0);
+
+		if ($parentid)
+			{
+			$r = $this->m->get($parentid);
+			$parentname = $r['name'];
+			}
+		$forward = URL;
+		$where = "`parentid` = '$parentid'";
+		$infos = $this->m->listinfo($where, 'listorder, menuid', $page, 20);
+		include gpf_tpl('admin', 'admin/menu_manage');
+	}//}}}
 	function action_add()
 	{//{{{
 		if ($dosubmit)
@@ -33,7 +47,7 @@ class ctrl_menu
 			{
 			if (!isset($parentid)) $parentid = 0;
 			if (!isset($target)) $target = 'right';
-			include admin_tpl('menu_add');
+			include gpf_tpl('admin', 'admin/menu_add');
 			}
 	}//}}}
 	function action_edit()
@@ -74,20 +88,6 @@ class ctrl_menu
 			include gmod::path('admin', 'include/menu.inc.php');
 			include gpf_tpl('admin', 'admin/menu_edit');
 			}
-	}//}}}
-	function action_manage()
-	{//{{{
-		$parentid = gpf::get('parentid', 'intval', 0);
-
-		if ($parentid)
-			{
-			$r = $this->m->get($parentid);
-			$parentname = $r['name'];
-			}
-		$forward = URL;
-		$where = "`parentid` = '$parentid'";
-		$infos = $this->m->listinfo($where, 'listorder, menuid', $page, 20);
-		include gpf_tpl('admin', 'admin/menu_manage');
 	}//}}}
 	function action_delete()
 	{//{{{
