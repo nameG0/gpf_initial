@@ -1,4 +1,7 @@
 <?php
+//ggzhu@2013-01-02 全局变量
+global $db;
+
 // define('PHPCMS_ROOT', str_replace("\\", '/', substr(dirname(__FILE__), 0, -7)));
 define('MICROTIME_START', microtime());
 define('IN_PHPCMS', TRUE);
