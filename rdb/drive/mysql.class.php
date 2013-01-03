@@ -7,35 +7,75 @@
  */
 class rdb_mysql extends rdb_drive
 {
-	var $search = array('/union(\s*(\/\*.*\*\/)?\s*)+select/i', '/load_file(\s*(\/\*.*\*\/)?\s*)+\(/i', '/into(\s*(\/\*.*\*\/)?\s*)+outfile/i');
-	var $replace = array('union &nbsp; select', 'load_file &nbsp; (', 'into &nbsp; outfile');
+	public $connid = NULL;
+	public $search = array('/union(\s*(\/\*.*\*\/)?\s*)+select/i', '/load_file(\s*(\/\*.*\*\/)?\s*)+\(/i', '/into(\s*(\/\*.*\*\/)?\s*)+outfile/i');
+	public $replace = array('union &nbsp; select', 'load_file &nbsp; (', 'into &nbsp; outfile');
 
-	function connect($dbhost, $dbuser, $dbpw, $dbname = '', $pconnect = 0, $charset = '')
-	{
-		$func = $pconnect == 1 ? 'mysql_pconnect' : 'mysql_connect';
-		if(!$this->connid = @$func($dbhost, $dbuser, $dbpw))
+	function connect($host, $user, $pw)
+	{//{{{
+		$this->connid = mysql_connect($host, $user, $pw);
+		if ($this->connid)
 			{
-			$this->halt('Can not connect to MySQL server');
-			return false;
+			return true;
 			}
-		if($this->version() > '4.1')
+		return false;
+	}//}}}
+	function pconnect($host, $user, $pw)
+	{//{{{
+		$this->connid = mysql_pconnect($host, $user, $pw);
+		if ($this->connid)
 			{
-			$serverset = $charset ? "character_set_connection='$charset',character_set_results='$charset',character_set_client=binary" : '';
+			return true;
+			}
+		return false;
+	}//}}}
+
+	function charset($charset)
+	{//{{{
+		if ($this->version() > '4.1')
+			{
+			$serverset = '';
+			if ($charset)
+				{
+				$serverset = "character_set_connection='{$charset}',character_set_results='{$charset}',character_set_client=binary";
+				}
 			$serverset .= $this->version() > '5.0.1' ? ((empty($serverset) ? '' : ',')." sql_mode='' ") : '';
-			$serverset && mysql_query("SET $serverset", $this->connid);
+			if ($serverset)
+				{
+				mysql_query("SET {$serverset}", $this->connid);
+				}
 			}
-		if($dbname && !@mysql_select_db($dbname , $this->connid))
-			{
-			$this->halt('Cannot use database '.$dbname);
-			return false;
-			}
-		$this->dbname = $dbname;
-		return $this->connid;
+		return true;
+	}//}}}
+	function _connect($dbhost, $dbuser, $dbpw, $dbname = '', $pconnect = 0, $charset = '')
+	{
+		// $func = $pconnect == 1 ? 'mysql_pconnect' : 'mysql_connect';
+		// if(!$this->connid = @$func($dbhost, $dbuser, $dbpw))
+			// {
+			// $this->halt('Can not connect to MySQL server');
+			// return false;
+			// }
+		// if($this->version() > '4.1')
+			// {
+			// $serverset = $charset ? "character_set_connection='$charset',character_set_results='$charset',character_set_client=binary" : '';
+			// $serverset .= $this->version() > '5.0.1' ? ((empty($serverset) ? '' : ',')." sql_mode='' ") : '';
+			// $serverset && mysql_query("SET $serverset", $this->connid);
+			// }
+		// if($dbname && !@mysql_select_db($dbname , $this->connid))
+			// {
+			// $this->halt('Cannot use database '.$dbname);
+			// return false;
+			// }
+		// $this->dbname = $dbname;
+		// return $this->connid;
 	}
 
 	function select_db($dbname)
 	{
-		if(!@mysql_select_db($dbname , $this->connid)) return false;
+		if (!mysql_select_db($dbname , $this->connid))
+			{
+			return false;
+			}
 		$this->dbname = $dbname;
 		return true;
 	}
@@ -50,131 +90,6 @@ class rdb_mysql extends rdb_drive
 			}
 		$this->querynum++;
 		return $query;
-	}
-
-	// function select($sql, $keyfield = '')
-	// {
-	// $array = array();
-	// $tmp = run_time();
-	// $result = $this->query($sql);
-	// $tmp = run_time($tmp);
-	// $this->sql_select_time_total += $tmp;
-	// log::add("{$tmp} {$sql}", log::INFO, '', '', __CLASS__.'->'.__FUNCTION__);
-	// unset($tmp);
-	// while($r = $this->fetch_array($result))
-	// {
-	// if($keyfield)
-	// {
-	// $key = $r[$keyfield];
-	// $array[$key] = $r;
-	// }
-	// else
-	// {
-	// $array[] = $r;
-	// }
-	// }
-	// $this->free_result($result);
-	// return $array;
-	// }
-
-	//2011-03-17 ggzhu 加入 $other 参数，用于输入如 IGNORE 这样的操作符
-	//2011-03-24 ggzhu 加入对二维数组的支持
-	// function insert($table, $data, $other = '')
-	// {
-	// $type = is_array(current($data)) ? 2 : 1;	//标记数组的维数
-	// //一维数组时检查字段合法性
-	// if (1 == $type)
-	// {
-	// $fields = $this->get_fields($table);
-	// foreach($data as $key => $value)
-	// {
-	// if(!in_array($key,$fields))unset($data[$key]);
-	// }
-	// if (!$data)
-	// {
-	// return false;
-	// }
-	// }
-	// $sql_field = join("`,`", array_keys((1 == $type ? $data : current($data))));
-	// //用if分支,比强制转换为二维数组及 switch 结构快那么一点点
-	// if (1 == $type)
-	// {
-	// $sql_value = "('" . join("','", $data) . "')";
-	// }
-	// else
-	// {
-	// $middle = '';
-	// $sql_value = '';
-	// foreach ($data as $r)
-	// {
-	// $sql_value .= "{$middle}('" . join("','", $r) . "')";
-	// $middle = ', ';
-	// }
-	// }
-	// $sql = "INSERT {$other} INTO `{$table}` (`{$sql_field}`) VALUES {$sql_value}";
-	// $tmp = run_time();
-	// $ret = $this->query($sql);
-	// $tmp = run_time($tmp);
-	// $this->sql_insert_time_total += $tmp;
-	// return $ret;
-	// }
-
-	//2011-03-17 ggzhu 废弃，用 insert 及 $other 参数实现
-	/*
-	function insert_ignore($tablename, $array)
-	{
-		$fields = $this->get_fields($tablename);
-		foreach($array as $key => $value)
-		{
-			if(!in_array($key,$fields))unset($array[$key]);
-		}
-		if (!$array)
-			{
-			return false;
-			}
-		return $this->query("INSERT IGNORE INTO `$tablename`(`".implode('`,`', array_keys($array))."`) VALUES('".implode("','", $array)."')");
-	}
-	 */
-
-	//ggzhu 2010-10-22 添加 $is_query 参数，若为false,则返回sql语句,不执行
-	function update($tablename, $array, $where = '', $is_query = true)
-	{
-		$fields = $this->get_fields($tablename);
-		foreach($array as $key => $value)
-			{
-			if(!in_array($key,$fields))
-				{
-				unset($array[$key]);
-				}
-			}
-		//防止空更新
-		if (empty($array))
-			{
-			return ;
-			}
-		if($where)
-			{
-			$sql = '';
-			foreach($array as $k=>$v)
-				{
-				$sql .= ", `$k`='$v'";
-				}
-			$sql = substr($sql, 1);
-			$sql = "UPDATE `$tablename` SET $sql WHERE $where";
-			}
-		else
-			{
-			$sql = "REPLACE INTO `$tablename`(`".implode('`,`', array_keys($array))."`) VALUES('".implode("','", $array)."')";
-			}
-		if (!$is_query)
-			{
-			return $sql;
-			}
-		$tmp = run_time();
-		$ret = $this->query($sql);
-		$tmp = run_time($tmp);
-		$this->sql_update_time_total += $tmp;
-		return $ret;
 	}
 
 	function get_primary($table)
