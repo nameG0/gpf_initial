@@ -12,7 +12,6 @@
 
 define('GPF_PATH', dirname(__FILE__) . DIRECTORY_SEPARATOR); //gpf 目录
 require GPF_PATH . "gpf.func.php";
-// require GPF_PATH . "gpf.cls.php";
 // require GPF_PATH . "gmod.cls.php";
 
 register_shutdown_function('_gpf_shutdown_function');
