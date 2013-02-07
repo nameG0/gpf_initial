@@ -682,17 +682,17 @@ function gpf_cookie($name = NULL, $filter = 'gpf_html', $def_val = NULL, $def_if
 function gpf_mod_init($mod_name)
 {//{{{
 	$path = GPF_PATH_MODULE . "{$mod_name}/include/init.inc.php";
-	if (gpf::is_inc($path))
+	if (gpf_is_inc($path))
 		{
 		return true;
 		}
 	if (!is_file($path))
 		{
-		gpf::log("模块初始化文件不存在[{$path}]", gpf::WARN, '', 0, __CLASS__.'->'.__FUNCTION__);
+		gpf_log("模块初始化文件不存在[{$path}]", GPF_LOG_WARN, '', 0, __FUNCTION__);
 		return false;
 		}
-	gpf::inc($path);
-	gpf::log($mod_name, gpf::INFO, '', 0, __CLASS__.'->'.__FUNCTION__);
+	gpf_inc($path);
+	gpf_log($mod_name, GPF_LOG_INFO, '', 0, __FUNCTION__);
 	return true;
 }//}}}
 /**
@@ -710,7 +710,7 @@ function gpf_mod_path($mod_name, $path)
  */
 function gpf_mod_inc($mod_name, $path)
 {//{{{
-	gpf::inc(GPF_PATH_MODULE . "{$mod_name}/{$path}");
+	gpf_inc(GPF_PATH_MODULE . "{$mod_name}/{$path}");
 }//}}}
 /**
  * 加载模块 API 目录文件。
@@ -721,8 +721,8 @@ function gpf_mod_inc($mod_name, $path)
 function gpf_mod_api($mod_name, $file_name)
 {//{{{
 	$path = GPF_PATH_MODULE . "{$mod_name}/api/{$file_name}.php";
-	gpf::inc($path);
-	return self::_api_class($mod_name, $file_name);
+	gpf_inc($path);
+	return _gpf_api_class($mod_name, $file_name);
 }//}}}
 /**
  * 若加载的 API 目录文件为类定义文件，则实例化。
@@ -735,11 +735,11 @@ function _gpf_mod_api_class($mod_name, $file_name)
 		}
 	$class_name = substr($file_name, 0, -6);
 	$class_full = "{$mod_name}Api_{$class_name}";
-	if (!gpf::is_obj($class_full))
+	if (!gpf_is_obj($class_full))
 		{
-		gpf::obj_set($class_full, new $class_full());
+		gpf_obj_set($class_full, new $class_full());
 		}
-	return gpf::obj_get($class_full);
+	return gpf_obj_get($class_full);
 }//}}}
 
 //============================== module#old ==============================
@@ -764,7 +764,7 @@ function mod_info($mod, $key = NULL)
 		$path = GPF_PATH_DATA . "module/{$mod}.info";
 		if (!is_file($path))
 			{
-			gpf::log("模块 {$mod} 未启用", gpf::ERROR, __FILE__, __LINE__, __FUNCTION__);
+			gpf_log("模块 {$mod} 未启用", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
 			$cache[$mod] = false;
 			}
 		else
@@ -951,7 +951,6 @@ function mod_setting($mod, $info)
 	file_put_contents($path, $info_str);
 }//}}}
 
-
 //============================== mvc ==============================
 /**
  * 加载读类(r_)Model
@@ -961,14 +960,14 @@ function mod_setting($mod, $info)
 function gpf_mod_rm($mod_name, $class_name)
 {//{{{
 	$class_full = "r_{$mod_name}_{$class_name}";
-	if (gpf::is_obj($class_full))
+	if (gpf_is_obj($class_full))
 		{
-		return gpf::obj_get($class_full);
+		return gpf_obj_get($class_full);
 		}
 	$path = GPF_PATH_MODULE . "{$mod_name}/model/r_{$class_name}.class.php";
-	gpf::inc($path);
-	gpf::obj_set($class_full, new $class_full());
-	return gpf::obj_get($class_full);
+	gpf_inc($path);
+	gpf_obj_set($class_full, new $class_full());
+	return gpf_obj_get($class_full);
 }//}}}
 /**
  * 加载写类(r_)Model
@@ -978,14 +977,14 @@ function gpf_mod_rm($mod_name, $class_name)
 function gpf_mod_wm($mod_name, $class_name)
 {//{{{
 	$class_full = "w_{$mod_name}_{$class_name}";
-	if (gpf::is_obj($class_full))
+	if (gpf_is_obj($class_full))
 		{
-		return gpf::obj_get($class_full);
+		return gpf_obj_get($class_full);
 		}
 	$path = GPF_PATH_MODULE . "{$mod_name}/model/w_{$class_name}.class.php";
-	gpf::inc($path);
-	gpf::obj_set($class_full, new $class_full());
-	return gpf::obj_get($class_full);
+	gpf_inc($path);
+	gpf_obj_set($class_full, new $class_full());
+	return gpf_obj_get($class_full);
 }//}}}
 
 /**
@@ -994,15 +993,15 @@ function gpf_mod_wm($mod_name, $class_name)
 function gpf_mod_v($mod, $name)
 {//{{{
 	$path = GPF_PATH_MODULE . "{$mod}/view/{$name}.php";
-	if (!gpf::is_inc($path))
+	if (!gpf_is_inc($path))
 		{
 		if (!is_file($path))
 			{
-			gpf::log("文件不存在 {$path}", gpf::ERROR, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
-			gpf::err("相关文件不存在", __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+			gpf_log("文件不存在 {$path}", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
+			gpf_err("相关文件不存在", __FILE__, __LINE__, __FUNCTION__);
 			return false;
 			}
-		gpf::inc($path);
+		gpf_inc($path);
 		}
 	if ('.class' === substr($name, -6, 6))
 		{
@@ -1014,18 +1013,18 @@ function gpf_mod_v($mod, $name)
 			{
 			$class_name = "v_{$mod}_" . substr($name, 0, -6);
 			}
-		if (gpf::is_obj($class_name))
+		if (gpf_is_obj($class_name))
 			{
-			return gpf::obj_get($class_name);
+			return gpf_obj_get($class_name);
 			}
 		if (!class_exists($class_name))
 			{
-			gpf::log("类不存在 {$class_name}", gpf::ERROR, __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
-			gpf::err("相关文件不存在", __FILE__, __LINE__, __CLASS__.'->'.__FUNCTION__);
+			gpf_log("类不存在 {$class_name}", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
+			gpf_err("相关文件不存在", __FILE__, __LINE__, __FUNCTION__);
 			return false;
 			}
 		$obj = new $class_name();
-		gpf::obj_set($class_name, $obj);
+		gpf_obj_set($class_name, $obj);
 		return $obj;
 		}
 }//}}}
@@ -1085,7 +1084,7 @@ function gpf_time($time = NULL)
  */
 function gpf_static($mod_name = '')
 {//{{{
-	gpf::log($mod_name, gpf::INFO, __FILE__, __LINE__, __FUNCTION__);
+	gpf_log($mod_name, GPF_LOG_INFO, __FILE__, __LINE__, __FUNCTION__);
 	if ($mod_name)
 		{
 		$to = GPF_STATIC_DIR . "{$mod_name}/";
@@ -1146,12 +1145,12 @@ function _gpf_static_copy($sour, $to)
  */
 function gpf_tpl($mod, $file)
 {//{{{
-	gpf::log("{$mod} : {$file}", gpf::INFO, __FILE__, __LINE__, __FUNCTION__);
+	gpf_log("{$mod} : {$file}", GPF_LOG_INFO, __FILE__, __LINE__, __FUNCTION__);
 	$path = gmod::path($mod, "template/{$file}.tpl.php");
 	if (!is_file($path))
 		{
-		gpf::log("模板不存在[{$path}]", gpf::ERROR, __FILE__, __LINE__, __FUNCTION__);
-		gpf::err("template not exists", __FILE__, __LINE__, __FUNCTION__);
+		gpf_log("模板不存在[{$path}]", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
+		gpf_err("template not exists", __FILE__, __LINE__, __FUNCTION__);
 		return false;
 		}
 	return $path;
