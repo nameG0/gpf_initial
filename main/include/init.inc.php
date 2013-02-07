@@ -5,4 +5,4 @@
  * @package include
  * @filesource
  */
-mod_init('cms');
+// mod_init('cms');

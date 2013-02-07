@@ -125,14 +125,15 @@ function _paging_style($style)
 		$name = $mod;
 		$mod = 'siud';
 		}
-	$dir_list = mod_callback($mod, 'p');
-	foreach ($dir_list as $v)
-		{
-		$path = "{$v}siud_paging/{$name}.php";
-		if (is_file($path))
-			{
-			return $path;
-			}
-		}
+	//zjq@2013-02-03 因为 mod_callback 返回 false 导致报错，暂时注释掉。
+	// $dir_list = mod_callback($mod, 'p');
+	// foreach ($dir_list as $v)
+		// {
+		// $path = "{$v}siud_paging/{$name}.php";
+		// if (is_file($path))
+			// {
+			// return $path;
+			// }
+		// }
 	return false;
 }//}}}

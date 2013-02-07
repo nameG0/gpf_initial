@@ -13,7 +13,14 @@ class ctrl_index
 {
 	function action_index()
 	{//{{{
-		include tpl('index', 'main');
+		$this->tpl_index();
+		// include tpl('index', 'main');
+	}//}}}
+	function tpl_index()
+	{//{{{
+		?>
+<p ><a href="?a=pc8gb">留言模块</a></p>
+		<?php
 	}//}}}
 
 	/**
