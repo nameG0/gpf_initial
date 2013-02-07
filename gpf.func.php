@@ -29,11 +29,23 @@ function gpf_html($data)
 	return is_array($data) ? array_map(__FUNCTION__, $data) : htmlspecialchars($data);
 }//}}}
 /**
- * 把参数强制转换为数组返回
+ * 计算运行时间
+ * @param NULL|int $time {NULL:返回当前时间, int:计算当前时间与转入时间的间隔}
+ * <code>
+ * $t1 = gpf_time(); //存当前时间
+ * sleep(1);
+ * echo gpf_time($t1); //计算运行时间
+ * </code>
  */
-function gpf_arr($data)
+function gpf_time($time = NULL)
 {//{{{
-	return (array)$data;
+	list($usec, $sec) = explode(" ", microtime());
+	$mt = ((float)$usec + (float)$sec);
+	if (is_null($time))
+		{
+		return $mt;
+		}
+	return $mt - $time;
 }//}}}
 
 /**

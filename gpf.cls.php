@@ -549,7 +549,8 @@ class gpf
 		return $value;
 	}//}}}
 	//调用过滤函数
-	//array_filter(array_map('intval', (array)$arr)) 可以这样写：@gpf_arr,intval,@array_filter
+	//强制类型转换可以这样写：(int), (array),注意要用小写字母。
+	//array_filter(array_map('intval', (array)$arr)) 可以这样写：(array),intval,@array_filter
 	static private function _input_filter($value, $filter)
 	{//{{{
 		if ($filter)
@@ -562,6 +563,22 @@ class gpf
 					{
 					$v = substr($v, 1);
 					$value = $v($value);
+					}
+				else if ('(' === $v[0])
+					{
+					//强制类型转换使用 () 表示，比如 (array)
+					if ('(array)' === $v)
+						{
+						$value = (array)$value;
+						}
+					else if ('(int)' === $v)
+						{
+						$value = (int)$value;
+						}
+					else if ('(string)' === $v)
+						{
+						$value = (string)$value;
+						}
 					}
 				else
 					{
