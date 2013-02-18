@@ -1,11 +1,33 @@
 <?php
 /**
- * GPF 函数
+ * GPF 基本代码
  * 
  * @package default
  * @filesource
  */
-//============================== inc
+//============================== define ===============================
+//缩短 DIRECTORY_SEPARATOR
+if (!defined('DS'))
+	{
+	define('DS', DIRECTORY_SEPARATOR);
+	}
+//默认gpf以一个模块的形式出现，所以可以定义默认的目录常量。
+if (!defined('GPF_MODULE'))
+	{
+	define('GPF_MODULE', dirname(dirname(__FILE__)) . '/');
+	}
+//建议CONFIG目录放到module目录外
+if (!defined('GPF_CONFIG'))
+	{
+	define('GPF_CONFIG', dirname(GPF_MODULE) . '/config/');
+	}
+//建议LIB目录放到module目录外
+if (!defined('GPF_LIB'))
+	{
+	define('GPF_CONFIG', dirname(GPF_LIB) . '/lib/');
+	}
+
+//============================== inc ===============================
 $GLOBALS['gpf_inc'] = array(); //保存已加载过的文件标记。
 /**
  * 把一个文件路径设为已加载。
@@ -46,7 +68,7 @@ function gpf_inc($path)
 		_gpf_set_inc($path);
 		}
 }//}}}
-//============================== obj
+//============================== obj ===============================
 $GLOBALS['gpf_obj'] = array(); //保存对象实例。
 /**
  * 对应索引是否已存在
@@ -115,6 +137,7 @@ function _gpf_shutdown_function()
 	//处理错误日志
 	_gpf_log_flush();
 }//}}}
+register_shutdown_function('_gpf_shutdown_function');
 //============================== log
 //错误等级
 define('GPF_LOG_SYSTEM', 'SYSTEM'); 	//系统崩聩，如数据库无法链接

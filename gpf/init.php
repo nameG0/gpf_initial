@@ -13,7 +13,6 @@
 define('GPF_PATH', dirname(__FILE__) . DIRECTORY_SEPARATOR); //gpf 目录
 require GPF_PATH . "gpf.func.php";
 
-register_shutdown_function('_gpf_shutdown_function');
 
 // define('DS', DIRECTORY_SEPARATOR);
 // //路径常量用 G_PATH_ 前序。
