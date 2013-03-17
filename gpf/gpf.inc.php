@@ -398,8 +398,8 @@ function gpf_err_func($func_name)
 }//}}}
 
 //============================== hook ==============================
-$GLOBALS['gpf_obj_hook '] = array();
-$GLOBALS['gpf_obj_callback '] = array();
+$GLOBALS['gpf_obj_hook'] = array();
+$GLOBALS['gpf_obj_callback'] = array();
 /**
  * 实例化并返回 hook 对象。
  * @param string $mod_name 模块名。eg. member
@@ -695,6 +695,96 @@ function gpf_cookie($name = NULL, $filter = 'gpf_html', $def_val = NULL, $def_if
 	//过滤引号
 	$value = _gpf_input_adds($value);
 	return $value;
+}//}}}
+//处理一个标签属性部份的xss
+function _gpf_xss_preg_replace_callback($match)
+{//{{{
+	//普通字符串替换
+	$str1 = $str2 = array();
+	//避免通过换行绕过匹配
+	$str1[] = "\t";
+	$str2[] = '';
+	$str1[] = "\n";
+	$str2[] = '';
+	$str1[] = "\r";
+	$str2[] = '';
+	//禁止关键词
+	$str1[] = 'javascript:';
+	$str2[] = 'gpfxss';
+	$str1[] = 'expression';
+	$str2[] = 'gpfxss';
+	$str1[] = '/*';
+	$str2[] = 'gpfxss';
+	$str1[] = '*/';
+	$str2[] = 'gpfxss';
+	$str1[] = 'base64';
+	$str2[] = 'gpfxss';
+	$str1[] = 'vbscript';
+	$str2[] = 'gpfxss';
+
+	$xss = str_ireplace($str1, $str2, $match[0]);
+
+	//禁用所有on*事件
+	$xss = preg_replace('/\bon[^\b]+\b/i', ' gpfxss', $xss);
+	return $xss;
+}//}}}
+//简单的xss过滤功能(gpf_xss)
+//过滤逻辑基本假设：用户正常使用HTML代码不会带有可能导致XSS的代码，比如<script>标签.
+//所以，对可能导致XSS的代码不是“去除”掉,而是无害化掉：
+//eg. <img onload="alert(1)" /> --> <img xssload="alert(1)" />
+//以尽可能避免因过滤逻辑漏洞而被xss代码绕过：
+//eg. <<script></script>script>alert(1);</script>
+function gpf_xss($xss)
+{//{{{
+	if (is_array($xss))
+		{
+		foreach ($xss as $k => $v)
+			{
+			$xss[$k] = gpf_xss($v);
+			}
+		return $xss;
+		}
+
+	//普通字符串替换
+	$str1 = array();
+	$str2 = array();
+
+	//禁用所有&#97;这样的表示法,避免后面的过滤被绕过
+	$str1[] = '&#';
+	$str2[] = '&amp;#';
+	//php标签
+	$str1[] = '<?';
+	$str2[] = '&lt;?';
+	$str1[] = '?>';
+	$str2[] = '?&gt;';
+
+	$xss = str_ireplace($str1, $str2, $xss);
+
+	//正则替换
+	$preg1 = array();
+	$preg2 = array();
+
+	//转换属性中的">","<",后面的替换只在标签属性区内进行，避免被绕过
+	//eg. <img title=">" onload="" />
+	//在浏览器中测试过<img title="\">" 这种写法是不成立的，因此这个正则没有大问题。
+	$preg1[] = "/[a-z]+=([\'\"]).*?\\1/ei";
+	$preg2[] = 'str_replace(array(">", "<"), array("&gt;", "&lt;"), "\\0")';
+
+	//去掉最明显的<script></script>标签,避免输出一些明显的xss代码面子上不好看。
+	$preg1[] = '#<script[^>]*>(.*?)</script>#is';
+	$preg2[] = '';
+	//危险的标签
+	$tag = array('meta', 'form', 'iframe', 'frame', 'frameset', 'style', 'script', 'link', 'object', 'applet', 'base', 'video', 'embed', 'head');
+	$preg1[] = '/<('.join("|", $tag).')\b/i';
+	$preg2[] = '<gpfxss';
+	$preg1[] = '#</(' . join("|", $tag) . ')\b#';
+	$preg2[] = '</gpfxss';
+
+	$xss = preg_replace($preg1, $preg2, $xss);
+
+	//开始过滤标签属性
+	$xss = preg_replace_callback('/<[a-z]+[^>]*>/is', '_gpf_xss_preg_replace_callback', $xss);
+	return $xss;
 }//}}}
 
 //============================== module ==============================
