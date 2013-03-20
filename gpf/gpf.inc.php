@@ -1,6 +1,6 @@
 <?php
 /**
- * GPF 基本代码
+ * GPF(G0 PHP FW)简单框架
  * 
  * @package default
  * @filesource
@@ -374,6 +374,7 @@ function gpf_err($error, $file = '', $line = 0, $func = '')
 			}
 		call_user_func($error_func, $error);
 		}
+	return false;
 }//}}}
 /**
  * 取错误提示内容。
@@ -559,144 +560,47 @@ function gpf_url_func($name, $value)
 	//因为模板引擎常用占用 { 和 }，所以可考虑改用 [ 和 ]
 }//}}}
 
-//============================== get/post ==============================
-$GLOBALS['gpf_unadds'] = false; //不进行引号过滤 todo 未实现
-$GLOBALS['gpf_unadds_once'] = false; //当次不进行引号过滤 todo 未实现
-//如果取不到数据，直接返回默认值，无需过滤。
-//也有一种可能性：过滤函数是 MD5 这类，而默认值又希望使用明文。所以默认值也有需要过滤的。
-//所以取值和过滤引号和过滤函数作为一个函数。返回默认值为另一个函数。
-//应该先用过滤函数过滤再过滤引号，因为不排除过滤函数会加入引号。
+//============================== get,post ==============================
 /**
- * @param null|mixed $name 若为 NULL 则返回整个 $data
- * @param string $def_if {!isset, empty}
+ * 兼容数组的 addslashes
+ * @param string|array $data
  */
-function _gpf_input_get($data, $name, $def_val, $def_if)
+function gpf_addslashes($data)
 {//{{{
-	if (is_null($name))
-		{
-		return $data;
-		}
-	if (!isset($data[$name]))
-		{
-		return $def_val;
-		}
-	$value = $data[$name];
-	if ('empty' === $def_if && empty($value))
-		{
-		$value = $def_val;
-		}
-	return $value;
-}//}}}
-//调用过滤函数
-//强制类型转换可以这样写：(int), (array),注意要用小写字母。
-//array_filter(array_map('intval', (array)$arr)) 可以这样写：(array),intval,@array_filter
-function _gpf_input_filter($value, $filter)
-{//{{{
-	if ($filter)
-		{
-		$list = explode(",", $filter);
-		foreach ($list as $v)
-			{
-			//函数名前加@表示函数参数要求为数组。比如 array_filter
-			if ('@' === $v[0])
-				{
-				$v = substr($v, 1);
-				$value = $v($value);
-				}
-			else if ('(' === $v[0])
-				{
-				//强制类型转换使用 () 表示，比如 (array)
-				if ('(array)' === $v)
-					{
-					$value = (array)$value;
-					}
-				else if ('(int)' === $v)
-					{
-					$value = (int)$value;
-					}
-				else if ('(string)' === $v)
-					{
-					$value = (string)$value;
-					}
-				}
-			else
-				{
-				$value = _gpf_input_call($value, $v);
-				}
-			}
-		}
-	return $value;
-}//}}}
-function _gpf_input_call($value, $func_name)
-{//{{{
-	if (!is_array($value))
-		{
-		return $func_name($value);
-		}
-	foreach ($value as $k => $v)
-		{
-		$value[$k] = _gpf_input_call($v, $func_name);
-		}
-	return $value;
-}//}}}
-//过滤引号
-function _gpf_input_adds($value)
-{//{{{
-	if (!get_magic_quotes_gpc())
-		{
-		$value = gpf_adds($value);
-		}
-	return $value;
+	return is_array($data) ? array_map(__FUNCTION__, $data) : addslashes($data);
 }//}}}
 /**
- * 取 $_GET 数据
- * @param null|mixed 所取索引，为 NULL 表示取整个数组。
+ * 兼容数组的 stripslashes
+ * @param string|array $data
  */
-function gpf_get($name = NULL, $filter = 'gpf_html', $def_val = NULL, $def_if = '!isset')
+function gpf_stripslashes($data)
 {//{{{
-	//取数据（包括处理默认值）
-	$value = _gpf_input_get($_GET, $name, $def_val, $def_if);
-	if (is_null($value))
-		{
-		return $value;
-		}
-	//过滤函数
-	$value = _gpf_input_filter($value, $filter);
-	//过滤引号
-	$value = _gpf_input_adds($value);
-	return $value;
+	return is_array($data) ? array_map(__FUNCTION__, $data) : stripslashes($data);
 }//}}}
-//取 $_POST 数据
-function gpf_post($name = NULL, $filter = 'gpf_html', $def_val = NULL, $def_if = '!isset')
+/**
+ * 兼容数组的 htmlspecialchars
+ */
+function gpf_htmlspecialchars($data)
 {//{{{
-	//取数据（包括处理默认值）
-	$value = _gpf_input_get($_POST, $name, $def_val, $def_if);
-	if (is_null($value))
-		{
-		return $value;
-		}
-	//过滤函数
-	$value = _gpf_input_filter($value, $filter);
-	//过滤引号
-	$value = _gpf_input_adds($value);
-	return $value;
+	return is_array($data) ? array_map(__FUNCTION__, $data) : htmlspecialchars($data);
 }//}}}
-//取 COOKIE 数据
-function gpf_cookie($name = NULL, $filter = 'gpf_html', $def_val = NULL, $def_if = '!isset')
+/**
+ * 兼容数组的 strip_tags
+ */
+function gpf_strip_tags($data)
 {//{{{
-	//取数据（包括处理默认值）
-	$value = _gpf_input_get($_COOKIE, $name, $def_val, $def_if);
-	if (is_null($value))
-		{
-		return $value;
-		}
-	//过滤函数
-	$value = _gpf_input_filter($value, $filter);
-	//过滤引号
-	$value = _gpf_input_adds($value);
-	return $value;
+	return is_array($data) ? array_map(__FUNCTION__, $data) : strip_tags($data);
 }//}}}
-//处理一个标签属性部份的xss
+/**
+ * 兼容数组的整数类型转换
+ */
+function gpf_intval($data)
+{//{{{
+	return is_array($data) ? array_map(__FUNCTION__, $data) : intval($data);
+}//}}}
+/**
+ * 处理一个标签属性部份的xss
+ */
 function _gpf_xss_preg_replace_callback($match)
 {//{{{
 	//普通字符串替换
@@ -728,12 +632,14 @@ function _gpf_xss_preg_replace_callback($match)
 	$xss = preg_replace('/\bon[^\b]+\b/i', ' gpfxss', $xss);
 	return $xss;
 }//}}}
-//简单的xss过滤功能(gpf_xss)
-//过滤逻辑基本假设：用户正常使用HTML代码不会带有可能导致XSS的代码，比如<script>标签.
-//所以，对可能导致XSS的代码不是“去除”掉,而是无害化掉：
-//eg. <img onload="alert(1)" /> --> <img xssload="alert(1)" />
-//以尽可能避免因过滤逻辑漏洞而被xss代码绕过：
-//eg. <<script></script>script>alert(1);</script>
+/**
+ * 简单的xss过滤功能
+ * 过滤逻辑基本假设：用户正常使用HTML代码不会带有可能导致XSS的代码，比如<script>标签.
+ * 所以，对可能导致XSS的代码不是替换为空,而是无害化掉：
+ * eg. <img onload="alert(1)" /> 替换为 <img xssload="alert(1)" /> 令 onload 失去作用即可。
+ * 以尽可能避免因过滤逻辑漏洞而被xss代码绕过：
+ * eg. <<script></script>script>alert(1);</script>
+ */
 function gpf_xss($xss)
 {//{{{
 	if (is_array($xss))
@@ -785,6 +691,414 @@ function gpf_xss($xss)
 	//开始过滤标签属性
 	$xss = preg_replace_callback('/<[a-z]+[^>]*>/is', '_gpf_xss_preg_replace_callback', $xss);
 	return $xss;
+}//}}}
+
+$GLOBALS['gpf_is_slashes'] = get_magic_quotes_gpc(); //标记PHP配置是否已自动处理引号
+$GLOBALS['gpf_post'] = $_POST;
+$GLOBALS['gpf_get'] = $_GET;
+$GLOBALS['gpf_request'] = $_REQUEST;
+
+/**
+ * 简单填充默认值(btw. gpfif = gpf input function)
+ * @param mixed $input 要填充的变量
+ * @param NULL|mixed|array $def_val 填充参数，若不是数组，则默认使用 !isset 作为填充条件,参数值为填充默认值
+ * 若为空数组，则理解为填充默认值为空数组，填充条件依然是 !isset
+ * 若为非空数组，则按 array(默认值, 填充条件) 格式传入。
+ * 填充条件可使用 isset, empty 以及其它接受一个参数的函数（eg. trim），都可以在名称前加“!”表示逻辑否。eg. !isset
+ * 若$def_val=NULL 表示不填充。
+ */
+function gpfif_default_value(& $input, $def_val)
+{//{{{
+	if (is_null($def_val))
+		{
+		return ;
+		}
+	if (!is_array($def_val))
+		{
+		$def_val = array($def_val, '!isset');
+		}
+	else if (!$def_val)
+		{
+		//这个情况认为默认值为空数组
+		$def_val = array(array(), '!isset');
+		}
+	list($def_value, $def_func) = $def_val;
+	unset($def_val);
+
+	$is_def_not = false; //默认值是否要经过!(not)运算
+	if ('!' === $def_func[0])
+		{
+		$is_def_not = true;
+		$def_func = substr($def_func, 1);
+		}
+	switch ($def_func)
+		{
+		//isset和empty是语言结构
+		case "isset":
+			$is_def = isset($input);
+			break;
+		case "empty":
+			$is_def = empty($input);
+			break;
+		default:
+			$is_def = $def_func($input);
+			break;
+		}
+	if ($is_def_not)
+		{
+		$is_def = !$is_def;
+		}
+	if ($is_def)
+		{
+		$input = $def_value;
+		}
+}//}}}
+/**
+ * 强制传入参数是否转为数组（或转为非数组）或不处理
+ * @param array $option {@@:必须是数组（强制类型转换）, !@:不允许是数组, @:自动} eg. array('@@')
+ */
+function gpfif_maybe_array(& $input, $option = array())
+{//{{{
+	//默认选项值
+	$_option = array(
+		"!@" => true, //不允许为数组(默认)
+		"@@" => false, //必须为数组（强制类型转换为数组）
+		"@" => false, //自动处理数组或非数组
+	);
+	foreach ($option as $k)
+		{
+		$_option[$k] = true;
+		}
+	//此处的判断逻辑是根据 $_option 设置的默认值以及调用者可能的输入编写的
+	//eg. $option = array('@')
+	if ($_option['@'])
+		{
+		return ;
+		}
+	if ($_option['@@'])
+		{
+		if (!is_array($input))
+			{
+			$input = (array)$input;
+			}
+		return ;
+		}
+	if ($_option['!@'])
+		{
+		if (is_array($input))
+			{
+			$input = (string)$input;
+			}
+		return ;
+		}
+}//}}}
+/**
+ * 根据get_magic_quotes_gpc()的设置值按要求返回是否转义引号的输入数据
+ * @param array $option {'!"':不转义引号} eg. $option = array('!"')
+ */
+function gpfif_slashes($input, $option = array())
+{//{{{
+	$gk_is_slashes = 'gpf_is_slashes';
+	//默认选项值
+	$_option = array(
+		'!"' => false, //是否返回不转义引号的数据（自动处理已转换过的数据）
+	);
+	foreach ($option as $k)
+		{
+		$_option[$k] = true;
+		}
+
+	$is_addslashes = true;
+	$is_stripslashes = false;
+	if ($_option['!"'])
+		{
+		//显式声明不转义引号
+		$is_addslashes = false;
+		$is_stripslashes = $GLOBALS[$gk_is_slashes];
+		}
+	else
+		{
+		//转义引号
+		$is_stripslashes = false;
+		$is_addslashes = !$GLOBALS[$gk_is_slashes];
+		}
+	if ($is_addslashes)
+		{
+		$input = gpf_addslashes($input);
+		}
+	else if ($is_stripslashes)
+		{
+		$input = gpf_stripslashes($input);
+		}
+	return $input;
+}//}}}
+
+/**
+ * 集合一下共同的过滤流程
+ * @param mixed 待处理变量
+ * @param mixed $def_val 参见 gpfif_default_value 参数说明
+ * @param array $option 参见 gpfif_maybe_array 和 gpfif_slashes 参数说明
+ * @param string $proc_func 安全过滤函数，eg. gpf_htmlspecialchars
+ * @param bool $is_slashes 是否处理引号（若已格式化为数组则可设为false，其余情况都应为true）
+ */
+function _gpfi($data, $def_val, $option, $proc_func, $is_slashes = true)
+{//{{{
+	//填充默认值
+	gpfif_default_value($data, $def_val);
+	//格式化数据类型
+	gpfif_maybe_array($data, $option);
+	//安全过滤
+	if ($proc_func)
+		{
+		$data = $proc_func($data);
+		}
+	//处理引号
+	if ($is_slashes)
+		{
+		$data = gpfif_slashes($data, $option);
+		}
+	return $data;
+}//}}}
+
+/**
+ * gpfi 系列函数都从 $_REQUEST 取数据
+ * 转换所有html实体字符(htmlspecialchars)
+ */
+function gpfi($name, $def_val = NULL, $option = array())
+{//{{{
+	$gk_array = 'gpfi_array';
+	if (!is_null($GLOBALS[$gk_array]))
+		{
+		return _gpfi_array_set($name, $def_val, $option, 'gpf_htmlspecialchars');
+		}
+	return _gpfi($GLOBALS['gpf_request'][$name], $def_val, $option, 'gpf_htmlspecialchars');
+}//}}}
+/**
+ * 强制格式化为数字(intval)
+ */
+function gpfi_int($name, $def_val = NULL, $option = array())
+{//{{{
+	$gk_array = 'gpfi_array';
+	if (!is_null($GLOBALS[$gk_array]))
+		{
+		return _gpfi_array_set($name, $def_val, $option, 'gpf_intval', false);
+		}
+	//整数不需要处理引号
+	return _gpfi($GLOBALS['gpf_request'][$name], $def_val, $option, 'gpf_intval', false);
+}//}}}
+/**
+ * 过滤掉所有html标签（strip_tags）
+ */
+function gpfi_txt($name, $def_val = NULL, $option = array())
+{//{{{
+	$gk_array = 'gpfi_array';
+	if (!is_null($GLOBALS[$gk_array]))
+		{
+		return _gpfi_array_set($name, $def_val, $option, 'gpf_strip_tags');
+		}
+	return _gpfi($GLOBALS['gpf_request'][$name], $def_val, $option, 'gpf_strip_tags');
+}//}}}
+/**
+ * 允许html内容（做xss过滤）
+ */
+function gpfi_html($name, $def_val = NULL, $option = array())
+{//{{{
+	$gk_array = 'gpfi_array';
+	if (!is_null($GLOBALS[$gk_array]))
+		{
+		return _gpfi_array_set($name, $def_val, $option, 'gpf_xss');
+		}
+	return _gpfi($GLOBALS['gpf_request'][$name], $def_val, $option, 'gpf_xss');
+}//}}}
+/**
+ * 不做安全过滤（但引号还是会处理）
+ */
+function gpfi_in($name, $def_val = NULL, $option = array())
+{//{{{
+	$gk_array = 'gpfi_array';
+	if (!is_null($GLOBALS[$gk_array]))
+		{
+		return _gpfi_array_set($name, $def_val, $option, '');
+		}
+	return _gpfi($GLOBALS['gpf_request'][$name], $def_val, $option, '');
+}//}}}
+/**
+ * gpfig 系列函数都从 $_GET 取数据,其余与gpfi系列函数相同
+ */
+function gpfig($name, $def_val = NULL, $option = array())
+{//{{{
+	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, 'gpf_htmlspecialchars');
+}//}}}
+function gpfig_int($name, $def_val = NULL, $option = array())
+{//{{{
+	//整数不需要处理引号
+	return _gpfi($GLOBALS['get_get'][$name], $def_val, $option, 'gpf_intval', false);
+}//}}}
+function gpfig_txt($name, $def_val = NULL, $option = array())
+{//{{{
+	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, 'gpf_strip_tags');
+}//}}}
+function gpfig_html($name, $def_val = NULL, $option = array())
+{//{{{
+	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, 'gpf_xss');
+}//}}}
+function gpfig_in($name, $def_val = NULL, $option = array())
+{//{{{
+	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, '');
+}//}}}
+/**
+ * gpfip 系列函数都从 $_POST 取数据,其余与gpfi系列函数相同
+ */
+function gpfip($name, $def_val = NULL, $option = array())
+{//{{{
+	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, 'gpf_htmlspecialchars');
+}//}}}
+function gpfip_int($name, $def_val = NULL, $option = array())
+{//{{{
+	//整数不需要处理引号
+	return _gpfi($GLOBALS['get_get'][$name], $def_val, $option, 'gpf_intval', false);
+}//}}}
+function gpfip_txt($name, $def_val = NULL, $option = array())
+{//{{{
+	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, 'gpf_strip_tags');
+}//}}}
+function gpfip_html($name, $def_val = NULL, $option = array())
+{//{{{
+	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, 'gpf_xss');
+}//}}}
+function gpfip_in($name, $def_val = NULL, $option = array())
+{//{{{
+	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, '');
+}//}}}
+
+$GLOBALS['gpfi_array'] = NULL; //临时保存处理一个数组时的数据
+$GLOBALS['gpfi_get'] = array(); //保存经过处理后待返回的数据
+/**
+ * 集合一下共同的流程
+ */
+function _gpfi_array($name, $input_from)
+{//{{{
+	$gk_array = 'gpfi_array';
+	if (!is_null($GLOBALS[$gk_array]))
+		{
+		return gpf_err("正在处理一组数据，不支持嵌套处理", __FILE__, __LINE__, __FUNCTION__);
+		}
+	if (is_null($name))
+		{
+		$data = $GLOBALS[$input_from];
+		}
+	else if (is_array($name))
+		{
+		$data = $name;
+		}
+	else
+		{
+		//强制转换，避免后面的处理流程出错
+		$data = (array)$GLOBALS[$input_from][$name];
+		}
+	$GLOBALS[$gk_array] = $data;
+	return true;
+}//}}}
+/**
+ * 处理一组数据中的具体键
+ * @param string $name 具体键名，可以用“,”分隔多个。
+ */
+function _gpfi_array_set($name, $def_val, $option, $proc_func, $is_slashes = true)
+{//{{{
+	$gk_array = 'gpfi_array';
+	$gk_get = 'gpfi_get';
+
+	$name_list = array_map('trim', explode(",", $name));
+	foreach ($name_list as $k)
+		{
+		//已处理的数据移到 gpfi_get 中。
+		$GLOBALS[$gk_get][$k] = _gpfi($GLOBALS[$gk_array][$k], $def_val, $option, $proc_func, $is_slashes);
+		// var_dump($GLOBALS[$gk_array][$k]);
+		unset($GLOBALS[$gk_array][$k]);
+		}
+}//}}}
+/**
+ * 开始处理一个数据
+ * 调用此函数后，继续使用 gpfi 系统函数，最后调用 gpfi_get 返回处理完的数组数据
+ * @param mixed $name 若为字符串，从$_REQUEST中取数据，若为NULL，表示整个$_REQUEST，若为数组，表示处理传入数组（此时注意引号状态要与$_POST等输入数据状态一致）
+ */
+function gpfi_array($name = NULL)
+{//{{{
+	return _gpfi_array($name, 'gpf_request');
+}//}}}
+/**
+ * 同 gpfi_array ，但只从$_GET取数据
+ */
+function gpfig_array($name = NULL)
+{//{{{
+	return _gpfi_array($name, 'gpf_get');
+}//}}}
+/**
+ * 同 gpfi_array,但只从$_POST取数据
+ */
+function gpfip_array($name = NULL)
+{//{{{
+	return _gpfi_array($name, 'gpf_post');
+}//}}}
+function gpfi_get()
+{//{{{
+	$gk_array = 'gpfi_array';
+	$gk_get = 'gpfi_get';
+
+	$ret = $GLOBALS[$gk_get];
+	$GLOBALS[$gk_get] = array();
+	if ($GLOBALS[$gk_array])
+		{
+		foreach ($GLOBALS[$gk_array] as $k => $v)
+			{
+			//已处理的数据移到 gpfi_get 中。
+			$ret[$k] = _gpfi($v, $def_val, array(), 'gpf_htmlspecialchars');
+			}
+		}
+	$GLOBALS[$gk_array] = NULL;
+	return $ret;
+}//}}}
+
+//zjq@2013-03-20 todo 等待重写
+//调用过滤函数
+//强制类型转换可以这样写：(int), (array),注意要用小写字母。
+//array_filter(array_map('intval', (array)$arr)) 可以这样写：(array),intval,@array_filter
+function _gpf_input_filter($value, $filter)
+{//{{{
+	if ($filter)
+		{
+		$list = explode(",", $filter);
+		foreach ($list as $v)
+			{
+			//函数名前加@表示函数参数要求为数组。比如 array_filter
+			if ('@' === $v[0])
+				{
+				$v = substr($v, 1);
+				$value = $v($value);
+				}
+			else if ('(' === $v[0])
+				{
+				//强制类型转换使用 () 表示，比如 (array)
+				if ('(array)' === $v)
+					{
+					$value = (array)$value;
+					}
+				else if ('(int)' === $v)
+					{
+					$value = (int)$value;
+					}
+				else if ('(string)' === $v)
+					{
+					$value = (string)$value;
+					}
+				}
+			else
+				{
+				$value = _gpf_input_call($value, $v);
+				}
+			}
+		}
+	return $value;
 }//}}}
 
 //============================== module ==============================
@@ -1144,29 +1458,6 @@ function gpf_mod_v($mod, $name)
 
 
 //============================== other ==============================
-/**
- * 支持数组的 addslashes
- * @param string|array $data
- */
-function gpf_adds($data)
-{//{{{
-	return is_array($data) ? array_map(__FUNCTION__, $data) : addslashes($data);
-}//}}}
-/**
- * 支持数组的 stripslashes
- * @param string|array $data
- */
-function gpf_unadds($data)
-{//{{{
-	return is_array($data) ? array_map(__FUNCTION__, $data) : stripslashes($data);
-}//}}}
-/**
- * 支持数组的 htmlspecialchars
- */
-function gpf_html($data)
-{//{{{
-	return is_array($data) ? array_map(__FUNCTION__, $data) : htmlspecialchars($data);
-}//}}}
 /**
  * 计算运行时间
  * @param NULL|int $time {NULL:返回当前时间, int:计算当前时间与转入时间的间隔}
