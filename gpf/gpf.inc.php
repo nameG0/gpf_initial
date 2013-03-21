@@ -7,25 +7,13 @@
  */
 //============================== define ===============================
 //缩短 DIRECTORY_SEPARATOR
-if (!defined('DS'))
-	{
-	define('DS', DIRECTORY_SEPARATOR);
-	}
+(defined('DS') OR define('DS', DIRECTORY_SEPARATOR));
 //默认gpf以一个模块的形式出现，所以可以定义默认的目录常量。
-if (!defined('GPF_MODULE'))
-	{
-	define('GPF_MODULE', dirname(dirname(__FILE__)) . '/');
-	}
+(defined('GPF_MODULE') OR define('GPF_MODULE', dirname(dirname(__FILE__)) . '/'));
 //建议CONFIG目录放到module目录外
-if (!defined('GPF_CONFIG'))
-	{
-	define('GPF_CONFIG', dirname(GPF_MODULE) . '/config/');
-	}
+(defined('GPF_CONFIG') OR define('GPF_CONFIG', dirname(GPF_MODULE) . '/config/'));
 //建议LIB目录放到module目录外
-if (!defined('GPF_LIB'))
-	{
-	define('GPF_LIB', dirname(GPF_MODULE) . '/0lib/');
-	}
+(defined('GPF_LIB') OR define('GPF_LIB', dirname(GPF_MODULE) . '/0lib/'));
 
 //============================== inc ===============================
 $GLOBALS['gpf_inc'] = array(); //保存已加载过的文件标记。
