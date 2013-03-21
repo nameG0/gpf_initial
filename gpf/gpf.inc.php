@@ -339,15 +339,28 @@ function gpf_pcheck()
 /**
  * 进行错误提示
  * @param string $error 错误提示信息。
- * @param string 所有文件(__FILE__)
- * @param int 所有行号(__LINE__)
- * @param string 所在函数(__FUNCTION__)
+ * @param array $arg 调用错误处理回调函数时传递的参数
+ * @return false
  */
-function gpf_err($error, $file = '', $line = 0, $func = '')
+function gpf_err($error, $arg = array())
 {//{{{
 	$gk_error = 'gpf_error';
 	$gk_is_pass = 'gpf_is_pass';
 	$gk_error_func = 'gpf_error_func';
+
+	//zjq@2013-03-21 因为gpf_err一调用基本就是exit掉php，所以可以自动取trace信息
+	$trace = debug_backtrace(false);
+	// var_dump($trace);
+	//处理逻辑根据debug_backtrace()的返回格式编写
+	$t0 = $trace[0];
+	$t1 = isset($trace[1]) ? $trace[1] : array();
+	$file = $t0['file'];
+	$line = $t0['line'];
+	$func = isset($t1['function']) ? $t1['function'] : '';
+	if (isset($t1['class']))
+		{
+		$func = "{$t1['class']}{$t1['type']}{$func}";
+		}
 
 	$GLOBALS[$gk_error] = $error;
 	$GLOBALS[$gk_is_pass] = false;
@@ -360,7 +373,9 @@ function gpf_err($error, $file = '', $line = 0, $func = '')
 			{
 			exit($error);
 			}
-		call_user_func($error_func, $error);
+		//第一个参数是错误提示信息
+		array_unshift($arg, $error);
+		call_user_func_array($error_func, $arg);
 		}
 	return false;
 }//}}}
