@@ -21,7 +21,7 @@ $GLOBALS['gpf_inc'] = array(); //保存已加载过的文件标记。
  * 把一个文件路径设为已加载。
  * @param string $path 文件绝对路径。
  */
-function _gpf_set_inc($path)
+function gpf_set_inc($path)
 {//{{{
 	if (isset($path[33]))
 		{
@@ -53,7 +53,7 @@ function gpf_inc($path)
 	if (!gpf_is_inc($path))
 		{
 		require $path;
-		_gpf_set_inc($path);
+		gpf_set_inc($path);
 		}
 }//}}}
 //============================== obj ===============================
@@ -78,6 +78,40 @@ function gpf_obj($name, $obj = NULL)
 	else
 		{
 		$GLOBALS['gpf_obj'][$name] = $obj;
+		}
+}//}}}
+//=============================== load
+/**
+ * 加载func,class等定义类文件，若为class定义文件，传入$class_name可以顺便实例化（只实例化一次）
+ * @param string $pathfull 待加载文件的绝对路径,但不需要最后的“.php”
+ * @param string $class_name 顺便实例化的类名
+ */
+function gpf_load($pathfull, $class_name = '')
+{//{{{
+	$gk_obj = 'gpf_obj';
+
+	if ($class_name)
+		{
+		if (isset($GLOBALS[$gk_obj][$class_name]))
+			{
+			return $GLOBALS[$gk_obj][$class_name];
+			}
+		//避免通过其它语句已加载了文件
+		//只能通过类名避免重复加载，若加载函数定义文件而文件又使用了其它方式加载，就等着php报fatal错吧！
+		if (class_exists($class_name))
+			{
+			$GLOBALS[$gk_obj][$class_name] = new $class_name();
+			return $GLOBALS[$gk_obj][$class_name];
+			}
+		}
+	//加载文件
+	$pathfull = $pathfull . '.php';
+	gpf_inc($pathfull);
+	if ($class_name)
+		{
+		//如果需要实例化的类未定义，就等着php报fatal错误吧！
+		$GLOBALS[$gk_obj][$class_name] = new $class_name();
+		return $GLOBALS[$gk_obj][$class_name];
 		}
 }//}}}
 //============================== shutdown
@@ -1106,6 +1140,16 @@ function _gpf_input_filter($value, $filter)
 
 //============================== module ==============================
 /**
+ * 加载模块内的定类文件(调用 gpf_load() 实现)
+ * @param string $path 从GPF_MODULE目录开始的相对路径。eg. gpf/gpf.inc.php
+ */
+function gpf_mod_load($path, $class_name = '')
+{//{{{
+	$pathfull = GPF_MODULE . $path;
+	return gpf_load($pathfull, $class_name);
+}//}}}
+/**
+ * zjq@2013-03-21 todo +disable 被 gpf_mod_load 代替
  * 初始化模块
  * 即加载模块的 include/init.inc.php
  */
@@ -1126,6 +1170,7 @@ function gpf_mod_init($mod_name)
 	return true;
 }//}}}
 /**
+ * zjq@2013-03-21 todo +disable 没什么作用。
  * 计算模块下文件的绝对路径
  * @param string $path 模块下文件路径。eg. include/common.inc.php
  * @return string 对应文件的绝对路径。
@@ -1135,6 +1180,7 @@ function gpf_mod_path($mod_name, $path)
 	return GPF_PATH_MODULE . "{$mod_name}/{$path}";
 }//}}}
 /**
+ * zjq@2013-03-21 todo +disable 被 gpf_mod_load 代替
  * 单次包含模块内文件
  * @param string $path 模块文件路径, eg. abc.class.php
  */
@@ -1143,6 +1189,7 @@ function gpf_mod_inc($mod_name, $path)
 	gpf_inc(GPF_PATH_MODULE . "{$mod_name}/{$path}");
 }//}}}
 /**
+ * zjq@2013-03-21 todo +disable 被 gpf_mod_load 代替
  * 加载模块 API 目录文件。
  * api 目录中的类使用 {mod_name}Api_{class_name} 为前序, 对应文件名为 {class_name}.class.php。
  * @param string $mod_name 模块名。
@@ -1155,6 +1202,7 @@ function gpf_mod_api($mod_name, $file_name)
 	return _gpf_api_class($mod_name, $file_name);
 }//}}}
 /**
+ * zjq@2013-03-21 todo +disable 被 gpf_mod_load 代替
  * 若加载的 API 目录文件为类定义文件，则实例化。
  */
 function _gpf_mod_api_class($mod_name, $file_name)
