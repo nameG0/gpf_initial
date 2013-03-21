@@ -1096,6 +1096,23 @@ function gpfi_get()
 	return $ret;
 }//}}}
 
+/**
+ * 手动写入数据（像框架路由这类功能会用到）
+ * @param mixed $value 数据的引号转义请与环境初始的$_POST等数据的状态一致
+ */
+function gpfi_set($name, $value)
+{//{{{
+	$GLOBALS['gpf_request'][$name] = $value;
+}//}}}
+function gpfig_set($name, $value)
+{//{{{
+	$GLOBALS['gpf_get'][$name] = $value;
+}//}}}
+function gpfip_set($name, $value)
+{//{{{
+	$GLOBALS['gpf_post'][$name] = $value;
+}//}}}
+
 //zjq@2013-03-20 todo 等待重写
 //调用过滤函数
 //强制类型转换可以这样写：(int), (array),注意要用小写字母。
