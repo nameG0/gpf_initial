@@ -24,7 +24,7 @@ if (!defined('GPF_CONFIG'))
 //建议LIB目录放到module目录外
 if (!defined('GPF_LIB'))
 	{
-	define('GPF_CONFIG', dirname(GPF_LIB) . '/lib/');
+	define('GPF_LIB', dirname(GPF_MODULE) . '/0lib/');
 	}
 
 //============================== inc ===============================
