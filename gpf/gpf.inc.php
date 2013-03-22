@@ -1629,41 +1629,77 @@ function gpf_tpl($mod, $file)
 	return $path;
 }//}}}
 
+//保存格式：[$name] => array($callback, $arg)
+$GLOBALS['gpf_event'] = array();
 /**
  * 提供一个全局的，在底部输出内容（比如：JS）的挂钩点。
- * zjq@2013-02-18
  * 注：回调函数需要自己输出JS标签
- * @param string $name 命名，用于避免同一个callback被挂多次,若为空则表示此callback允许重复挂多次
- * @param callback $callback 回调函数
+ * @param string $event 事件名，eg. foot
+ * @param callback $callback 回调函数（或方法）
+ * @param array $arg 调用回调函数的参数
+ * @param bool|string $unique 唯一标识，true 表示使用 $callback 作为标识，false表示不作唯一标识，使用 string 表示在 $callback 标识后加上后序（这样可用于对同一个函数不同参数作唯一）。
  */
-function foot_hook($name, $callback)
+function gpf_event($event, $callback, $arg = array(), $unique = false)
 {//{{{
-	$gk = 'func_foot_hook';
-	if (!is_array($GLOBALS[$gk]))
+	$gk = 'gpf_event';
+	//取标记名称
+	do
 		{
-		$GLOBALS[$gk] = array();
+		$name = '';
+		if (!$unique)
+			{
+			break;
+			}
+		if (is_string($callback))
+			{
+			//用函数名
+			$name = $callback;
+			break;
+			}
+		if (is_array($callback))
+			{
+			if (is_string($callback[0]))
+				{
+				//假设这表示调用静态方法，eg. array('log', 'add')
+				$name = $callback[0];
+				break;
+				}
+			if (is_object($callback[0]))
+				{
+				$name = get_class($callback[0]);
+				break;
+				}
+			}
 		}
+	while (false);
+	if (is_string($unique) && $unique)
+		{
+		$name .= $unique;
+		}
+
 	if ($name)
 		{
-		$GLOBALS[$gk][$name] = $callback;
+		$GLOBALS[$gk][$name] = array($callback, $arg);
 		}
 	else
 		{
-		$GLOBALS[$gk][] = $callback;
+		$GLOBALS[$gk][] = array($callback, $arg);
 		}
 }//}}}
-//在页面底部输出JS的部份调用，遂一调用js_hook所挂的钩。
-function foot_hook_call()
+/**
+ * 触发某一个事件中的回调函数
+ */
+function gpf_event_call($event)
 {//{{{
-	$gk = 'func_foot_hook';
-	log::add("call", log::INFO, __FILE__, __LINE__, __FUNCTION__);
+	$gk = 'gpf_event';
+	gpf_log($event, GPF_LOG_FLOW, __FILE__, __LINE__, __FUNCTION__);
 	if (!is_array($GLOBALS[$gk]))
 		{
 		return ;
 		}
-	foreach ($GLOBALS[$gk] as $k => $v)
+	foreach ($GLOBALS[$gk] as $v)
 		{
-		call_user_func($v);
+		call_user_func_array($v[0], $v[1]);
 		}
 	//zjq@2013-03-06 重置数组，避免重复被调用时出错
 	$GLOBALS[$gk] = array();
