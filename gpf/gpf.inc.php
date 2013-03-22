@@ -1612,6 +1612,7 @@ function _gpf_static_copy($sour, $to)
 }//}}}
 
 /**
+ * zjq@2013-03-22 todo +disable 框架中不提供模板功能，如果没的话自己写一个include函数吧。
  * 返回模板路径
  * @return string 模板路径
  */
@@ -1626,4 +1627,132 @@ function gpf_tpl($mod, $file)
 		return false;
 		}
 	return $path;
+}//}}}
+
+/**
+ * 提供一个全局的，在底部输出内容（比如：JS）的挂钩点。
+ * zjq@2013-02-18
+ * 注：回调函数需要自己输出JS标签
+ * @param string $name 命名，用于避免同一个callback被挂多次,若为空则表示此callback允许重复挂多次
+ * @param callback $callback 回调函数
+ */
+function foot_hook($name, $callback)
+{//{{{
+	$gk = 'func_foot_hook';
+	if (!is_array($GLOBALS[$gk]))
+		{
+		$GLOBALS[$gk] = array();
+		}
+	if ($name)
+		{
+		$GLOBALS[$gk][$name] = $callback;
+		}
+	else
+		{
+		$GLOBALS[$gk][] = $callback;
+		}
+}//}}}
+//在页面底部输出JS的部份调用，遂一调用js_hook所挂的钩。
+function foot_hook_call()
+{//{{{
+	$gk = 'func_foot_hook';
+	log::add("call", log::INFO, __FILE__, __LINE__, __FUNCTION__);
+	if (!is_array($GLOBALS[$gk]))
+		{
+		return ;
+		}
+	foreach ($GLOBALS[$gk] as $k => $v)
+		{
+		call_user_func($v);
+		}
+	//zjq@2013-03-06 重置数组，避免重复被调用时出错
+	$GLOBALS[$gk] = array();
+}//}}}
+
+/**
+ * 调用控制器处理请求
+ * 控制器使用类形式定义。直接调用控制器的方法，通过 $in 参数自定义控制器的路径，类名等参数。
+ * @param string $mod 控制器所在模块
+ * @param string $file 控制器源代码文件名
+ * @param string $action 处理方法名。
+ * @param array $in 各种细节参数(参见代码实现)。
+ */
+function gpf_ctrl($mod, $file, $action, $in = array())
+{//{{{
+	//默认使用index.class.php
+	($mod OR $mod = 'main');
+	($file OR $file = 'index');
+	($action OR $action = 'index');
+	preg_match("/^[0-9A-Za-z_-]+$/", $mod) OR gpf_err('Invalid Request.');
+	preg_match("/^[0-9A-Za-z_-]+$/", $file) OR gpf_err('Invalid Request.');
+	preg_match("/^[0-9A-Za-z_-]+$/", $action) OR gpf_err('Invalid Request.');
+
+	//计算参数
+	$in['mod'] = $mod;
+	$in['file'] = $file;
+	$in['action'] = $action;
+	//方法名前序
+	(empty($in['pre']) AND $in['pre'] = 'c_');
+	//类名, eg. c_cms_index, v_cms_view
+	(empty($in['class']) AND $in['class'] = "{$in['pre']}{$mod}_{$file}");
+	//方法名前序。不允许直接通过请求参数调用类中的方法，必须加上前序。
+	(empty($in['type']) AND $in['type'] = 'action_');
+	//控制器目录名
+	(empty($in['dir']) AND $in['dir'] = '0c');
+	//环境init方法名, eg. _action_init
+	(empty($in['func_init']) AND $in['func_init'] = "_{$in['type']}init");
+	//处理请求方法名, eg. action_index
+	(empty($in['func']) AND $in['func'] = $in['type'] . $action);
+	//控制器文件路径
+	(empty($in['path']) AND $in['path'] = GPF_MODULE . "{$mod}/{$in['dir']}/{$file}.class.php");
+	gpf_log(var_export($in, true), GPF_LOG_INFO, __FILE__, __LINE__, __FUNCTION__);
+
+	//实例化
+	do
+		{
+		$ctrl = NULL;
+		if (gpf_is_obj($in['class']))
+			{
+			$ctrl = gpf_obj($in['class']);
+			break;
+			}
+		//尽可能避免重复加载
+		if (class_exists($in['class']))
+			{
+			$ctrl = new $in['class']();
+			gpf_obj($in['class'], $ctrl);
+			break;
+			}
+		if (!is_file($in['path']))
+			{
+			gpf_log("控制器文件不存在 {$in['path']}", GPF_LOG_NOTEXI, __FILE__, __LINE__, __FUNCTION__);
+			gpf_obj($in['class'], false);
+			return false;
+			}
+		gpf_inc($in['path']);
+		if (!class_exists($in['class']))
+			{
+			gpf_log("控制器类不存在", GPF_LOG_NOTEXI, __FILE__, __LINE__, __FUNCTION__);
+			gpf_obj($in['class'], false);
+			return false;
+			}
+		$ctrl = new $in['class']();
+		}
+	while (false);
+	if (!$ctrl)
+		{
+		gpf_log("无法实例化控制器", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
+		return false;
+		}
+
+	if (method_exists($ctrl, $in['func_init']))
+		{
+		$ctrl->$in['func_init']();
+		}
+	if (!method_exists($ctrl, $in['func']))
+		{
+		gpf_log("处理方法不存在", GPF_LOG_NOTEXI, __FILE__, __LINE__, __FUNCTION__);
+		return false;
+		}
+	$ctrl->$in['func']();
 }//}}}
