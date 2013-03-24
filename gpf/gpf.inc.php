@@ -114,35 +114,91 @@ function gpf_load($pathfull, $class_name = '')
 		return $GLOBALS[$gk_obj][$class_name];
 		}
 }//}}}
-//============================== shutdown
+//=============================== event ===============================
+//保存格式：[$name] => array($callback, $arg)
+$GLOBALS['gpf_event'] = array();
 /**
- * GPF 注册了 shutdown_function，因此需要注册此函数使用此函数注册。
- * 增加页面结束前调用的函数,用于追加需要在页面结束时才能写入的数据，比如页面运行时间。
- * @param mixed $callback {NULL: $name 就是对应 callback, false:删除 $name 的注册, callback:以 $name 为索引注册}
+ * 提供一个全局的，在底部输出内容（比如：JS）的挂钩点。
+ * 注：回调函数需要自己输出JS标签
+ * @param string $event 事件名，eg. foot
+ * @param callback $callback 回调函数（或方法）
+ * @param array $arg 调用回调函数的参数
+ * @param bool|string $unique 唯一标识，true 表示使用 $callback 作为标识，false表示不作唯一标识，使用 string 表示在 $callback 标识后加上后序（这样可用于对同一个函数不同参数作唯一）。
  */
-function gpf_shutdown($name, $callback = NULL)
+function gpf_event($event, $callback, $arg = array(), $unique = false)
 {//{{{
-	$gk = 'gpf_shutdown_hook';
-	if (is_null($callback))
+	$gk = 'gpf_event';
+	//取标记名称
+	do
 		{
-		$GLOBALS[$gk][] = $name;
-		return ;
+		$name = '';
+		if (!$unique)
+			{
+			break;
+			}
+		if (is_string($callback))
+			{
+			//用函数名
+			$name = $callback;
+			break;
+			}
+		if (is_array($callback))
+			{
+			if (is_string($callback[0]))
+				{
+				//假设这表示调用静态方法，eg. array('log', 'add')
+				$name = $callback[0];
+				break;
+				}
+			if (is_object($callback[0]))
+				{
+				$name = get_class($callback[0]);
+				break;
+				}
+			}
 		}
-	if (false === $callback)
+	while (false);
+	if (is_string($unique) && $unique)
 		{
-		unset($GLOBALS[$gk][$name]);
-		return ;
+		$name .= $unique;
 		}
-	$GLOBALS[$gk][$name] = $callback;
+
+	if ($name)
+		{
+		$GLOBALS[$gk][$name] = array($callback, $arg);
+		}
+	else
+		{
+		$GLOBALS[$gk][] = array($callback, $arg);
+		}
 }//}}}
-$GLOBALS['gpf_shutdown_hook'] = array();
+/**
+ * 触发某一个事件中的回调函数
+ */
+function gpf_event_call($event)
+{//{{{
+	$gk = 'gpf_event';
+	gpf_log($event, GPF_LOG_FLOW, __FILE__, __LINE__, __FUNCTION__);
+	if (!is_array($GLOBALS[$gk]))
+		{
+		return ;
+		}
+	foreach ($GLOBALS[$gk] as $v)
+		{
+		call_user_func_array($v[0], $v[1]);
+		}
+	//zjq@2013-03-06 重置数组，避免重复被调用时出错
+	$GLOBALS[$gk] = array();
+}//}}}
+//============================== shutdown
+//GPF会注册系统的register_shutdown_function钩子，若其它函数也需要进行挂钩，可以：
+//gpf_event('shutdown', ...)
 /**
  * 注册到 register_shutdown_function 的处理函数
  */
 function _gpf_shutdown_function()
 {//{{{
-	$gk = 'gpf_shutdown_hook';
-	//ggzhu@2012-01-30 若脚本被 Fatal error 中断， php 不会调用 set_error_handler 注册的函数处理。
+	//zjq@2012-01-30 若脚本被 Fatal error 中断， php 不会调用 set_error_handler 注册的函数处理。
 	$error_last = error_get_last();
 	//若没有 Fatal 中断 $error_last = null.
 	if ($error_last)
@@ -150,11 +206,7 @@ function _gpf_shutdown_function()
 		gpf_log($error_last['message'], $error_last['type'], $error_last['file'], $error_last['line']);
 		}
 
-	//调用持载的函数
-	foreach ($GLOBALS[$gk] as $v)
-		{
-		call_user_func($v);
-		}
+	gpf_event_call('shutdown');
 
 	//处理错误日志
 	_gpf_log_flush();
@@ -1629,81 +1681,6 @@ function gpf_tpl($mod, $file)
 	return $path;
 }//}}}
 
-//保存格式：[$name] => array($callback, $arg)
-$GLOBALS['gpf_event'] = array();
-/**
- * 提供一个全局的，在底部输出内容（比如：JS）的挂钩点。
- * 注：回调函数需要自己输出JS标签
- * @param string $event 事件名，eg. foot
- * @param callback $callback 回调函数（或方法）
- * @param array $arg 调用回调函数的参数
- * @param bool|string $unique 唯一标识，true 表示使用 $callback 作为标识，false表示不作唯一标识，使用 string 表示在 $callback 标识后加上后序（这样可用于对同一个函数不同参数作唯一）。
- */
-function gpf_event($event, $callback, $arg = array(), $unique = false)
-{//{{{
-	$gk = 'gpf_event';
-	//取标记名称
-	do
-		{
-		$name = '';
-		if (!$unique)
-			{
-			break;
-			}
-		if (is_string($callback))
-			{
-			//用函数名
-			$name = $callback;
-			break;
-			}
-		if (is_array($callback))
-			{
-			if (is_string($callback[0]))
-				{
-				//假设这表示调用静态方法，eg. array('log', 'add')
-				$name = $callback[0];
-				break;
-				}
-			if (is_object($callback[0]))
-				{
-				$name = get_class($callback[0]);
-				break;
-				}
-			}
-		}
-	while (false);
-	if (is_string($unique) && $unique)
-		{
-		$name .= $unique;
-		}
-
-	if ($name)
-		{
-		$GLOBALS[$gk][$name] = array($callback, $arg);
-		}
-	else
-		{
-		$GLOBALS[$gk][] = array($callback, $arg);
-		}
-}//}}}
-/**
- * 触发某一个事件中的回调函数
- */
-function gpf_event_call($event)
-{//{{{
-	$gk = 'gpf_event';
-	gpf_log($event, GPF_LOG_FLOW, __FILE__, __LINE__, __FUNCTION__);
-	if (!is_array($GLOBALS[$gk]))
-		{
-		return ;
-		}
-	foreach ($GLOBALS[$gk] as $v)
-		{
-		call_user_func_array($v[0], $v[1]);
-		}
-	//zjq@2013-03-06 重置数组，避免重复被调用时出错
-	$GLOBALS[$gk] = array();
-}//}}}
 
 /**
  * 调用控制器处理请求
