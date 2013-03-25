@@ -660,6 +660,7 @@ function gpf_url_func($name, $value)
 }//}}}
 
 //============================== get,post ==============================
+//可通过 gpf_override('gpf_xss', ...) 设置接管xss过滤的callback
 /**
  * 兼容数组的 addslashes
  * @param string|array $data
@@ -739,7 +740,7 @@ function _gpf_xss_preg_replace_callback($match)
 	return $xss;
 }//}}}
 /**
- * 简单的xss过滤功能
+ * 简单的xss过滤功能(倾向执行速度)
  * 过滤逻辑基本假设：用户正常使用HTML代码不会带有可能导致XSS的代码，比如<script>标签.
  * 所以，对可能导致XSS的代码不是替换为空,而是无害化掉：
  * eg. <img onload="alert(1)" /> 替换为 <img xssload="alert(1)" /> 令 onload 失去作用即可。
