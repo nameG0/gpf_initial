@@ -1204,7 +1204,7 @@ function gpfip_set($name, $value)
 	$GLOBALS['gpf_post'][$name] = $value;
 }//}}}
 
-//zjq@2013-03-20 todo 等待重写
+//zjq@2013-03-20 todo 等待重写为filter系列函数
 //调用过滤函数
 //强制类型转换可以这样写：(int), (array),注意要用小写字母。
 //array_filter(array_map('intval', (array)$arr)) 可以这样写：(array),intval,@array_filter
@@ -1537,85 +1537,6 @@ function mod_setting($mod, $info)
 	file_put_contents($path, $info_str);
 }//}}}
 
-//============================== mvc ==============================
-/**
- * 加载读类(r_)Model
- * @param string $mod_name 模块名。eg. cms
- * @param string $class_name 类名，eg. content > r_content.class.php > r_cms_content
- */
-function gpf_mod_rm($mod_name, $class_name)
-{//{{{
-	$class_full = "r_{$mod_name}_{$class_name}";
-	if (gpf_is_obj($class_full))
-		{
-		return gpf_obj_get($class_full);
-		}
-	$path = GPF_PATH_MODULE . "{$mod_name}/model/r_{$class_name}.class.php";
-	gpf_inc($path);
-	gpf_obj_set($class_full, new $class_full());
-	return gpf_obj_get($class_full);
-}//}}}
-/**
- * 加载写类(r_)Model
- * @param string $mod_name 模块名。eg. cms
- * @param string $class_name 类名，eg. content > w_content.class.php > w_cms_content
- */
-function gpf_mod_wm($mod_name, $class_name)
-{//{{{
-	$class_full = "w_{$mod_name}_{$class_name}";
-	if (gpf_is_obj($class_full))
-		{
-		return gpf_obj_get($class_full);
-		}
-	$path = GPF_PATH_MODULE . "{$mod_name}/model/w_{$class_name}.class.php";
-	gpf_inc($path);
-	gpf_obj_set($class_full, new $class_full());
-	return gpf_obj_get($class_full);
-}//}}}
-
-/**
- * 加载模块 view 目录下的界面组件。
- */
-function gpf_mod_v($mod, $name)
-{//{{{
-	$path = GPF_PATH_MODULE . "{$mod}/view/{$name}.php";
-	if (!gpf_is_inc($path))
-		{
-		if (!is_file($path))
-			{
-			gpf_log("文件不存在 {$path}", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
-			gpf_err("相关文件不存在");
-			return false;
-			}
-		gpf_inc($path);
-		}
-	if ('.class' === substr($name, -6, 6))
-		{
-		if ('_' === $name[0])
-			{
-			$class_name = "v__{$mod}_" . substr($name, 1, -6);
-			}
-		else
-			{
-			$class_name = "v_{$mod}_" . substr($name, 0, -6);
-			}
-		if (gpf_is_obj($class_name))
-			{
-			return gpf_obj_get($class_name);
-			}
-		if (!class_exists($class_name))
-			{
-			gpf_log("类不存在 {$class_name}", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
-			gpf_err("相关文件不存在");
-			return false;
-			}
-		$obj = new $class_name();
-		gpf_obj_set($class_name, $obj);
-		return $obj;
-		}
-}//}}}
-
-
 //============================== other ==============================
 /**
  * 计算运行时间
@@ -1701,25 +1622,6 @@ function _gpf_static_copy($sour, $to)
 	gpf_mkdir(dirname($to));
 	copy($sour, $to);
 }//}}}
-
-/**
- * zjq@2013-03-22 todo +disable 框架中不提供模板功能，如果没的话自己写一个include函数吧。
- * 返回模板路径
- * @return string 模板路径
- */
-function gpf_tpl($mod, $file)
-{//{{{
-	gpf_log("{$mod} : {$file}", GPF_LOG_INFO, __FILE__, __LINE__, __FUNCTION__);
-	$path = gmod::path($mod, "template/{$file}.tpl.php");
-	if (!is_file($path))
-		{
-		gpf_log("模板不存在[{$path}]", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
-		gpf_err("template not exists");
-		return false;
-		}
-	return $path;
-}//}}}
-
 
 /**
  * 调用控制器处理请求
