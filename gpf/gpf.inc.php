@@ -14,6 +14,8 @@
 (defined('GPF_CONFIG') OR define('GPF_CONFIG', dirname(GPF_MODULE) . '/config/'));
 //建议LIB目录放到module目录外
 (defined('GPF_LIB') OR define('GPF_LIB', dirname(GPF_MODULE) . '/0lib/'));
+//建议放在config目录中。
+defined('GPF_FACTORY') OR define('GPF_FACTORY', GPF_CONFIG . 'gpf_factory/');
 
 //============================== inc ===============================
 $GLOBALS['gpf_inc'] = array(); //保存已加载过的文件标记。
@@ -113,6 +115,76 @@ function gpf_load($pathfull, $class_name = '')
 		$GLOBALS[$gk_obj][$class_name] = new $class_name();
 		return $GLOBALS[$gk_obj][$class_name];
 		}
+}//}}}
+//=============================== factory ===============================
+/**
+ * 简单的工厂函数
+ * 使用 GPF_FACTORY 常量定义工厂配置文件目录, eg. /config/gpf_factory/
+ * @param string $name 配置文件名 eg. db
+ */
+function gpf_factory($name)
+{//{{{
+	$obj_key = "gpf_factory/{$name}";
+	if (gpf_is_obj($obj_key))
+		{
+		return gpf_obj($obj_key);
+		}
+
+	$error = ''; //不为空表示发生错误
+	do
+		{
+		$path = GPF_FACTORY . $name . '.inc.php';
+		if (!is_file($path))
+			{
+			$error = "配置文件不存在 {$path}";
+			break;
+			}
+		$config = include $path;
+		if (!is_array($config))
+			{
+			$error = "配置文件未正确返回数据 {$path}";
+			break;
+			}
+		$target = $config['0target'];
+		$func_name = $config['0func'];
+		$dir = $config['0dir'];
+		if (!$target || !$func_name)
+			{
+			$error = "配置文件缺少 0target 或 0func 配置项 {$path}";
+			break;
+			}
+		$func_name = "cb_gpf_factory_{$func_name}";
+		if (function_exists($func_name))
+			{
+			break;
+			}
+		//加载cb函数定义文件
+		if (!$dir)
+			{
+			$dir = MODULE_PATH;
+			}
+		$cb_path = "{$dir}{$target}/0cb_gpf_factory/func.php";
+		if (!is_file($cb_path))
+			{
+			$error = "cb文件不存在 {$cb_path}";
+			break;
+			}
+		gpf_inc($cb_path);
+		if (!function_exists($func_name))
+			{
+			$error = "cb函数未定义 {$func_name}";
+			break;
+			}
+		}
+	while (false);
+	if ($error)
+		{
+		gpf_log($error, GPF_LOG_SYSTEM, __FILE__, __LINE__, __FUNCTION__);
+		return gpf_err('数据未定义');
+		}
+	//运行到此处表示对应的cb函数已加载
+	$GLOBALS[$gk][$name] = $func_name($config);
+	return $GLOBALS[$gk][$name];
 }//}}}
 //=============================== event ===============================
 //保存格式：[$name] => array($callback, $arg)
