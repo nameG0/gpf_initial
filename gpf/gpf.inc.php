@@ -215,6 +215,7 @@ function gpf_override($name, $callback = NULL)
  */
 function gpf_override_get($name)
 {//{{{
+	$gk = 'gpf_override';
 	if (isset($GLOBALS[$gk][$name]))
 		{
 		if (is_callable($GLOBALS[$gk][$name]))
@@ -225,7 +226,7 @@ function gpf_override_get($name)
 	return NULL;
 }//}}}
 //============================== shutdown
-//GPF会注册系统的register_shutdown_function钩子，若其它函数也需要进行挂钩，可以：
+//GPF会注册系统的register_shutdown_function钩子，若其它函数也需要进行挂钩，可以使用 gpf_event：
 //gpf_event('shutdown', ...)
 /**
  * 注册到 register_shutdown_function 的处理函数
@@ -953,10 +954,25 @@ function _gpfi($data, $def_val, $option, $proc_func, $is_slashes = true)
 	//格式化数据类型
 	gpfif_maybe_array($data, $option);
 	//安全过滤
-	if ($proc_func)
+	do
 		{
+		if (!$proc_func)
+			{
+			break;
+			}
+		//特例处理,可以接管xss过滤函数
+		if ('gpf_xss' === $proc_func)
+			{
+			$callback = gpf_override_get('gpf_xss');
+			if ($callback)
+				{
+				$data = call_user_func($callback, $data);
+				break;
+				}
+			}
 		$data = $proc_func($data);
 		}
+	while (false);
 	//处理引号
 	if ($is_slashes)
 		{
