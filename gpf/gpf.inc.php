@@ -190,6 +190,40 @@ function gpf_event_call($event)
 	//zjq@2013-03-06 重置数组，避免重复被调用时出错
 	$GLOBALS[$gk] = array();
 }//}}}
+//=============================== override
+$GLOBALS['gpf_override'] = array();
+/**
+ * 有时一些部份允许由用户设置指定的函数接管处理（就像set_error_handler()这类）
+ * 这里提供一个简单的接口托管这类功能。
+ * @param string $name 命名
+ * @param NULL|callback $callback 若为NULL表示删除override
+ */
+function gpf_override($name, $callback = NULL)
+{//{{{
+	$gk = 'gpf_override';
+	if (is_null($callback))
+		{
+		unset($GLOBALS[$gk]);
+		}
+	else
+		{
+		$GLOBALS[$gk][$name] = $callback;
+		}
+}//}}}
+/**
+ * 取指定命名是否有设置接管函数。
+ */
+function gpf_override_get($name)
+{//{{{
+	if (isset($GLOBALS[$gk][$name]))
+		{
+		if (is_callable($GLOBALS[$gk][$name]))
+			{
+			return $GLOBALS[$gk][$name];
+			}
+		}
+	return NULL;
+}//}}}
 //============================== shutdown
 //GPF会注册系统的register_shutdown_function钩子，若其它函数也需要进行挂钩，可以：
 //gpf_event('shutdown', ...)
@@ -219,7 +253,7 @@ define('GPF_LOG_ERROR', 'ERROR');	//系统错误，如参数非法
 define('GPF_LOG_WARN', 'WARN');		//警告信息，如调用废弃函数
 define('GPF_LOG_FLOW', 'FLOW');		//流程信息，如是否需要更新html文件
 define('GPF_LOG_SQL', 'SQL');		//数据库查错出错
-define('GPF_LOG_INFO', 'INFO');	//普通信息
+define('GPF_LOG_INFO', 'INFO');		//普通信息
 define('GPF_LOG_DEBUG', 'DEBUG');	//临时调试信息
 define('GPF_LOG_DUE', 'DUE');		//调用过期（已废弃）的函数或代码
 define('GPF_LOG_INPUT', 'INPUT');	//输入数据非法
@@ -377,62 +411,52 @@ function _gpf_log_flush()
 }//}}}
 
 //============================== error ==============================
-$GLOBALS['gpf_error_func'] = 'exit'; //callback|NULL 操作出错时自动进行提示的提示函数。
+//可以用 gpf_override('gpf_err'); 设置错误处理接管函数
+gpf_override('gpf_err', 'printf'); //默认默认为printf,实际使用exit（因为exit不是合法的callback，无法设置）
 $GLOBALS['gpf_error'] = ''; //错误提示信息。
-$GLOBALS['gpf_is_pass'] = false; //标记流程是否正常。
-$GLOBALS['gpf_pass_num'] = 0; //流程计数器，每调用一次 start() 加1.
 /**
- * 一个流程开始时调用
+ * 检查gpf_err信息是否不为空，不为空直接提示并中断程序运行。
  */
-function gpf_pnew()
+function gpf_err_check()
 {//{{{
-	$gk_num = 'gpf_pass_num';
-	$gk_error = 'gpf_error';
-	$gk_is_pass = 'gpf_is_pass';
-
-	$GLOBALS[$gk_num]++;
-	if (1 === $GLOBALS[$gk_num])
+	$gk = 'gpf_error';
+	if (!$GLOBALS[$gk])
 		{
-		$GLOBALS[$gk_is_pass] = true;
-		$GLOBALS[$gk_error] = '';
+		return ;
 		}
-}//}}}
-/**
- * 一个流程结束后调用
- */
-function gpf_pend()
-{//{{{
-	$gk_num = 'gpf_pass_num';
-	$gk_is_pass = 'gpf_is_pass';
-	$GLOBALS[$gk_num]--;
-	if ($GLOBALS[$gk_num] < 1)
+	//zjq@2013-03-21 因为是exit掉php，所以可以自动取trace信息
+	$trace = debug_backtrace(false);
+	// var_dump($trace);
+	//处理逻辑根据debug_backtrace()的返回格式编写
+	$t0 = $trace[0];
+	$t1 = isset($trace[1]) ? $trace[1] : array();
+	$file = $t0['file'];
+	$line = $t0['line'];
+	$func = isset($t1['function']) ? $t1['function'] : '';
+	if (isset($t1['class']))
 		{
-		$GLOBALS[$gk_num] = 0;
-		$GLOBALS[$gk_is_pass] = false;
+		$func = "{$t1['class']}{$t1['type']}{$func}";
 		}
-}//}}}
-/**
- * 检查流程是否正常，不正常直接提示并中断程序运行。
- */
-function gpf_pcheck()
-{//{{{
-	$gk_is_pass = 'gpf_is_pass';
-	if (!$GLOBALS[$gk_is_pass])
-		{
-		gpf_err("流程出错");
-		}
+	gpf_log("GERR_CHECK", GPF_LOG_ERROR, $file, $line, $func);
+	exit("流程出错");
 }//}}}
 /**
  * 进行错误提示
  * @param string $error 错误提示信息。
- * @param array $arg 调用错误处理回调函数时传递的参数
+ * @param false|array $arg 调用错误处理回调函数时传递的参数，若为false并且没有设置接管函数，则忽略此错误。
  * @return false
  */
 function gpf_err($error, $arg = array())
 {//{{{
-	$gk_error = 'gpf_error';
-	$gk_is_pass = 'gpf_is_pass';
-	$gk_error_func = 'gpf_error_func';
+	$gk = 'gpf_error';
+	if (false === $arg)
+		{
+		if ('printf' === gpf_override_get('gpf_err'))
+			{
+			//忽略此次错误
+			return false;
+			}
+		}
 
 	//zjq@2013-03-21 因为gpf_err一调用基本就是exit掉php，所以可以自动取trace信息
 	$trace = debug_backtrace(false);
@@ -448,14 +472,13 @@ function gpf_err($error, $arg = array())
 		$func = "{$t1['class']}{$t1['type']}{$func}";
 		}
 
-	$GLOBALS[$gk_error] = $error;
-	$GLOBALS[$gk_is_pass] = false;
+	$GLOBALS[$gk] = $error;
 	gpf_log("(GERR){$error}", GPF_LOG_FLOW, $file, $line, $func);
 
-	$error_func = $GLOBALS[$gk_error_func];
-	if ($error_func)
+	$callback = gpf_override_get('gpf_err');
+	if ($callback)
 		{
-		if (!is_callable($error_func))
+		if ('printf' === $callback)
 			{
 			exit($error);
 			}
@@ -470,21 +493,7 @@ function gpf_err($error, $arg = array())
  */
 function gpf_err_get()
 {//{{{
-	$gk = 'gpf_error';
-	return $GLOBALS[$gk_error];
-}//}}}
-/**
- * 设置自动提示函数
- * @param NULL|callback $func_name 错误处理函数，NULL 表示自动提示函数。
- */
-function gpf_err_func($func_name)
-{//{{{
-	$gk_error_func = 'gpf_error_func';
-	if (is_null($func_name))
-		{
-		$func_name = 'exit';
-		}
-	$GLOBALS[$gk_error_func] = $func_name;
+	return $GLOBALS['gpf_error'];
 }//}}}
 
 //============================== hook ==============================
