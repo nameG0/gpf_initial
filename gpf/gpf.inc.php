@@ -656,7 +656,7 @@ function gpf_url_func($name, $value)
  */
 function gpf_addslashes($data)
 {//{{{
-	return is_array($data) ? array_map(__FUNCTION__, $data) : addslashes($data);
+	return is_array($data) ? array_map('gpf_addslashes', $data) : addslashes($data);
 }//}}}
 /**
  * 兼容数组的 stripslashes
@@ -664,28 +664,35 @@ function gpf_addslashes($data)
  */
 function gpf_stripslashes($data)
 {//{{{
-	return is_array($data) ? array_map(__FUNCTION__, $data) : stripslashes($data);
+	return is_array($data) ? array_map('gpf_stripslashes', $data) : stripslashes($data);
 }//}}}
 /**
  * 兼容数组的 htmlspecialchars
  */
 function gpf_htmlspecialchars($data)
 {//{{{
-	return is_array($data) ? array_map(__FUNCTION__, $data) : htmlspecialchars($data);
+	return is_array($data) ? array_map('gpf_htmlspecialchars', $data) : htmlspecialchars($data);
 }//}}}
 /**
  * 兼容数组的 strip_tags
  */
 function gpf_strip_tags($data)
 {//{{{
-	return is_array($data) ? array_map(__FUNCTION__, $data) : strip_tags($data);
+	return is_array($data) ? array_map('gpf_strip_tags', $data) : strip_tags($data);
 }//}}}
 /**
- * 兼容数组的整数类型转换
+ * 兼容数组的 intval
  */
 function gpf_intval($data)
 {//{{{
-	return is_array($data) ? array_map(__FUNCTION__, $data) : intval($data);
+	return is_array($data) ? array_map('gpf_intval', $data) : intval($data);
+}//}}}
+/**
+ * 兼容数组的 floatval
+ */
+function gpf_floatval($data)
+{//{{{
+	return is_array($data) ? array_map('gpf_floatval', $data) : floatval($data);
 }//}}}
 /**
  * 处理一个标签属性部份的xss
@@ -976,6 +983,19 @@ function gpfi_int($name, $def_val = NULL, $option = array())
 	return _gpfi($GLOBALS['gpf_request'][$name], $def_val, $option, 'gpf_intval', false);
 }//}}}
 /**
+ * floatval
+ */
+function gpfi_float($name, $def_val = NULL, $option = array())
+{//{{{
+	$gk_array = 'gpfi_array';
+	if (!is_null($GLOBALS[$gk_array]))
+		{
+		return _gpfi_array_set($name, $def_val, $option, 'gpf_floatval', false);
+		}
+	//小数不需要处理引号
+	return _gpfi($GLOBALS['gpf_request'][$name], $def_val, $option, 'gpf_floatval', false);
+}//}}}
+/**
  * 过滤掉所有html标签（strip_tags）
  */
 function gpfi_txt($name, $def_val = NULL, $option = array())
@@ -1023,6 +1043,11 @@ function gpfig_int($name, $def_val = NULL, $option = array())
 	//整数不需要处理引号
 	return _gpfi($GLOBALS['get_get'][$name], $def_val, $option, 'gpf_intval', false);
 }//}}}
+function gpfig_float($name, $def_val = NULL, $option = array())
+{//{{{
+	//小数不需要处理引号
+	return _gpfi($GLOBALS['get_get'][$name], $def_val, $option, 'gpf_floatval', false);
+}//}}}
 function gpfig_txt($name, $def_val = NULL, $option = array())
 {//{{{
 	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, 'gpf_strip_tags');
@@ -1040,24 +1065,29 @@ function gpfig_in($name, $def_val = NULL, $option = array())
  */
 function gpfip($name, $def_val = NULL, $option = array())
 {//{{{
-	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, 'gpf_htmlspecialchars');
+	return _gpfi($GLOBALS['gpf_post'][$name], $def_val, $option, 'gpf_htmlspecialchars');
 }//}}}
 function gpfip_int($name, $def_val = NULL, $option = array())
 {//{{{
 	//整数不需要处理引号
-	return _gpfi($GLOBALS['get_get'][$name], $def_val, $option, 'gpf_intval', false);
+	return _gpfi($GLOBALS['gpf_post'][$name], $def_val, $option, 'gpf_intval', false);
+}//}}}
+function gpfip_float($name, $def_val = NULL, $option = array())
+{//{{{
+	//小数不需要处理引号
+	return _gpfi($GLOBALS['gpf_post'][$name], $def_val, $option, 'gpf_floatval', false);
 }//}}}
 function gpfip_txt($name, $def_val = NULL, $option = array())
 {//{{{
-	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, 'gpf_strip_tags');
+	return _gpfi($GLOBALS['gpf_post'][$name], $def_val, $option, 'gpf_strip_tags');
 }//}}}
 function gpfip_html($name, $def_val = NULL, $option = array())
 {//{{{
-	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, 'gpf_xss');
+	return _gpfi($GLOBALS['gpf_post'][$name], $def_val, $option, 'gpf_xss');
 }//}}}
 function gpfip_in($name, $def_val = NULL, $option = array())
 {//{{{
-	return _gpfi($GLOBALS['gpf_get'][$name], $def_val, $option, '');
+	return _gpfi($GLOBALS['gpf_post'][$name], $def_val, $option, '');
 }//}}}
 
 $GLOBALS['gpfi_array'] = NULL; //临时保存处理一个数组时的数据
@@ -1070,7 +1100,7 @@ function _gpfi_array($name, $input_from)
 	$gk_array = 'gpfi_array';
 	if (!is_null($GLOBALS[$gk_array]))
 		{
-		return gpf_err("正在处理一组数据，不支持嵌套处理", __FILE__, __LINE__, __FUNCTION__);
+		return gpf_err("正在处理一组数据，不支持嵌套处理");
 		}
 	if (is_null($name))
 		{
@@ -1545,7 +1575,7 @@ function gpf_mod_v($mod, $name)
 		if (!is_file($path))
 			{
 			gpf_log("文件不存在 {$path}", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
-			gpf_err("相关文件不存在", __FILE__, __LINE__, __FUNCTION__);
+			gpf_err("相关文件不存在");
 			return false;
 			}
 		gpf_inc($path);
@@ -1567,7 +1597,7 @@ function gpf_mod_v($mod, $name)
 		if (!class_exists($class_name))
 			{
 			gpf_log("类不存在 {$class_name}", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
-			gpf_err("相关文件不存在", __FILE__, __LINE__, __FUNCTION__);
+			gpf_err("相关文件不存在");
 			return false;
 			}
 		$obj = new $class_name();
@@ -1675,7 +1705,7 @@ function gpf_tpl($mod, $file)
 	if (!is_file($path))
 		{
 		gpf_log("模板不存在[{$path}]", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
-		gpf_err("template not exists", __FILE__, __LINE__, __FUNCTION__);
+		gpf_err("template not exists");
 		return false;
 		}
 	return $path;
