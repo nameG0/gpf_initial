@@ -34,9 +34,10 @@ function gpfd_file($file)
 		unset($output);
 		//写入初始信息
 		$url = "http://{$_SERVER["SERVER_NAME"]}{$_SERVER["REQUEST_URI"]}";
-		_gpfd_output("{$url}\r\n<a href=\"{$url}\" target=\"_blank\">{$url}</a><hr />");
+		_gpfd_output("{$url}\r\n<a href=\"{$url}\" target=\"_blank\">[URL]</a><hr />");
 		ob_start();
 		}
+	_gpfd_output("<h2 style=\"color:blue;font-size:18px;\">OPEN:{$file}</h2>\n");
 
 	$php = file_get_contents($file);
 

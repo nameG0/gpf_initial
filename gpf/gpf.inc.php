@@ -1832,3 +1832,17 @@ function gpf_debug_js()
 	gpf_inc(dirname(__FILE__). '/debug.inc.php');
 	gpfd_js();
 }//}}}
+
+/**
+ * 用于引用外部代码（lib）文件（单次包含）
+ * @param string $path 文件（或目录），不需要最后的“.php”，若以“/”结尾，自动加上init.inc.php
+ */
+function gpf_lib_load($path, $class_name = '')
+{//{{{
+	if ('/' === substr($path, -1, 1))
+		{
+		$path .= 'init.inc';
+		}
+	$pathfull = GPF_LIB . $path;
+	return gpf_load($pathfull, $class_name);
+}//}}}
