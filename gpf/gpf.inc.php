@@ -16,6 +16,10 @@
 (defined('GPF_LIB') OR define('GPF_LIB', dirname(GPF_MODULE) . '/0lib/'));
 //建议放在config目录中。
 defined('GPF_FACTORY') OR define('GPF_FACTORY', GPF_CONFIG . 'gpf_factory/');
+//debug模式时生成的php临时文件存放路径
+//GPF_DEBUG_PHP
+//debug模式输出信息文件存放路径
+//GPF_DEBUG_OUTPUT
 
 //============================== inc ===============================
 $GLOBALS['gpf_inc'] = array(); //保存已加载过的文件标记。
@@ -1798,4 +1802,20 @@ function gpf_ctrl($mod, $file, $action, $in = array())
 		return false;
 		}
 	$ctrl->$in['func']();
+}//}}}
+
+/**
+ * 对一个PHP文件开启GPF DEBUG模式
+ * 调用方法：让PHP文件内第一条执行语句为（注意大小写）
+ * return include gpf_debug(__FILE__);
+ * 如果PHP文件是类定义文件（或函数定义），在开启DEBUG时，还需加上一个if块：
+ * if(1):
+ * ....PHP文件原本的代码。
+ * endif;
+ * 以避免重复定义致命错误
+ */
+function gpf_debug($file)
+{//{{{
+	gpf_inc(dirname(__FILE__). '/debug.inc.php');
+	return gpfd_file($file);
 }//}}}
