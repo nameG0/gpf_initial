@@ -102,9 +102,11 @@ function gpfdf_dump($f, $l, $name)
 	unset($arg[0], $arg[1], $arg[2]);
 	$html = _gpfd_ftitle($f, $l);
 	$html .= "<h2 style=\"color:red;font-size:18px;\">{$name}</h2>\n";
-	$tmp = ob_get_clean();
+	$tmp = ob_get_contents();
+	ob_clean();
 	call_user_func_array('var_dump', $arg);
-	$html .= ob_get_clean();
+	$html .= ob_get_contents();
+	ob_clean();
 	echo $tmp;
 	_gpfd_output($html);
 }//}}}
