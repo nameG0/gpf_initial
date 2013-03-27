@@ -20,6 +20,10 @@ defined('GPF_FACTORY') OR define('GPF_FACTORY', GPF_CONFIG . 'gpf_factory/');
 //GPF_DEBUG_PHP
 //debug模式输出信息文件存放路径
 //GPF_DEBUG_OUTPUT
+//debug.js请求路径
+//GPF_DEBUG_JS_SCRIPT
+//调用gpfd_js处理请求的PHP文件访问路径（必须带有?号）
+//GPF_DEBUG_JS_PHP
 
 //============================== inc ===============================
 $GLOBALS['gpf_inc'] = array(); //保存已加载过的文件标记。
@@ -1818,4 +1822,13 @@ function gpf_debug($file)
 {//{{{
 	gpf_inc(dirname(__FILE__). '/debug.inc.php');
 	return gpfd_file($file);
+}//}}}
+
+/**
+ * JS调试信息记录，在接受JS调试信息的页面(GPF_DEBUG_JS常量指向的地址)中调用即可
+ */
+function gpf_debug_js()
+{//{{{
+	gpf_inc(dirname(__FILE__). '/debug.inc.php');
+	gpfd_js();
 }//}}}
