@@ -34,10 +34,10 @@ function gpfd_file($file)
 		unset($output);
 		//写入初始信息
 		$url = "http://{$_SERVER["SERVER_NAME"]}{$_SERVER["REQUEST_URI"]}";
-		_gpfd_output("{$url}\r\n<a href=\"{$url}\" target=\"_blank\">[URL]</a><hr />");
+		_gpfd_output("{$url}\r\n<a href=\"{$url}\" target=\"_blank\">[URL]</a><br />" . date("Y-m-d H:i:s") . "<hr />");
 		ob_start();
 		}
-	_gpfd_output("<h2 style=\"color:blue;font-size:18px;\">OPEN:{$file}</h2>\n");
+	_gpfd_output("<h2 style=\"color:blue;font-size:18px;\">DEBUG:{$file}</h2>\n");
 
 	$php = file_get_contents($file);
 
@@ -58,6 +58,26 @@ function gpfd_file($file)
 	//debug/disable}
 	$pregi[] = '#//debug/disable{.*?//debug/disable}#se';
 	$prego[] = "str_replace(array('//debug/disable{', '//debug/disable}'), array('if(0){', '}'), '\\0');";
+	//debug/off{
+	//"disable"的别名
+	//debug/off}
+	$pregi[] = '#//debug/off{.*?//debug/off}#se';
+	$prego[] = "str_replace(array('//debug/off{', '//debug/off}'), array('if(0){', '}'), '\\0');";
+	/* //debug/run
+	 PHP_CODE 表示这部份代码是debug模式下才运行的代码段
+	 */
+	$pregi[] = '#/\* //debug/run.*?\*/#se';
+	$prego[] = "str_replace(array('/*', '*/'), '//', '\\0');";
+	//debug/if/[条件]{
+	//PHP_CODE debug模式时会变成实际的if语句，实现[条件]成立时才执行。
+	//debug/if}
+	$pregi[] = '#//debug/if/(.*?){(.*?)//debug/if}#s';
+	$prego[] = "if (\\1) {\\2}";
+	//debug/offif/[条件]{
+	//PHP_CODE debug模式时变成实际的if语句，实现[条件]成立时不执行。
+	//debug/offif}
+	$pregi[] = '#//debug/offif/(.*?){(.*?)//debug/offif}#s';
+	$prego[] = "if (!(\\1)) {\\2}";
 
 	$php = preg_replace($pregi, $prego, $php);
 
