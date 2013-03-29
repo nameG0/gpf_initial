@@ -5,6 +5,12 @@
  * @package default
  * @filesource
  */
+//可通过定义GPF_DEBUG_LOAD常量指向自定义debug函数定义文件实现自动加载
+if (defined('GPF_DEBUG_LOAD'))
+	{
+	gpf_inc(GPF_DEBUG_LOAD);
+	}
+
 $GLOBALS['gpf_debug_fp'] = NULL; //调试信息输出文件指针
 $GLOBALS['gpf_debug_current_file'] = ''; //当前处理的PHP文件绝对路径
 $GLOBALS['gpf_debug_current_file_urlencode'] = ''; //当前处理的PHP文件绝对路径(经URL编码)
@@ -34,22 +40,20 @@ function gpfd_file($file)
 		unset($output);
 		//写入初始信息
 		$url = "http://{$_SERVER["SERVER_NAME"]}{$_SERVER["REQUEST_URI"]}";
-		_gpfd_output("{$url}\r\n<a href=\"{$url}\" target=\"_blank\">[URL]</a><br />" . date("Y-m-d H:i:s") . "<hr />");
+		gpfd_output("{$url}\r\n<a href=\"{$url}\" target=\"_blank\">[URL]</a><br />" . date("Y-m-d H:i:s") . "<hr />");
 		ob_start();
 		}
-	_gpfd_output("<h2 style=\"color:blue;font-size:18px;\">DEBUG:{$file}</h2>\n");
+	gpfd_output("<h2 style=\"color:blue;font-size:18px;\">DEBUG:{$file}</h2>\n");
 
 	$php = file_get_contents($file);
 
-	//================================ 字符串替换 ===============================
-	$stri = $stro = array();
+	$stri = $stro = array(); //字符串替换
+	$pregi = $prego = array(); //正则替换
+
+	//避免死循环
 	$stri[] = 'return include gpf_debug(';
-	$stro[] = '//gpf_debug(';
+	$stro[] = "//GPF DEBUG: {$file} === ";
 
-	$php = str_replace($stri, $stro, $php);
-
-	//=============================== 正则替换 ===============================
-	$pregi = $prego = array();
 	//debug/php/php 直接转换为 php 中的 PHP 代码。eg. //debug/php/echo 1;
 	$pregi[] = '#//debug/php/(.*)#';
 	$prego[] = '\\1';
@@ -78,15 +82,60 @@ function gpfd_file($file)
 	//debug/offif}
 	$pregi[] = '#//debug/offif/(.*?){(.*?)//debug/offif}#s';
 	$prego[] = "if (!(\\1)) {\\2}";
+	//debug/if:1:/PHP_CODE{
+	//... 当 if:1: 时，PHP_CODE生效（if:0:时则无效），用于按条件添加像for,foreach等这类带大括号的控制结构
+	//debug/endif/}
+	$pregi[] = '#//debug/if:1:/(.*?)//debug/endif/(.*)#se';
+	$prego[] = "str_replace(array('//debug/if:1:/', '//debug/endif/'), '', '\\0')";
 
+	//提供简单的测试断言功能
+	//debug/test= 测试状态开关,设为1(true)为开，设为0(false)为关
+	//debug/test=1
+	$pregi[] = '#//debug/test=([^\r]*)#';
+	$prego[] = '$gpf_debug_test = \\1;';
+	//debug/test/[断言] 测试断言，会向浏览器直接输出断言结果
+	//debug/test/1 === 1
+	$pregi[] = '#//debug/test/([^\r]*)#';
+	$prego[] = 'if ($gpf_debug_test) { gpfd_test(\\1, \'' . $GLOBALS[$gk_file] . '\', __LINE__); }';
+	//debug/testif/[断言条件]/[断言] 按条件进行测试断言
+	//debug/testif/$open == 1/$close == 1
+	$pregi[] = '#//debug/testif/([^/]*)/([^\r]*)#';
+	$prego[] = 'if ($gpf_debug_test && \\1) { gpfd_test(\\2, \'' . $GLOBALS[$gk_file] . '\', __LINE__); }';
+	//debug/testoff{
+	//PHP_CODE 测试开启时不运行的PHP代码
+	//debug/testoff}
+	$pregi[] = '#//debug/testoff{(.*?)//debug/testoff}#se';
+	$prego[] = "str_replace(array('//debug/testoff{', '//debug/testoff}'), array('if(!\$gpf_debug_test){', '}'), '\\0');";
+	//debug/testphp/PHP_CODE 测试开启时运行的PHP代码（单行）
+	//debug/testphp/echo 1;
+	$pregi[] = '#//debug/testphp/#';
+	$prego[] = 'if($gpf_debug_test) ';
+	/* //debug/testphp 测试开启时运行的PHP代码段（可多行）
+	 PHP_CODE
+	 */
+	$pregi[] = '#/\* //debug/testphp(.*?)\*/#se';
+	$prego[] = "str_replace(array('/* //debug/testphp', '*/'), array('if(\$gpf_debug_test){', '}'), '\\0')";
+
+
+	$php = str_replace($stri, $stro, $php);
 	$php = preg_replace($pregi, $prego, $php);
-
-	//================================ 其它 ===============================
 
 	//debug/dump/$value, ... 用var_dump输出变量同时显示变量名
 	$php = preg_replace_callback('#//debug/dump/(.*)#', '_gpfd_dump_callback', $php);
 
+	//=============================== //debug/f/ 系列扩展函数 ===============================
+	//debug/f/NAME/ARG
+	//debug/f/result/$result
+	$php = preg_replace_callback('#//debug/f/([^/]*)/([^\r]*)#', '_gpfdf_callback', $php);
+
 	$php = _gpfd_js_file($php);
+
+	//调用扩展替换函数
+	$func_name = 'gpfd_my';
+	if (function_exists($func_name))
+		{
+		$php = $func_name($php);
+		}
 
 	$debug_file = GPF_DEBUG_PHP . md5($file) . '.php';
 	file_put_contents($debug_file, $php);
@@ -96,7 +145,7 @@ function gpfd_file($file)
 /**
  * 输出调试信息
  */
-function _gpfd_output($data)
+function gpfd_output($data)
 {//{{{
 	$gk = 'gpf_debug_fp';
 	fwrite($GLOBALS[$gk], $data . "\n");
@@ -107,20 +156,14 @@ function _gpfd_dump_callback($match)
 	$gk = 'gpf_debug_current_file';
 	$arg = rtrim($match[1]);
 	$arg_str = addslashes($arg);
-	return "gpfdf_dump('{$GLOBALS[$gk]}', __LINE__, '{$arg_str}', {$arg});";
+	$f = $GLOBALS[$gk];
+	return "gpfd_dump(\"<b>{$f}:\".__LINE__.\"</b><br />\n\", '{$arg_str}', {$arg});";
 }//}}}
-
-function _gpfd_ftitle($f, $l)
-{//{{{
-	return "<b>{$f}:{$l}</b><br />\n";
-}//}}}
-
 //输出变量
-function gpfdf_dump($f, $l, $name)
+function gpfd_dump($html, $name)
 {//{{{
 	$arg = func_get_args();
-	unset($arg[0], $arg[1], $arg[2]);
-	$html = _gpfd_ftitle($f, $l);
+	unset($arg[0], $arg[1]);
 	$html .= "<h2 style=\"color:red;font-size:18px;\">{$name}</h2>\n";
 	$tmp = ob_get_contents();
 	ob_clean();
@@ -128,7 +171,15 @@ function gpfdf_dump($f, $l, $name)
 	$html .= ob_get_contents();
 	ob_clean();
 	echo $tmp;
-	_gpfd_output($html);
+	gpfd_output($html);
+}//}}}
+
+//测试断言
+function gpfd_test($test, $f, $l)
+{//{{{
+	$color = $test ? 'green' : 'red';
+	?><p style="color:<?=$color?>"><?=$test ? 'TRUE' : 'FALSE'?> <?=$f?>:<?=$l?></p>
+<?php
 }//}}}
 
 //=============================== JS DEBUG ===============================
@@ -216,4 +267,51 @@ function _gpfd_js_file($php)
 	$php = preg_replace($pregi, $prego, $php);
 
 	return $php;
+}//}}}
+
+//=============================== //debug/f/ 系列 ===============================
+//允许自定义函数扩展 //debug/f/ 标签
+function _gpfdf_callback($match)
+{//{{{
+	$gk = 'gpf_debug_current_file';
+	$name = $match[1];
+	$arg = $match[2];
+	$func_name = "gpfdf_{$name}_callback";
+	if (function_exists($func_name))
+		{
+		return $func_name($arg);
+		}
+	$func_name = "gpfdf_{$name}";
+	if (!function_exists($func_name))
+		{
+		return $match[0];
+		}
+	//为方便调试信息的查看，首个参数总是文件路径和行号说明：
+	$f = $GLOBALS[$gk];
+	return "{$func_name}(\"<b>{$f}:\".__LINE__.\"</b><br />\n\", {$arg});";
+}//}}}
+
+//输出一维数组（一般用于输出数据库查询记录集）
+function gpfdf_r($output, $r)
+{//{{{
+	$key = array_keys($r);
+	$output .= '<table class="" cellpadding="0" cellspacing="0" border="1" align="" style="" ><tr><th>|';
+	$output .= join("|</th><th>|", $key) . '|</th></tr>';
+	$output .= '<tr><td>|' . join("|</td><td>|", $r) . '|</td></tr>';
+	$output .= '</table>';
+	gpfd_output($output);
+}//}}}
+
+//输出二维数组（一般用于输出数据库查询记录集）
+function gpfdf_res($output, $res)
+{//{{{
+	$key = array_keys(reset($res));
+	$output .= '<table class="" cellpadding="0" cellspacing="0" border="1" align="" style="" ><tr><th>|';
+	$output .= join("|</th><th>|", $key) . '|</th></tr>';
+	foreach ($res as $r)
+		{
+		$output .= '<tr><td>|' . join("|</td><td>|", $r) . '|</td></tr>';
+		}
+	$output .= '</table>';
+	gpfd_output($output);
 }//}}}
