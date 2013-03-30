@@ -91,15 +91,15 @@ function gpfd_file($file)
 	//提供简单的测试断言功能
 	//debug/test= 测试状态开关,设为1(true)为开，设为0(false)为关
 	//debug/test=1
-	$pregi[] = '#//debug/test=([^\r]*)#';
-	$prego[] = '$gpf_debug_test = \\1;';
+	$pregi[] = '#//debug/test=([^\s]*)#';
+	$prego[] = '$gpf_debug_test = \\1; //';
 	//debug/test/[断言] 测试断言，会向浏览器直接输出断言结果
 	//debug/test/1 === 1
-	$pregi[] = '#//debug/test/([^\r]*)#';
+	$pregi[] = '#//debug/test/([^\r\n]*)#';
 	$prego[] = 'if ($gpf_debug_test) { gpfd_test(\\1, \'' . $GLOBALS[$gk_file] . '\', __LINE__); }';
 	//debug/testif/[断言条件]/[断言] 按条件进行测试断言
 	//debug/testif/$open == 1/$close == 1
-	$pregi[] = '#//debug/testif/([^/]*)/([^\r]*)#';
+	$pregi[] = '#//debug/testif/([^/]*)/([^\r\n]*)#';
 	$prego[] = 'if ($gpf_debug_test && \\1) { gpfd_test(\\2, \'' . $GLOBALS[$gk_file] . '\', __LINE__); }';
 	//debug/testoff{
 	//PHP_CODE 测试开启时不运行的PHP代码
@@ -126,7 +126,7 @@ function gpfd_file($file)
 	//=============================== //debug/f/ 系列扩展函数 ===============================
 	//debug/f/NAME/ARG
 	//debug/f/result/$result
-	$php = preg_replace_callback('#//debug/f/([^/]*)/([^\r]*)#', '_gpfdf_callback', $php);
+	$php = preg_replace_callback('#//debug/f/([^/]*)/([^\r\n]*)#', '_gpfdf_callback', $php);
 
 	$php = _gpfd_js_file($php);
 
@@ -157,7 +157,7 @@ function _gpfd_dump_callback($match)
 	$arg = rtrim($match[1]);
 	$arg_str = addslashes($arg);
 	$f = $GLOBALS[$gk];
-	return "gpfd_dump(\"<b>{$f}:\".__LINE__.\"</b><br />\n\", '{$arg_str}', {$arg});";
+	return "gpfd_dump(\"<b>{$f}:\".__LINE__.\"</b><br />\", '{$arg_str}', {$arg});";
 }//}}}
 //输出变量
 function gpfd_dump($html, $name)
@@ -288,29 +288,23 @@ function _gpfdf_callback($match)
 		}
 	//为方便调试信息的查看，首个参数总是文件路径和行号说明：
 	$f = $GLOBALS[$gk];
-	return "{$func_name}(\"<b>{$f}:\".__LINE__.\"</b><br />\n\", {$arg});";
-}//}}}
-
-//输出一维数组（一般用于输出数据库查询记录集）
-function gpfdf_r($output, $r)
-{//{{{
-	$key = array_keys($r);
-	$output .= '<table class="" cellpadding="0" cellspacing="0" border="1" align="" style="" ><tr><th>|';
-	$output .= join("|</th><th>|", $key) . '|</th></tr>';
-	$output .= '<tr><td>|' . join("|</td><td>|", $r) . '|</td></tr>';
-	$output .= '</table>';
-	gpfd_output($output);
+	return "{$func_name}(\"<b>{$f}:\".__LINE__.\"</b><br />\", {$arg});";
 }//}}}
 
 //输出二维数组（一般用于输出数据库查询记录集）
 function gpfdf_res($output, $res)
 {//{{{
 	$key = array_keys(reset($res));
-	$output .= '<table class="" cellpadding="0" cellspacing="0" border="1" align="" style="" ><tr><th>|';
+	$output .= '<table class="" cellpadding="0" cellspacing="0" border="1" align="" style="font-size:12px;" ><tr><th>|';
 	$output .= join("|</th><th>|", $key) . '|</th></tr>';
 	foreach ($res as $r)
 		{
-		$output .= '<tr><td>|' . join("|</td><td>|", $r) . '|</td></tr>';
+		$output .= '<tr>';
+		foreach ($r as $v)
+			{
+			$output .= '<td>' . var_export($v, 1) . '</td>';
+			}
+		$output .= '</tr>';
 		}
 	$output .= '</table>';
 	gpfd_output($output);

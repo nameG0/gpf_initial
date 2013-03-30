@@ -478,7 +478,8 @@ function _gpf_log_flush()
 		return ;
 		}
 	$count = count($GLOBALS[$gk_data]);
-	echo "<br/><font color=blue>Infomation:({$count})</font><hr/><div>\n";
+	$output = '';
+	$output .= "<br/><font color=blue>Infomation:({$count})</font><hr/><div>\n";
 	foreach ($GLOBALS[$gk_data] as $k => $v)
 		{
 		if (empty($GLOBALS[$gk_output_level][$v['level']]))
@@ -486,9 +487,14 @@ function _gpf_log_flush()
 			continue;
 			}
 		$br = isset($v['msg'][100]) ? '<br/><br/>' : '<br/>';	//长句加多个换行，更容易查看
-		echo "<span style=\"", $GLOBALS[$gk_style][$v['level']], "\">{$v['func']} {$v['msg']} [", $GLOBALS[$gk_txt][$v['level']], "] {$v['file']}:{$v['line']}</span>{$br}\n";
+		$output .= "<span style=\"" . $GLOBALS[$gk_style][$v['level']] . "\">{$v['func']} {$v['msg']} [" . $GLOBALS[$gk_txt][$v['level']] . "] {$v['file']}:{$v['line']}</span>{$br}\n";
 		}
-	echo "<br/><br/><br/></div>\n";
+	$output .= "<br/><br/><br/></div>\n";
+	echo $output;
+	if (function_exists('gpfd_output'))
+		{
+		gpfd_output($output);
+		}
 }//}}}
 
 //============================== error ==============================
