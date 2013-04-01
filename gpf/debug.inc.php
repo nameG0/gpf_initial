@@ -5,9 +5,24 @@
  * @package default
  * @filesource
  */
+//环境检查
+$_gpf_check = array(
+	'GPF_DEBUG_PHP', 'GPF_DEBUG_OUTPUT', 'GPF_DEBUG_JS_SCRIPT', 'GPF_DEBUG_JS_SCRIPT', 'GPF_DEBUG_JS_PHP',
+	);
+foreach ($_gpf_check as $_v)
+	{
+	if (!defined($_v))
+		{
+		exit("未定义常量 {$_v}");
+		}
+	}
 //可通过定义GPF_DEBUG_LOAD常量指向自定义debug函数定义文件实现自动加载
 if (defined('GPF_DEBUG_LOAD'))
 	{
+	if (function_exists('gpf_inc'))
+		{
+		exit("未加载 gpf.inc.php 时不能定义 GPF_DEBUG_LOAD 常量");
+		}
 	gpf_inc(GPF_DEBUG_LOAD);
 	}
 
@@ -24,14 +39,23 @@ function gpfd_file($file)
 	$gk_file = 'gpf_debug_current_file';
 	$gk_urlencode = 'gpf_debug_current_file_urlencode';
 
-	$GLOBALS[$gk_file] = addslashes($file);
+	$_file = realpath($file);
+	if (!$_file)
+		{
+		exit("待DEBUG文件不存在:{$file}");
+		}
+	$file = $_file;
+	$GLOBALS[$gk_file] = $filestr = addslashes($file);
 	$GLOBALS[$gk_urlencode] = urlencode($file);
 	if (NULL === $GLOBALS[$gk])
 		{
 		//初始化
 		$output = date("ymd") . $_SERVER['PHP_SELF'] . '_' . md5($_SERVER['REQUEST_URI']) . '.html';
 		$output = str_replace('/', '_', $output);
-		gpf_log($output, GPF_LOG_DEBUG, __FILE__, __LINE__, __FUNCTION__);
+		if (function_exists('gpf_log'))
+			{
+			gpf_log($output, GPF_LOG_DEBUG, __FILE__, __LINE__, __FUNCTION__);
+			}
 		$GLOBALS[$gk] = fopen(GPF_DEBUG_OUTPUT . $output, 'wb');
 		if (!$GLOBALS[$gk])
 			{
@@ -88,11 +112,11 @@ function gpfd_file($file)
 	$pregi[] = '#//debug/if:1:/(.*?)//debug/endif/(.*)#se';
 	$prego[] = "str_replace(array('//debug/if:1:/', '//debug/endif/'), '', '\\0')";
 
-	//提供简单的测试断言功能
+	//=============================== 提供简单的测试断言功能 ===============================
 	//debug/test= 测试状态开关,设为1(true)为开，设为0(false)为关
 	//debug/test=1
-	$pregi[] = '#//debug/test=([^\s]*)#';
-	$prego[] = '$gpf_debug_test = \\1; //';
+	$pregi[] = '#//debug/test=(.*?)/(.*)#';
+	$prego[] = "if(defined('GPF_TEST')){ \$gpf_debug_test = \\1; gpfd_test_name('{$filestr}', __LINE__, \$gpf_debug_test, '\\2'); }//";
 	//debug/test/[断言] 测试断言，会向浏览器直接输出断言结果
 	//debug/test/1 === 1
 	$pregi[] = '#//debug/test/([^\r\n]*)#';
@@ -180,6 +204,15 @@ function gpfd_test($test, $f, $l)
 	$color = $test ? 'green' : 'red';
 	?><p style="color:<?=$color?>"><?=$test ? 'TRUE' : 'FALSE'?> <?=$f?>:<?=$l?></p>
 <?php
+}//}}}
+//显示测试项名称及开启状态
+function gpfd_test_name($f, $l, $is_test, $name)
+{//{{{
+	?>
+	<div style="color:<?=$is_test ? 'green' : 'blue'?>">
+		[<?=$is_test ? '开启' : '关闭'?>] <?=$name?> <?=$f?>:<?=$l?>
+	</div>
+	<?php
 }//}}}
 
 //=============================== JS DEBUG ===============================

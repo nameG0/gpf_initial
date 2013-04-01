@@ -5,6 +5,7 @@
  * @package default
  * @filesource
  */
+//debug/test=1/gpf.inc.php
 //============================== define ===============================
 //缩短 DIRECTORY_SEPARATOR
 (defined('DS') OR define('DS', DIRECTORY_SEPARATOR));
@@ -24,6 +25,8 @@ defined('GPF_FACTORY') OR define('GPF_FACTORY', GPF_CONFIG . 'gpf_factory/');
 //GPF_DEBUG_JS_SCRIPT
 //调用gpfd_js处理请求的PHP文件访问路径（必须带有?号）
 //GPF_DEBUG_JS_PHP
+//是否开启断言测试模式
+//GPF_TEST
 
 //============================== inc ===============================
 $GLOBALS['gpf_inc'] = array(); //保存已加载过的文件标记。
