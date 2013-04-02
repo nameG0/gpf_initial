@@ -54,7 +54,9 @@ function gpfd_file($file)
 		$output = str_replace('/', '_', $output);
 		if (function_exists('gpf_log'))
 			{
-			gpf_log($output, GPF_LOG_DEBUG, __FILE__, __LINE__, __FUNCTION__);
+			$h = "<a href=\"file:///" . GPF_DEBUG_OUTPUT . "{$output}\" target=\"_blank\">{$output}</a>";
+			gpf_log($h, GPF_LOG_DEBUG, __FILE__, __LINE__, __FUNCTION__);
+			unset($h);
 			}
 		$GLOBALS[$gk] = fopen(GPF_DEBUG_OUTPUT . $output, 'wb');
 		if (!$GLOBALS[$gk])
@@ -69,6 +71,16 @@ function gpfd_file($file)
 		}
 	gpfd_output("<h2 style=\"color:blue;font-size:18px;\">DEBUG:{$file}</h2>\n");
 
+	$tmp = basename($file);
+	$debug_file = GPF_DEBUG_PHP . $tmp[0] . '/' . md5($file) . '.php';
+	unset($tmp);
+	if (is_file($debug_file) && filemtime($debug_file) > filemtime($file))
+		{
+		return $debug_file;
+		}
+	gpfd_output("<p>debug:replace</p>\n");
+
+	//开始进行替换
 	$php = file_get_contents($file);
 
 	$stri = $stro = array(); //字符串替换
@@ -77,6 +89,9 @@ function gpfd_file($file)
 	//避免死循环
 	$stri[] = 'return include gpf_debug(';
 	$stro[] = "//GPF DEBUG: {$file} === ";
+
+	$stri[] = '__FILE__';
+	$stro[] = "'{$filestr}'";
 
 	//debug/php/php 直接转换为 php 中的 PHP 代码。eg. //debug/php/echo 1;
 	$pregi[] = '#//debug/php/(.*)#';
@@ -140,7 +155,6 @@ function gpfd_file($file)
 	$pregi[] = '#/\* //debug/testphp(.*?)\*/#se';
 	$prego[] = "str_replace(array('/* //debug/testphp', '*/'), array('if(\$gpf_debug_test){', '}'), '\\0')";
 
-
 	$php = str_replace($stri, $stro, $php);
 	$php = preg_replace($pregi, $prego, $php);
 
@@ -161,7 +175,11 @@ function gpfd_file($file)
 		$php = $func_name($php);
 		}
 
-	$debug_file = GPF_DEBUG_PHP . md5($file) . '.php';
+	$dir = dirname($debug_file);
+	if (!is_dir($dir))
+		{
+		mkdir($dir);
+		}
 	file_put_contents($debug_file, $php);
 	return $debug_file;
 }//}}}

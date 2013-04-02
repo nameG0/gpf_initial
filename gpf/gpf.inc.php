@@ -17,6 +17,8 @@
 (defined('GPF_LIB') OR define('GPF_LIB', dirname(GPF_MODULE) . '/0lib/'));
 //建议放在config目录中。
 defined('GPF_FACTORY') OR define('GPF_FACTORY', GPF_CONFIG . 'gpf_factory/');
+//debug模式开关
+//GPF_DEBUG
 //debug模式时生成的php临时文件存放路径
 //GPF_DEBUG_PHP
 //debug模式输出信息文件存放路径
@@ -25,7 +27,7 @@ defined('GPF_FACTORY') OR define('GPF_FACTORY', GPF_CONFIG . 'gpf_factory/');
 //GPF_DEBUG_JS_SCRIPT
 //调用gpfd_js处理请求的PHP文件访问路径（必须带有?号）
 //GPF_DEBUG_JS_PHP
-//是否开启断言测试模式
+//断言测试模式开关
 //GPF_TEST
 
 //============================== inc ===============================
@@ -63,11 +65,40 @@ function gpf_is_inc($path)
  */
 function gpf_inc($path)
 {//{{{
-	if (!gpf_is_inc($path))
+	if (gpf_is_inc($path))
 		{
-		require $path;
-		gpf_set_inc($path);
+		return ;
 		}
+	gpf_set_inc($path);
+	//DEBUG模式处理
+	if (defined('GPF_DEBUG') && true === GPF_DEBUG)
+		{
+		if (!function_exists('gpfd_file'))
+			{
+			$debug_inc = dirname(__FILE__). '/debug.inc.php';
+			gpf_set_inc($path);
+			require $debug_inc;
+			if ($path === $debug_inc)
+				{
+				return ;
+				}
+			}
+		$path = gpfd_file($path);
+		}
+	require $path;
+}//}}}
+/**
+ * 若开启DEBUG模式，使用此函数生成不能使用gpf_inc加载的文件路径
+ */
+function gpf_path($path)
+{//{{{
+	//DEBUG模式处理
+	if (!defined('GPF_DEBUG') || true !== GPF_DEBUG)
+		{
+		return $path;
+		}
+	gpf_inc(dirname(__FILE__). '/debug.inc.php');
+	return gpfd_file($path);
 }//}}}
 //============================== obj ===============================
 $GLOBALS['gpf_obj'] = array(); //保存对象实例。
