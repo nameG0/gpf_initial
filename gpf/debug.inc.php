@@ -137,8 +137,8 @@ function gpfd_file($file)
 	/* //debug/testphp 测试开启时运行的PHP代码段（可多行）
 	 PHP_CODE
 	 */
-	$pregi[] = '#/\* //debug/testphp(.*?)\*/#se';
-	$prego[] = "str_replace(array('/* //debug/testphp', '*/'), array('if(\$gpf_debug_test){', '}'), '\\0')";
+	$pregi[] = '#/\* //debug/testphp(.*?)\*/#s';
+	$prego[] = "if(\$gpf_debug_test){\\1}";
 
 
 	$php = str_replace($stri, $stro, $php);
@@ -162,6 +162,7 @@ function gpfd_file($file)
 		}
 
 	$debug_file = GPF_DEBUG_PHP . md5($file) . '.php';
+	$php = str_replace("\r", '', $php);
 	file_put_contents($debug_file, $php);
 	return $debug_file;
 }//}}}

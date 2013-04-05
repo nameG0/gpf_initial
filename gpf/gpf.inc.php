@@ -1383,56 +1383,6 @@ function gpf_mod_init($mod_name)
 	gpf_log($mod_name, GPF_LOG_INFO, '', 0, __FUNCTION__);
 	return true;
 }//}}}
-/**
- * zjq@2013-03-21 todo +disable 没什么作用。
- * 计算模块下文件的绝对路径
- * @param string $path 模块下文件路径。eg. include/common.inc.php
- * @return string 对应文件的绝对路径。
- */
-function gpf_mod_path($mod_name, $path)
-{//{{{
-	return GPF_PATH_MODULE . "{$mod_name}/{$path}";
-}//}}}
-/**
- * zjq@2013-03-21 todo +disable 被 gpf_mod_load 代替
- * 单次包含模块内文件
- * @param string $path 模块文件路径, eg. abc.class.php
- */
-function gpf_mod_inc($mod_name, $path)
-{//{{{
-	gpf_inc(GPF_PATH_MODULE . "{$mod_name}/{$path}");
-}//}}}
-/**
- * zjq@2013-03-21 todo +disable 被 gpf_mod_load 代替
- * 加载模块 API 目录文件。
- * api 目录中的类使用 {mod_name}Api_{class_name} 为前序, 对应文件名为 {class_name}.class.php。
- * @param string $mod_name 模块名。
- * @param string $file_name 文件名，不含 .php 后序。eg. api.func, api.class
- */
-function gpf_mod_api($mod_name, $file_name)
-{//{{{
-	$path = GPF_PATH_MODULE . "{$mod_name}/api/{$file_name}.php";
-	gpf_inc($path);
-	return _gpf_api_class($mod_name, $file_name);
-}//}}}
-/**
- * zjq@2013-03-21 todo +disable 被 gpf_mod_load 代替
- * 若加载的 API 目录文件为类定义文件，则实例化。
- */
-function _gpf_mod_api_class($mod_name, $file_name)
-{//{{{
-	if ('.class' !== substr($file_name, -6, 6))
-		{
-		return ;
-		}
-	$class_name = substr($file_name, 0, -6);
-	$class_full = "{$mod_name}Api_{$class_name}";
-	if (!gpf_is_obj($class_full))
-		{
-		gpf_obj_set($class_full, new $class_full());
-		}
-	return gpf_obj_get($class_full);
-}//}}}
 
 //============================== module#old ==============================
 /**
@@ -1665,42 +1615,95 @@ function gpf_time($time = NULL)
 }//}}}
 
 /**
- * 更新 static 目录文件。
+ * 把$path+$dir所指向目录内的所有文件全复制到GPF_STATIC_DIR常量所指向的目录中。
  * <pre>
  * 需定义常量：
- * GPF_STATIC_DIR :/public/static/ 目录路径。
+ * GPF_STATIC_DIR :/public/ 目录路径。
  * </pre>
- * @param string $mod_name 模块名,为空表示全部复制（一般用于初始化）。
+ * @param string $path 起始目录。以/结尾,比如网站根目录,
+ * @param string $dir 后续目录，eg. 0lib/gpf/ eg. 0module/main/
  */
-function gpf_static($mod_name = '')
+function gpf_static($path, $dir)
 {//{{{
-	gpf_log($mod_name, GPF_LOG_INFO, __FILE__, __LINE__, __FUNCTION__);
-	if ($mod_name)
+	//debug/test=1/function_gpf_static
+	if (!defined('GPF_STATIC_DIR'))
 		{
-		$to = GPF_STATIC_DIR . "{$mod_name}/";
-		_gpf_static_copy(GPF_PATH_MODULE . "{$mod_name}/static/", $to);
+		//debug/testphp/$GLOBALS['t_static_not_dir'] = true;
+		gpf_log('!defined GPF_STATIC_DIR', GPF_LOG_FLOW, __FILE__, __LINE__, __FUNCTION__);
+		return false;
 		}
-	else
+	//debug/testphp/$GLOBALS['t_static_not_dir'] = false;
+	$sour = $path . $dir;
+	$to = GPF_STATIC_DIR . $dir;
+	//debug/testphp/$GLOBALS['t_static_sour'] = $sour;
+	//debug/testphp/$GLOBALS['t_static_to'] = $to;
+	//debug/dump/$sour, $to
+	if (!is_dir($sour))
 		{
-		$handle = dir(GPF_PATH_MODULE);
-		while ($entry = $handle->read())
-			{
-			if (($entry == ".") || ($entry == ".."))
-				{
-				continue;
-				}
-			_gpf_static_copy(GPF_PATH_MODULE . $entry . "/static/", GPF_STATIC_DIR . $entry . '/');
-			}
-		$handle->close();
+		//debug/testphp/$GLOBALS['t_static_not_sour'] = true;
+		return false;
 		}
+	//debug/testphp/$GLOBALS['t_static_not_sour'] = false;
+	$is_copy = false;
+	//debug/testphp/$GLOBALS['t_static_not_to'] = false;
+	//debug/testphp/$GLOBALS['t_static_switch'] = false;
+	if (!is_dir($to))
+		{
+		//debug/testphp/$GLOBALS['t_static_not_to'] = true;
+		$is_copy = true;
+		}
+	else if (defined('GPF_STATIC_SWITCH') && true === GPF_STATIC_SWITCH)
+		{
+		//debug/testphp/$GLOBALS['t_static_switch'] = true;
+		$is_copy = true;
+		}
+	//debug/testphp/$GLOBALS['t_static_is_copy'] = $is_copy;
+
+	if (!$is_copy)
+		{
+		gpf_log('!copy', GPF_LOG_FLOW, __FILE__, __LINE__, __FUNCTION__);
+		return false;
+		}
+	gpf_log($dir, GPF_LOG_FLOW, __FILE__, __LINE__, __FUNCTION__);
+	_gpf_static_copy($sour, $to);
+	return true;
+}//}}}
+function gpf_mod_static($mod)
+{//{{{
+	//debug/test=1/gpf_mod_static
+	$GPF_MODULE = GPF_MODULE;
+	//debug/testphp/($GLOBALS['GPF_MODULE'] AND $GPF_MODULE = $GLOBALS['GPF_MODULE']);
+	$dir = dirname($GPF_MODULE) . '/';
+	$base = basename($GPF_MODULE);
+	//zjq@20130405 模块内使用0static目录保存所有静态资源文件
+	gpf_static($dir, "{$base}/{$mod}/0static");
+}//}}}
+function gpf_lib_static($lib)
+{//{{{
+	//debug/test=1/gpf_lib_static
+	$GPF_LIB = GPF_LIB;
+	//debug/testphp/($GLOBALS['GPF_LIB'] AND $GPF_LIB = $GLOBALS['GPF_LIB']);
+	$dir = dirname($GPF_LIB) . '/';
+	$base = basename($GPF_LIB);
+	//zjq@20130405 每个lib内使用0static目录保存所有静态资源文件
+	gpf_static($dir, "{$base}/{$lib}/0static");
 }//}}}
 /**
  * 只复制更新过的文件，因为“复制”操作很耗时。
  */
 function _gpf_static_copy($sour, $to)
 {//{{{
+	//debug/test=1/function__gpf_static_copy
 	if (is_dir($sour))
 		{
+		if ('/' !== substr($sour, -1))
+			{
+			$sour .= '/';
+			}
+		if ('/' !== substr($to, -1))
+			{
+			$to .= '/';
+			}
 		$handle = dir($sour);
 		while ($entry = $handle->read())
 			{
@@ -1712,22 +1715,105 @@ function _gpf_static_copy($sour, $to)
 				{
 				$entry .= '/';
 				}
+			//debug/dump/$sour . $entry, $to . $entry
 			_gpf_static_copy($sour . $entry, $to . $entry);
 			}
 		$handle->close();
 		return ;
 		}
+	//debug/testphp/$GLOBALS['t_staticcopy_not_sour'] = false;
+	//debug/testphp/$GLOBALS['t_staticcopy_is_copy'] = false;
 	if (!is_file($sour))
 		{
+		//debug/testphp/$GLOBALS['t_staticcopy_not_sour'] = true;
 		return ;
 		}
 	if (is_file($to) && filemtime($to) >= filemtime($sour))
 		{
 		return ;
 		}
-	gpf_mkdir(dirname($to));
+	//建立目标目录
+	$_mkdir = array();
+	$to_dir = dirname($to);
+	while (!is_dir($to_dir))
+		{
+		$_mkdir[] = $to_dir;
+		$to_dir = dirname($to_dir);
+		}
+	if ($_mkdir)
+		{
+		$_mkdir = array_reverse($_mkdir);
+		foreach ($_mkdir as $k => $v)
+			{
+			mkdir($v);
+			}
+		}
+	//debug/testphp/$GLOBALS['t_staticcopy_is_copy'] = true;
 	copy($sour, $to);
 }//}}}
+//debug/test=isset($GLOBALS['dir777'])/[GPF_STATIC]
+/* //debug/testphp
+$_dir777 = $GLOBALS['dir777'].'static/';
+`rm -rf {$_dir777}`;
+//debug/test/!is_dir($_dir777)
+`mkdir -p {$_dir777}to/`;
+//debug/test/is_dir($_dir777.'to')
+
+`mkdir -p {$_dir777}copy`;
+touch($_dir777.'copy/js.js');
+_gpf_static_copy($_dir777.'notexists.js', '');
+//debug/test/true===$GLOBALS['t_staticcopy_not_sour']
+
+_gpf_static_copy($_dir777.'copy/js.js', $_dir777.'to/copy/js.js');
+//debug/test/true===$GLOBALS['t_staticcopy_is_copy']
+//debug/test/is_file($_dir777.'to/copy/js.js')
+
+_gpf_static_copy($_dir777.'copy/js.js', $_dir777.'to/copy/js.js');
+//debug/test/false===$GLOBALS['t_staticcopy_is_copy']
+//debug/test/false===$GLOBALS['t_staticcopy_not_sour']
+
+`rm -rf {$_dir777}to/copy/`;
+_gpf_static_copy($_dir777.'copy', $_dir777.'to/copy');
+//debug/test/true===$GLOBALS['t_staticcopy_is_copy']
+//debug/test/is_file($_dir777.'to/copy/js.js')
+
+//debug/test/false === gpf_static($_dir777.'noexists', "")
+//debug/test/true === $GLOBALS['t_static_not_dir']
+
+define('GPF_STATIC_DIR', $_dir777.'to/');
+//debug/test/false === gpf_static($_dir777.'noexists', '')
+//debug/test/true === $GLOBALS['t_static_not_sour']
+
+`mkdir -p {$_dir777}static/`;
+touch($_dir777.'static/js.js');
+//debug/test/true === gpf_static($_dir777, 'static')
+//debug/test/true===$GLOBALS['t_static_not_to']
+//debug/test/true===$GLOBALS['t_static_is_copy']
+//debug/test/is_file($_dir777.'to/static/js.js')
+
+//debug/test/false === gpf_static($_dir777, 'static')
+//debug/test/false===$GLOBALS['t_static_is_copy']
+//debug/test/false===$GLOBALS['t_static_switch']
+
+define('GPF_STATIC_SWITCH', true);
+`rm -rf {$_dir777}to/static/`;
+//debug/test/true === gpf_static($_dir777, 'static')
+//debug/test/is_file($_dir777.'to/static/js.js')
+
+`mkdir -p {$_dir777}lib/testlib/0static/`;
+touch($_dir777.'lib/testlib/0static/js.js');
+$GLOBALS['GPF_LIB'] = $_dir777 . 'lib/';
+gpf_lib_static('testlib');
+//debug/test/is_file($_dir777.'to/lib/testlib/0static/js.js')
+ 
+`mkdir -p {$_dir777}module/testmod/0static/`;
+touch($_dir777.'module/testmod/0static/js.js');
+$GLOBALS['GPF_MODULE'] = $_dir777 . 'module/';
+gpf_mod_static('testmod');
+//debug/test/is_file($_dir777.'to/module/testmod/0static/js.js')
+
+`rm -rf {$_dir777}`;
+ */
 
 /**
  * 调用控制器处理请求
