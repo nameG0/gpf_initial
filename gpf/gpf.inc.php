@@ -5,7 +5,6 @@
  * @package default
  * @filesource
  */
-//debug/test=1/gpf.inc.php
 //============================== define ===============================
 //缩短 DIRECTORY_SEPARATOR
 (defined('DS') OR define('DS', DIRECTORY_SEPARATOR));
@@ -587,57 +586,21 @@ function gpf_err_get()
 }//}}}
 
 //============================== hook ==============================
-$GLOBALS['gpf_obj_hook'] = array();
 $GLOBALS['gpf_obj_callback'] = array();
-/**
- * 实例化并返回 hook 对象。
- * @param string $mod_name 模块名。eg. member
- * @param string $class_name hook类名。eg. base -> h_base.class.php -> h_member_base
- */
-function gpf_hook($mod_name, $class_name)
-{//{{{
-	$gk_hook = 'gpf_obj_hook';
-
-	$class_name_full = "h_{$mod_name}_{$class_name}";
-	if (isset($GLOBALS[$gk_hook][$class_name_full]))
-		{
-		return $GLOBALS[$gk_hook][$class_name_full];
-		}
-	if (!class_exists($class_name_full))
-		{
-		$_path = PHPCMS_ROOT . "{$mod_name}/hook/h_{$class_name}.class.php";
-		if (!is_file($_path))
-			{
-			gpf_log("hook 类不存在[{$_path}]", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
-			$GLOBALS[$gk_hook][$class_name_full] = false;
-			return false;
-			}
-		require $_path;
-		if (!class_exists($class_name_full))
-			{
-			gpf_log("hook 类未定义[{$class_name_full}]", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
-			$GLOBALS[$gk_hook][$class_name_full] = false;
-			return false;
-			}
-		}
-	$obj = new $class_name_full();
-	$GLOBALS[$gk_hook][$class_name_full] = $obj;
-	return $obj;
-}//}}}
 /**
  * 加载并返回 callback 对象数组。
  * <pre>
- * 提供给 hook 类使用，调用格式：$list = ghook::load(mod_name, __CLASS__, __FUNCTION__);
+ * 提供给 hook 类使用，调用格式：$list = gpf_hook(mod_name, __CLASS__, __FUNCTION__);
  * </pre>
  * @param string $class_name hook 类完整类名，一般使用 __CLASS__。eg. h_member_base
  */
-function gpf_hook_load($mod_name, $class_name, $func_name)
+function gpf_hook($mod_name, $class_name, $func_name)
 {//{{{
 	$gk_callback = 'gpf_obj_callback';
 
 	if (!isset($GLOBALS[$gk_callback]["{$mod_name}/{$class_name}"]))
 		{
-		$GLOBALS[$gk_callback]["{$mod_name}/{$class_name}"] = _gpf_load_callback($mod_name, $class_name);
+		$GLOBALS[$gk_callback]["{$mod_name}/{$class_name}"] = _gpf_hook_callback($mod_name, $class_name);
 		}
 	$obj_list = array();
 	foreach ($GLOBALS[$gk_callback]["{$mod_name}/{$class_name}"] as $_obj)
@@ -650,18 +613,19 @@ function gpf_hook_load($mod_name, $class_name, $func_name)
 	return $obj_list;
 }//}}}
 /**
- * 加载一个模块的 callback 对象
+ * 加载一个模块的一个 callback 对象
  * @param string hook 模块名
- * @param string $class_name self::load() 同名参数
+ * @param string $class_name eg. h_member_base
  * @param array 对象列表
  */
-function _gpf_load_callback($mod_name, $class_name)
+function _gpf_hook_callback($mod_name, $class_name)
 {//{{{
 	$mod_callback = _gpf_hook_mod_file($mod_name);
 	if (!$mod_callback)
 		{
 		return array();
 		}
+	//eg. h_member_base > member_base
 	$class_name_short = substr($class_name, 2);
 	$obj_callback = array();
 	foreach ($mod_callback as $_mod)
@@ -669,13 +633,14 @@ function _gpf_load_callback($mod_name, $class_name)
 		$class_name_full = "hc_{$_mod}_{$class_name_short}";
 		if (!class_exists($class_name_full))
 			{
-			$_path = PHPCMS_ROOT . "{$_mod}/hook/hc_{$class_name_short}.class.php";
+			$_path = GPF_MODULE . "{$_mod}/0hook/hc_{$class_name_short}.class.php";
 			if (!is_file($_path))
 				{
-				gpf_log("callback 文件不存在[{$_path}]", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
+				gpf_log("hook_callback 文件不存在[{$_path}]", GPF_LOG_WARN, __FILE__, __LINE__, __FUNCTION__);
 				continue;
 				}
-			require $_path;
+			//debug/dump/$_path
+			gpf_inc($_path);
 			if (!class_exists($class_name_full))
 				{
 				gpf_log("callback 类未定义[{$class_name_full}]", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
@@ -686,20 +651,31 @@ function _gpf_load_callback($mod_name, $class_name)
 		}
 	return $obj_callback;
 }//}}}
+$GLOBALS['gpf_hook_mod_file'] = array();
 /**
  * 加载模块 hook 目录 mod 文件
  * @param array 挂钩的模块列表。
  */
 function _gpf_hook_mod_file($mod_name)
 {//{{{
-	$_path = PHPCMS_ROOT . "{$mod_name}/hook/mod";
-	if (!is_file($_path))
+	$gk = 'gpf_hook_mod_file';
+	//debug/php/$GLOBALS['t_hmf_is_cache'] = false;
+	if (isset($GLOBALS[$gk][$mod_name]))
 		{
-		return array();
+		//debug/php/$GLOBALS['t_hmf_is_cache'] = true;
+		return $GLOBALS[$gk][$mod_name];
 		}
-	$mod_callback = file($_path);
-	$mod_callback = array_filter(array_map('trim', $mod_callback));
-	return $mod_callback;
+	$GLOBALS[$gk][$mod_name] = array();
+
+	$_path = GPF_MODULE . "{$mod_name}/0hook/mod";
+	//debug/dump/$_path
+	if (is_file($_path))
+		{
+		$list = file($_path);
+		//debug/dump/$list
+		$GLOBALS[$gk][$mod_name] = array_filter(array_map('trim', $list));
+		}
+	return $GLOBALS[$gk][$mod_name];
 }//}}}
 
 //============================== url ==============================
@@ -1551,7 +1527,6 @@ function gpf_time($time = NULL)
  */
 function gpf_static($path, $dir)
 {//{{{
-	//debug/test=1/function_gpf_static
 	if (!defined('GPF_STATIC_DIR'))
 		{
 		//debug/testphp/$GLOBALS['t_static_not_dir'] = true;
@@ -1677,69 +1652,6 @@ function _gpf_static_copy($sour, $to)
 	//debug/testphp/$GLOBALS['t_staticcopy_is_copy'] = true;
 	copy($sour, $to);
 }//}}}
-//debug/test=isset($GLOBALS['dir777'])/[GPF_STATIC]
-/* //debug/testphp
-$_dir777 = $GLOBALS['dir777'].'static/';
-`rm -rf {$_dir777}`;
-//debug/test/!is_dir($_dir777)
-`mkdir -p {$_dir777}to/`;
-//debug/test/is_dir($_dir777.'to')
-
-`mkdir -p {$_dir777}copy`;
-touch($_dir777.'copy/js.js');
-_gpf_static_copy($_dir777.'notexists.js', '');
-//debug/test/true===$GLOBALS['t_staticcopy_not_sour']
-
-_gpf_static_copy($_dir777.'copy/js.js', $_dir777.'to/copy/js.js');
-//debug/test/true===$GLOBALS['t_staticcopy_is_copy']
-//debug/test/is_file($_dir777.'to/copy/js.js')
-
-_gpf_static_copy($_dir777.'copy/js.js', $_dir777.'to/copy/js.js');
-//debug/test/false===$GLOBALS['t_staticcopy_is_copy']
-//debug/test/false===$GLOBALS['t_staticcopy_not_sour']
-
-`rm -rf {$_dir777}to/copy/`;
-_gpf_static_copy($_dir777.'copy', $_dir777.'to/copy');
-//debug/test/true===$GLOBALS['t_staticcopy_is_copy']
-//debug/test/is_file($_dir777.'to/copy/js.js')
-
-//debug/test/false === gpf_static($_dir777.'noexists', "")
-//debug/test/true === $GLOBALS['t_static_not_dir']
-
-define('GPF_STATIC_DIR', $_dir777.'to/');
-//debug/test/false === gpf_static($_dir777.'noexists', '')
-//debug/test/true === $GLOBALS['t_static_not_sour']
-
-`mkdir -p {$_dir777}static/`;
-touch($_dir777.'static/js.js');
-//debug/test/true === gpf_static($_dir777, 'static')
-//debug/test/true===$GLOBALS['t_static_not_to']
-//debug/test/true===$GLOBALS['t_static_is_copy']
-//debug/test/is_file($_dir777.'to/static/js.js')
-
-//debug/test/false === gpf_static($_dir777, 'static')
-//debug/test/false===$GLOBALS['t_static_is_copy']
-//debug/test/false===$GLOBALS['t_static_switch']
-
-define('GPF_STATIC_SWITCH', true);
-`rm -rf {$_dir777}to/static/`;
-//debug/test/true === gpf_static($_dir777, 'static')
-//debug/test/is_file($_dir777.'to/static/js.js')
-
-`mkdir -p {$_dir777}lib/testlib/0static/`;
-touch($_dir777.'lib/testlib/0static/js.js');
-$GLOBALS['GPF_LIB'] = $_dir777 . 'lib/';
-gpf_lib_static('testlib');
-//debug/test/is_file($_dir777.'to/lib/testlib/0static/js.js')
- 
-`mkdir -p {$_dir777}module/testmod/0static/`;
-touch($_dir777.'module/testmod/0static/js.js');
-$GLOBALS['GPF_MODULE'] = $_dir777 . 'module/';
-gpf_mod_static('testmod');
-//debug/test/is_file($_dir777.'to/module/testmod/0static/js.js')
-
-`rm -rf {$_dir777}`;
- */
 
 /**
  * 调用控制器处理请求
