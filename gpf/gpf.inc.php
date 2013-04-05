@@ -650,7 +650,7 @@ function gpf_hook_load($mod_name, $class_name, $func_name)
 	return $obj_list;
 }//}}}
 /**
- * 加载挂钩模块的 callback 对象
+ * 加载一个模块的 callback 对象
  * @param string hook 模块名
  * @param string $class_name self::load() 同名参数
  * @param array 对象列表
@@ -990,14 +990,14 @@ function gpfif_maybe_array(& $input, $option = array())
 }//}}}
 /**
  * 根据get_magic_quotes_gpc()的设置值按要求返回是否转义引号的输入数据
- * @param array $option {'!"':不转义引号} eg. $option = array('!"')
+ * @param array $option {'!\\':不转义引号} eg. $option = array('!\\')
  */
 function gpfif_slashes($input, $option = array())
 {//{{{
 	$gk_is_slashes = 'gpf_is_slashes';
 	//默认选项值
 	$_option = array(
-		'!"' => false, //是否返回不转义引号的数据（自动处理已转换过的数据）
+		'!\\' => false, //是否返回不转义引号的数据（自动处理已转换过的数据）
 	);
 	foreach ($option as $k)
 		{
@@ -1006,7 +1006,7 @@ function gpfif_slashes($input, $option = array())
 
 	$is_addslashes = true;
 	$is_stripslashes = false;
-	if ($_option['!"'])
+	if ($_option['!\\'])
 		{
 		//显式声明不转义引号
 		$is_addslashes = false;
@@ -1386,51 +1386,6 @@ function gpf_mod_init($mod_name)
 
 //============================== module#old ==============================
 /**
- * 读取指定模块信息。
- *
- * @param string $mod 模块名。
- * @param NULL|string $key 信息名，NULL 表示返回所有信息，此时会返回数组。
- * @return mixed|false 若模块可用返回模块信息，否则返回 false
- */
-function mod_info($mod, $key = NULL)
-{//{{{
-	//已读取的模块信息缓存在变量中。
-	static $cache = array();
-
-	//模块信息的命名规则为 {module_name}.info
-	//模块信息保存在 {project_name_data}/module/ 下。
-
-	if (!isset($cache[$mod]))
-		{
-		
-		$path = GPF_PATH_DATA . "module/{$mod}.info";
-		if (!is_file($path))
-			{
-			gpf_log("模块 {$mod} 未启用", GPF_LOG_ERROR, __FILE__, __LINE__, __FUNCTION__);
-			$cache[$mod] = false;
-			}
-		else
-			{
-			$mod_info = unserialize(file_get_contents($path));
-
-			//生成 path_sour, path_inst 。
-			$path_sour = GPF_PATH_SOUR . $mod . DS;
-			$mod_info['path_sour'] = is_dir($path_sour) ? $path_sour : '';
-			$path_inst = GPF_PATH_INST . $mod . DS;
-			$mod_info['path_inst'] = is_dir($path_inst) ? $path_inst : '';
-
-			$cache[$mod] = $mod_info;
-			}
-		}
-
-	if (!is_null($key) && is_array($cache[$mod]))
-		{
-		return $cache[$mod][$key];
-		}
-	return $cache[$mod];
-}//}}}
-
-/**
  * 进行模块的 callback 操作。
  *
  * <code>
@@ -1563,36 +1518,6 @@ function mod_callback($target, $action = 'rp', $register = NULL)
 	return false;
 }//}}}
 
-/**
- * 注册或删除模块信息
- *
- * <pre>
- * <b>注册</b>
- * mod_setting('name', array('setting' => array(), ...)
- * 注册 name 模块。 $info 参数为模块的信息。
- * <b>删除</b>
- * mod_setting('name', NULL);
- * </pre>
- * @param string $mod 模块名。
- * @param array|NULL 模块信息，若为 NULL 表示删除模块信息。
- */
-function mod_setting($mod, $info)
-{//{{{
-	$path = GPF_PATH_DATA . "module/{$mod}.info";
-	if (is_null($info))
-		{
-		if (is_file($path))
-			{
-			unlink($path);
-			}
-		return ;
-		}
-
-	$info['name'] = $mod;
-	$info_str = serialize($info);
-	file_put_contents($path, $info_str);
-}//}}}
-
 //============================== other ==============================
 /**
  * 计算运行时间
@@ -1614,6 +1539,7 @@ function gpf_time($time = NULL)
 	return $mt - $time;
 }//}}}
 
+//=============================== gpf_static ===============================
 /**
  * 把$path+$dir所指向目录内的所有文件全复制到GPF_STATIC_DIR常量所指向的目录中。
  * <pre>
