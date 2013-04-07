@@ -16,6 +16,8 @@
 (defined('GPF_LIB') OR define('GPF_LIB', dirname(GPF_MODULE) . '/0lib/'));
 //建议放在config目录中。
 defined('GPF_FACTORY') OR define('GPF_FACTORY', GPF_CONFIG . 'gpf_factory/');
+//debug模式开关
+//GPF_DEBUG
 //debug模式时生成的php临时文件存放路径
 //GPF_DEBUG_PHP
 //debug模式输出信息文件存放路径
@@ -24,7 +26,7 @@ defined('GPF_FACTORY') OR define('GPF_FACTORY', GPF_CONFIG . 'gpf_factory/');
 //GPF_DEBUG_JS_SCRIPT
 //调用gpfd_js处理请求的PHP文件访问路径（必须带有?号）
 //GPF_DEBUG_JS_PHP
-//是否开启断言测试模式
+//断言测试模式开关
 //GPF_TEST
 
 //============================== inc ===============================
@@ -62,11 +64,29 @@ function gpf_is_inc($path)
  */
 function gpf_inc($path)
 {//{{{
-	if (!gpf_is_inc($path))
+	if (gpf_is_inc($path))
 		{
-		require $path;
-		gpf_set_inc($path);
+		return ;
 		}
+	gpf_set_inc($path);
+	//DEBUG模式处理
+	if (defined('GPF_DEBUG') && true === GPF_DEBUG)
+		{
+		$path = gpf_debug($path);
+		}
+	require $path;
+}//}}}
+/**
+ * 若开启DEBUG模式，使用此函数生成不能使用gpf_inc加载的文件路径
+ */
+function gpf_path($path)
+{//{{{
+	//DEBUG模式处理
+	if (!defined('GPF_DEBUG') || true !== GPF_DEBUG)
+		{
+		return $path;
+		}
+	return gpf_debug($path);
 }//}}}
 //============================== obj ===============================
 $GLOBALS['gpf_obj'] = array(); //保存对象实例。
@@ -1250,14 +1270,18 @@ function gpfip_array($name = NULL)
 {//{{{
 	return _gpfi_array($name, 'gpf_post');
 }//}}}
-function gpfi_get()
+/**
+ * 调用 gpfi_array 系列后取最终数据
+ * @param bool $is_auto_all 是否把未显式声名的键默认按 gpfi 处理，若为false则未显式声名的键全部丢弃
+ */
+function gpfi_get($is_auto_all = true)
 {//{{{
 	$gk_array = 'gpfi_array';
 	$gk_get = 'gpfi_get';
 
 	$ret = $GLOBALS[$gk_get];
 	$GLOBALS[$gk_get] = array();
-	if ($GLOBALS[$gk_array])
+	if ($is_auto_all && $GLOBALS[$gk_array])
 		{
 		foreach ($GLOBALS[$gk_array] as $k => $v)
 			{
@@ -1753,7 +1777,10 @@ function gpf_ctrl($mod, $file, $action, $in = array())
  */
 function gpf_debug($file)
 {//{{{
-	gpf_inc(dirname(__FILE__). '/debug.inc.php');
+	if (!function_exists('gpfd_file'))
+		{
+		require dirname(__FILE__). '/debug.inc.php';
+		}
 	return gpfd_file($file);
 }//}}}
 
@@ -1762,7 +1789,10 @@ function gpf_debug($file)
  */
 function gpf_debug_js()
 {//{{{
-	gpf_inc(dirname(__FILE__). '/debug.inc.php');
+	if (!function_exists('gpfd_file'))
+		{
+		require dirname(__FILE__). '/debug.inc.php';
+		}
 	gpfd_js();
 }//}}}
 
